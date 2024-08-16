@@ -1,0 +1,5 @@
+src/data/debug/
+src/korean_ocr_using_pororo/
+venv/
+
+*pyc
