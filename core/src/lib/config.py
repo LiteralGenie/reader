@@ -8,9 +8,13 @@ import toml
 class Config:
     series_folder: Path
 
+    api: "ApiConfig"
+
     @classmethod
     def load(cls, data: dict) -> "Config":
         d = data.copy()
+
+        d["api"] = ApiConfig.load(d["api"])
 
         for fp_key in [
             "series_folder",
@@ -23,3 +27,18 @@ class Config:
     def load_toml(cls, fp: Path) -> "Config":
         data = toml.loads(fp.read_text())
         return cls.load(data)
+
+
+@dataclass
+class ApiConfig:
+    port: int
+    url: str
+
+    @classmethod
+    def load(cls, data: dict) -> "ApiConfig":
+        d = data.copy()
+
+        for fp_key in []:
+            d[fp_key] = Path(d[fp_key])
+
+        return cls(**d)
