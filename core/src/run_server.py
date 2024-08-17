@@ -6,7 +6,7 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from lib.config import Config
-from lib.handlers.series import get_all_series
+from lib.handlers.series import get_all_series, get_chapter, get_series
 from pathvalidate import sanitize_filename
 
 
@@ -30,8 +30,33 @@ def series():
     return data
 
 
-@app.get("/image/{series}/{chapter}/{page}")
-def image(series: str, chapter: str, page: str):
+@app.get("/series/{series}")
+def series_by_id(series: str):
+    series = sanitize_filename(series)
+
+    try:
+        data = get_series(app.state.cfg, series)
+    except FileExistsError:
+        raise HTTPException(404)
+
+    return data
+
+
+@app.get("/series/{series}/{chapter}")
+def chapter_by_id(series: str, chapter: str):
+    series = sanitize_filename(series)
+    chapter = sanitize_filename(chapter)
+
+    try:
+        data = get_chapter(app.state.cfg, series, chapter)
+    except FileExistsError:
+        raise HTTPException(404)
+
+    return data
+
+
+@app.get("/series/{series}/{chapter}/{page}")
+def image_by_id(series: str, chapter: str, page: str):
     series = sanitize_filename(series)
     chapter = sanitize_filename(chapter)
     page = sanitize_filename(page)

@@ -1,2 +1,13 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<script lang="ts">
+    import type { PageData } from './$types'
+
+    export let data: PageData
+</script>
+
+<div class="flex flex-col">
+    {#each data.series as s}
+        <a class="underline text-blue-600" href="/series/{s.name}">
+            {s.name}
+        </a>
+    {/each}
+</div>

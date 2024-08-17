@@ -32,7 +32,6 @@ class Config:
 @dataclass
 class ApiConfig:
     port: int
-    url: str
 
     @classmethod
     def load(cls, data: dict) -> "ApiConfig":

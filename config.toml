@@ -22,13 +22,3 @@ series_folder = "./data/series"
 [api]
 
 port = 9494
-
-# If without a reverse proxy (website domain), set this to 
-#   http://YOUR_IP:port
-# 
-# For example 
-#   http://192.168.50.110:9494
-# 
-# Otherwise use the domain you set up with nginx or whatever
-#   https://reader.gisadan.dev
-url = "http://localhost:9494"
