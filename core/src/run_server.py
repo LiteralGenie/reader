@@ -3,9 +3,11 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 from lib.config import Config
 from lib.handlers.series import get_all_series
+from pathvalidate import sanitize_filename
 
 
 @asynccontextmanager
@@ -26,6 +28,19 @@ app = FastAPI(lifespan=_lifespan)
 def series():
     data = get_all_series(app.state.cfg)
     return data
+
+
+@app.get("/image/{series}/{chapter}/{page}")
+def image(series: str, chapter: str, page: str):
+    series = sanitize_filename(series)
+    chapter = sanitize_filename(chapter)
+    page = sanitize_filename(page)
+
+    fp: Path = app.state.cfg.series_folder / series / chapter / page
+    if not fp.exists():
+        raise HTTPException(404)
+
+    return FileResponse(fp)
 
 
 def _parse_args():
