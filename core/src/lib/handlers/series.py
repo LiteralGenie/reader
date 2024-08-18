@@ -1,6 +1,4 @@
-from dataclasses import dataclass
-
-from pathvalidate import sanitize_filename
+import json
 
 from ..config import Config
 
@@ -31,13 +29,15 @@ def get_all_chapters(cfg: Config, series: str):
 
     series_dir = cfg.series_folder / series
     if not series_dir.exists():
-        raise FileExistsError()
+        raise FileNotFoundError()
 
     for fp in series_dir.glob("*"):
         if fp.is_file():
             continue
 
         has_ocr_data = (fp / "ocr_data.json").exists()
+        if not has_ocr_data:
+            continue
 
         pages = get_all_pages(cfg, series, fp.name)
 
@@ -57,18 +57,32 @@ def get_all_chapters(cfg: Config, series: str):
 def get_all_pages(cfg: Config, series: str, chapter: str):
     chap_dir = cfg.series_folder / series / chapter
     if not chap_dir.exists():
-        raise FileExistsError()
+        raise FileNotFoundError()
 
-    pages = [
-        fp.name
-        for fp in [
-            *chap_dir.glob("*.jpg"),
-            *chap_dir.glob("*.png"),
-        ]
-        if not fp.is_dir()
+    fp_ocr_data = chap_dir / "ocr_data.json"
+    if not fp_ocr_data.exists():
+        raise FileNotFoundError()
+
+    ocr_data = json.loads(fp_ocr_data.read_text())
+
+    fp_images = [
+        *chap_dir.glob("*.jpg"),
+        *chap_dir.glob("*.png"),
     ]
+    fp_images.sort(key=lambda fp: fp.name)
 
-    pages.sort()
+    pages = []
+    for fp in fp_images:
+        matches = ocr_data.get(fp.name, dict()).get("matches", None)
+        if not matches:
+            print(f"Warning: No OCR data for page {fp.name}")
+
+        pages.append(
+            dict(
+                filename=fp.name,
+                matches=matches,
+            )
+        )
 
     return pages
 

@@ -36,7 +36,7 @@ def series_by_id(series: str):
 
     try:
         data = get_series(app.state.cfg, series)
-    except FileExistsError:
+    except FileNotFoundError:
         raise HTTPException(404)
 
     return data
@@ -49,7 +49,7 @@ def chapter_by_id(series: str, chapter: str):
 
     try:
         data = get_chapter(app.state.cfg, series, chapter)
-    except FileExistsError:
+    except FileNotFoundError:
         raise HTTPException(404)
 
     return data

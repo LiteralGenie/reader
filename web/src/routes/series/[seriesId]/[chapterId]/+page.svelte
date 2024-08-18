@@ -1,17 +1,22 @@
 <script lang="ts">
     import { page } from '$app/stores'
+    import OcrImage from '$lib/components/OcrImage.svelte'
     import type { PageData } from './$types'
 
     export let data: PageData
+    $: ({ chapter } = data)
+    $: ({ seriesId, chapterId } = $page.params)
 </script>
 
-<div class="flex flex-col">
-    <h1>{$page.params.chapterId}</h1>
+<div class="text-center w-full flex flex-col items-center">
+    <h1>{chapterId}</h1>
 
-    {#each data.chapter.pages as pg}
-        <img
-            src="/series/{$page.params.seriesId}/{$page.params
-                .chapterId}/{pg}"
-        />
-    {/each}
+    <div class="flex flex-col">
+        {#each chapter.pages as pg}
+            <OcrImage {pg} />
+        {/each}
+    </div>
 </div>
+
+<style lang="postcss">
+</style>

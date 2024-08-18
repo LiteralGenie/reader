@@ -8,7 +8,19 @@ export interface SeriesDto {
 export interface ChapterDto {
     name: string
     has_ocr_data: boolean
-    pages: string[]
+    pages: PageDto[]
+}
+
+export interface PageDto {
+    filename: string
+    matches: MatchDto[]
+}
+
+export interface MatchDto {
+    id: string
+    bbox: [number, number, number, number]
+    confidence: number
+    value: string
 }
 
 export async function fetchAllSeries(): Promise<SeriesDto[]> {
