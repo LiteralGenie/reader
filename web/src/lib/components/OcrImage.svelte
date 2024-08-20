@@ -31,13 +31,14 @@
             style={bboxToAbsolutePos(m.bbox)}
             title={m.value}
         >
-            {m.value}
+            <!-- {m.value} -->
         </div>
     {/each}
 </div>
 
 <style lang="postcss">
     .overlay {
-        background-color: rgba(255, 0, 0, 0.5);
+        /**background-color: rgba(255, 0, 0, 0.5);**/
+        border: 4px solid rgba(255, 0, 0, 0.5);
     }
 </style>

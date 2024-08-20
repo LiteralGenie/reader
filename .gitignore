@@ -1,2 +1,4 @@
 config.toml
 data/reader.sqlite
+*.sqlite-wal
+*.sqlite-shm

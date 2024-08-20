@@ -97,9 +97,10 @@ def ocr_for_chapter(series: str, chapter: str):
 
     data = get_all_ocr_data(chap_dir)
 
-    for fp_image, pg_data in data.items():
-        if pg_data is None:
-            insert_page_job(load_reader_db(), fp_image)
+    missing = [fp_image for fp_image in data if data[fp_image] is None]
+    missing.sort()
+    for fp_image in missing:
+        insert_page_job(load_reader_db(), fp_image)
 
     return {fp_image.name: pg_data for fp_image, pg_data in data.items()}
 
