@@ -19,6 +19,18 @@
 #          ...
 series_folder = "./data/series"
 
-[api]
+api_port = 9494
 
-port = 9494
+# Path to model weights (*.pt). Leave blank ("") to use default weights (not recommended)
+det_weights = ""
+reco_weights = ""
+
+# Model architecture name - https://mindee.github.io/doctr/modules/models.html
+det_arch = "db_resnet50"
+reco_arch = "parseq"
+
+# Input size for detector model
+det_input_size = 1024
+
+# Set to true if a NVIDIA GPU (that supports CUDA) is available for inference
+use_gpu = false

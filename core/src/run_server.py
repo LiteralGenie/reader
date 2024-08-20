@@ -9,13 +9,17 @@ from lib.config import Config
 from lib.handlers.series import get_all_series, get_chapter, get_series
 from pathvalidate import sanitize_filename
 
+# web gui doesn't support custom config so just hard code the config here too
+CONFIG_FILE = Path(__file__).parent.parent.parent / "config.toml"
+
 
 @asynccontextmanager
 async def _lifespan(app: FastAPI):
     args = _parse_args()
     app.state.args = args
 
-    cfg = Config.load_toml(args.config_file)
+    # cfg = Config.load_toml(args.config_file)
+    cfg = Config.load_toml(CONFIG_FILE)
     app.state.cfg = cfg
 
     yield
@@ -71,10 +75,10 @@ def image_by_id(series: str, chapter: str, page: str):
 def _parse_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "config_file",
-        type=Path,
-    )
+    # parser.add_argument(
+    #     "config_file",
+    #     type=Path,
+    # )
     parser.add_argument(
         "--debug",
         action="store_true",
@@ -86,11 +90,12 @@ def _parse_args():
 
 if __name__ == "__main__":
     args = _parse_args()
-    cfg = Config.load_toml(args.config_file)
+    # cfg = Config.load_toml(args.config_file)
+    cfg = Config.load_toml(CONFIG_FILE)
 
     uvicorn.run(
         "run_server:app",
         reload=args.debug,
         host="0.0.0.0",
-        port=cfg.api.port,
+        port=cfg.api_port,
     )

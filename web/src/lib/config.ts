@@ -50,15 +50,13 @@ export function loadConfig(): Config {
 export class Config {
     constructor(
         public series_folder: string,
-        public api: ApiConfig
+        public api_port: number
     ) {}
 
     static loadToml(fp: string) {
         const data: any = toml.parse(
             fs.readFileSync(fp, { encoding: 'utf-8' })
         )
-
-        data.api = ApiConfig.load(data.api)
 
         return Config.load(data)
     }
@@ -68,14 +66,6 @@ export class Config {
     }
 
     get apiUrl(): string {
-        return `http://localhost:${this.api.port}`
-    }
-}
-
-export class ApiConfig {
-    constructor(public port: number) {}
-
-    static load(data: any) {
-        return new ApiConfig(data.port)
+        return `http://localhost:${this.api_port}`
     }
 }

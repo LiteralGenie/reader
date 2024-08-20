@@ -1,4 +1,7 @@
+git+https://github.com/LiteralGenie/ocr_data.git@10bafd5af6d8648876b1c15c5ef22183919d1840
+
 fastapi
+konlpy
 pathvalidate
 toml
 uvicorn
