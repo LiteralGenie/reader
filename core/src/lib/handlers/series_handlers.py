@@ -1,5 +1,5 @@
+from ..chapter_db import get_page, insert_page, load_chapter_db
 from ..config import Config
-from .ocr.ocr_db import get_page, insert_page, load_db
 
 
 def get_all_series(cfg: Config) -> list[dict]:
@@ -53,7 +53,7 @@ def get_all_pages(cfg: Config, series: str, chapter: str):
     ]
     fp_images.sort(key=lambda fp: fp.name)
 
-    db = load_db(chap_dir / "_reader_data.sqlite")
+    db = load_chapter_db(chap_dir)
 
     pages = []
     for fp in fp_images:
