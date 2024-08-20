@@ -1,7 +1,10 @@
-git+https://github.com/LiteralGenie/ocr_data.git@10bafd5af6d8648876b1c15c5ef22183919d1840
+git+https://github.com/LiteralGenie/ocr_data.git@94debac3cfee7d90d384c04c43e76b0f67304faa
 
+python-doctr
 fastapi
 konlpy
 pathvalidate
+pillow
 toml
+torch
 uvicorn

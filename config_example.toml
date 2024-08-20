@@ -32,5 +32,8 @@ reco_arch = "parseq"
 # Input size for detector model
 det_input_size = 1024
 
+# Input images are sliced into overlapping windows according to margin size before being fed to the ocr models
+margin_size = 100
+
 # Set to true if a NVIDIA GPU (that supports CUDA) is available for inference
 use_gpu = false

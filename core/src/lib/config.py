@@ -18,6 +18,8 @@ class Config:
 
     det_input_size: int
 
+    margin_size: int
+
     use_gpu: bool
 
     @classmethod

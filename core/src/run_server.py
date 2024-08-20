@@ -6,7 +6,7 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from lib.config import Config
-from lib.handlers.series import get_all_series, get_chapter, get_series
+from lib.handlers.series_handlers import get_all_chapters, get_all_pages, get_all_series
 from pathvalidate import sanitize_filename
 
 # web gui doesn't support custom config so just hard code the config here too
@@ -39,7 +39,7 @@ def series_by_id(series: str):
     series = sanitize_filename(series)
 
     try:
-        data = get_series(app.state.cfg, series)
+        data = get_all_chapters(app.state.cfg, series)
     except FileNotFoundError:
         raise HTTPException(404)
 
@@ -52,7 +52,7 @@ def chapter_by_id(series: str, chapter: str):
     chapter = sanitize_filename(chapter)
 
     try:
-        data = get_chapter(app.state.cfg, series, chapter)
+        data = get_all_pages(app.state.cfg, series, chapter)
     except FileNotFoundError:
         raise HTTPException(404)
 
