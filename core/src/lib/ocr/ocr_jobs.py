@@ -25,38 +25,37 @@ def start_page_job_worker(cfg: Config, reader_db: ReaderDb):
     exec = ProcessPoolExecutor(1)
     predictor = load_predictor(cfg)
 
-    async def loop():
+    async def fn():
         while True:
-            todo_ids = [
-                r["id"]
-                for r in reader_db.execute(
-                    """
+            todo = reader_db.execute(
+                """
                     SELECT id 
                     FROM jobs
                     WHERE
                         type = ?
                         AND processing = 0
                     """,
-                    [_JOB_TYPE],
-                )
-            ]
+                [_JOB_TYPE],
+            ).fetchone()
 
-            for id in todo_ids:
-                await asyncio.get_running_loop().run_in_executor(
-                    exec,
-                    process_page_job,
-                    cfg,
-                    predictor,
-                    id,
-                )
-                # process_page_job(cfg, reader_db, predictor, id)
+            if not todo:
+                await asyncio.sleep(1)
+                continue
 
-            await asyncio.sleep(1)
+            loop = asyncio.get_running_loop()
+            await loop.run_in_executor(
+                exec,
+                process_page_job,
+                cfg,
+                predictor,
+                todo["id"],
+            )
 
-    return asyncio.create_task(loop())
+    return asyncio.create_task(fn())
 
 
 def insert_page_job(db: ReaderDb, fp_image: Path):
+    print("Inserting page job for", fp_image)
     data = dict(
         fp_image=str(fp_image),
         chap_dir=str(fp_image.parent),
@@ -94,7 +93,7 @@ def process_page_job(
             [job_id, _JOB_TYPE],
         ).fetchone()
 
-        print("Processing job", job_id, job["data"])
+        print("Processing page job", job_id, job["data"])
 
         job = json.loads(job["data"])
 
@@ -136,7 +135,7 @@ def process_page_job(
                 )
                 reader_db.commit()
 
-                print(f"Ocr job {job_id} at {progress:.0%}")
+                print(f"OCR job {job_id} at {progress:.0%}")
         except StopIteration as e:
             matches = e.value
 
