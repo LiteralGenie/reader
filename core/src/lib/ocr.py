@@ -13,12 +13,27 @@ from comic_ocr.lib.label_utils import OcrMatch
 from doctr.models.predictor import OCRPredictor
 from PIL import Image
 
-from ..chapter_db import load_chapter_db
-from ..config import Config
-from ..misc_utils import dump_dataclass
-from ..reader_db import ReaderDb, load_reader_db
+from .chapter_db import get_ocr_data, load_chapter_db
+from .config import Config
+from .misc_utils import dump_dataclass
+from .reader_db import ReaderDb, load_reader_db
 
 _JOB_TYPE = "page"
+
+
+def get_all_ocr_data(chap_dir: Path) -> dict[Path, dict | None]:
+    fp_images = [
+        *chap_dir.glob("*.jpg"),
+        *chap_dir.glob("*.png"),
+    ]
+
+    db = load_chapter_db(chap_dir)
+
+    data: dict[Path, dict | None] = dict()
+    for fp in fp_images:
+        data[fp] = get_ocr_data(db, fp.name)
+
+    return data
 
 
 def start_page_job_worker(cfg: Config, reader_db: ReaderDb):
@@ -86,18 +101,18 @@ def insert_page_job(db: ReaderDb, fp_image: Path):
 
 
 def process_all_page_jobs(cfg: Config, job_ids: list[str]):
-    predictor = load_predictor(cfg)
+    predictor = _load_predictor(cfg)
 
     for id in job_ids:
-        process_page_job(cfg, predictor, id)
+        _process_page_job(cfg, predictor, id)
 
 
-def process_page_job(
+def _process_page_job(
     cfg: Config,
     predictor: OCRPredictor,
     job_id: str,
 ):
-    predictor = load_predictor(cfg)
+    predictor = _load_predictor(cfg)
 
     reader_db = load_reader_db()
 
@@ -120,7 +135,7 @@ def process_page_job(
         # Generate OCR data
         fp_image = Path(job["fp_image"])
 
-        ocr_iter = ocr_page(
+        ocr_iter = _ocr_page(
             cfg,
             predictor,
             fp_image,
@@ -179,7 +194,7 @@ def process_page_job(
         raise
 
 
-def ocr_page(
+def _ocr_page(
     cfg: Config,
     predictor: OCRPredictor,
     fp_image: Path,
@@ -219,7 +234,7 @@ def ocr_page(
     return matches
 
 
-def load_predictor(cfg: Config) -> OCRPredictor:
+def _load_predictor(cfg: Config) -> OCRPredictor:
     det_model = doctr.models.detection.__dict__[cfg.det_arch](
         pretrained=False,
         pretrained_backbone=False,

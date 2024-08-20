@@ -1,5 +1,5 @@
-from ..chapter_db import get_page, insert_page, load_chapter_db
-from ..config import Config
+from .chapter_db import get_page, insert_page, load_chapter_db
+from .config import Config
 
 
 def get_all_series(cfg: Config) -> list[dict]:

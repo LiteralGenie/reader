@@ -11,10 +11,9 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse, StreamingResponse
 from lib.chapter_db import get_ocr_data, load_chapter_db
 from lib.config import Config
-from lib.handlers.series_handlers import get_all_chapters, get_all_pages, get_all_series
-from lib.ocr.ocr import get_all_ocr_data
-from lib.ocr.ocr_jobs import insert_page_job, start_page_job_worker
+from lib.ocr import get_all_ocr_data, insert_page_job, start_page_job_worker
 from lib.reader_db import clear_jobs, load_reader_db
+from lib.series import get_all_chapters, get_all_pages, get_all_series
 from pathvalidate import sanitize_filename
 
 # web gui doesn't support custom config so just hard code the config here too
