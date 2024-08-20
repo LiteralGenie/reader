@@ -1,15 +1,20 @@
+import { fetchAllOcrData } from '$lib/api/ocr'
 import { fetchChapterById } from '$lib/api/series'
-import { error } from '@sveltejs/kit'
 import type { PageServerLoad } from './$types'
 
 export const load: PageServerLoad = async ({ params }) => {
-    const chapter = await fetchChapterById(
+    const pages = await fetchChapterById(
         params.seriesId,
         params.chapterId
     )
-    if (!chapter) throw error(404, 'Not Found')
+
+    const ocrData = await fetchAllOcrData(
+        params.seriesId,
+        params.chapterId
+    )
 
     return {
-        chapter
+        pages,
+        ocrData
     }
 }

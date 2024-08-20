@@ -62,7 +62,7 @@ export class Config {
     }
 
     static load(data: any) {
-        return new Config(data.series_folder, data.api)
+        return new Config(data.series_folder, data.api_port)
     }
 
     get apiUrl(): string {

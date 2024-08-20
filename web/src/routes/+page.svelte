@@ -6,8 +6,8 @@
 
 <div class="flex flex-col">
     {#each data.series as s}
-        <a class="underline text-blue-600" href="/series/{s.name}">
-            {s.name}
+        <a class="underline text-blue-600" href="/series/{s.filename}">
+            {s.filename}
         </a>
     {/each}
 </div>

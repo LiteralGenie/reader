@@ -1,1 +1,6 @@
-job queue
+move worker init to outside web server (so that uvicorn can spawn multiple workers)
+display job status %
+rescan option
+logging
+image load priority
+fix spacing before nlp

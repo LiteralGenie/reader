@@ -4,7 +4,7 @@
     import type { PageData } from './$types'
 
     export let data: PageData
-    $: ({ chapter } = data)
+    $: ({ pages, ocrData } = data)
     $: ({ seriesId, chapterId } = $page.params)
 </script>
 
@@ -12,8 +12,8 @@
     <h1>{chapterId}</h1>
 
     <div class="flex flex-col">
-        {#each chapter.pages as pg}
-            <OcrImage {pg} />
+        {#each pages as pg}
+            <OcrImage {pg} matches={ocrData[pg.filename] ?? []} />
         {/each}
     </div>
 </div>

@@ -35,5 +35,9 @@ det_input_size = 1024
 # Input images are sliced into overlapping windows according to margin size before being fed to the ocr models
 margin_size = 100
 
+# Images are resized to this width (if above) before being OCR'd
+# This improves results for images with large fonts (>60pt)
+max_ocr_width = 1200
+
 # Set to true if a NVIDIA GPU (that supports CUDA) is available for inference
 use_gpu = false

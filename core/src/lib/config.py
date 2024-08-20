@@ -20,6 +20,8 @@ class Config:
 
     margin_size: int
 
+    max_ocr_width: int
+
     use_gpu: bool
 
     @classmethod

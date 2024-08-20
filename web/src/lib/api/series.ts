@@ -1,19 +1,19 @@
 import { env } from '$env/dynamic/private'
+import { error } from '@sveltejs/kit'
 
 export interface SeriesDto {
-    name: string
-    chapters: ChapterDto[]
+    filename: string
 }
 
 export interface ChapterDto {
-    name: string
-    has_ocr_data: boolean
-    pages: PageDto[]
+    filename: string
 }
 
 export interface PageDto {
     filename: string
-    matches: MatchDto[]
+    sha256: string
+    width: number
+    height: number
 }
 
 export interface MatchDto {
@@ -26,37 +26,37 @@ export interface MatchDto {
 export async function fetchAllSeries(): Promise<SeriesDto[]> {
     // @ts-ignore
     const url = env.config.apiUrl + '/series'
-    const data: SeriesDto[] = await (await fetch(url)).json()
+    const data = await (await fetch(url)).json()
     return data
 }
 
 export async function fetchSeriesById(
     series: string
-): Promise<SeriesDto | null> {
+): Promise<ChapterDto[]> {
     // @ts-ignore
     const url = env.config.apiUrl + `/series/${series}`
 
     const resp = await fetch(url)
     if (resp.status !== 200) {
-        return null
+        throw error(404, 'Not Found')
     }
 
-    const data: SeriesDto = await resp.json()
+    const data = await resp.json()
     return data
 }
 
 export async function fetchChapterById(
     series: string,
     chapter: string
-): Promise<ChapterDto | null> {
+): Promise<PageDto[]> {
     // @ts-ignore
     const url = env.config.apiUrl + `/series/${series}/${chapter}`
 
     const resp = await fetch(url)
     if (resp.status !== 200) {
-        return null
+        throw error(404, 'Not Found')
     }
 
-    const data: ChapterDto = await resp.json()
+    const data = await resp.json()
     return data
 }

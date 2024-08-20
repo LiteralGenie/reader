@@ -134,6 +134,7 @@ def process_page_job(
                         """,
                     [progress, job_id, _JOB_TYPE],
                 )
+                reader_db.commit()
 
                 print(f"Ocr job {job_id} at {progress:.0%}")
         except StopIteration as e:
@@ -177,6 +178,16 @@ def ocr_page(
 ) -> Generator[float, None, list[OcrMatch]]:
     im = Image.open(fp_image)
 
+    resize_mult = 1
+    if im.size[0] > cfg.max_ocr_width:
+        w, h = im.size
+
+        resize_mult = cfg.max_ocr_width / w
+        new_size = (int(w * resize_mult), int(h * resize_mult))
+
+        print(f"Resizing image from {(w,h)} to {new_size}")
+        im = im.resize(new_size)
+
     windows = calc_windows(
         im.size,
         cfg.det_input_size,
@@ -193,6 +204,9 @@ def ocr_page(
 
         percent_done = (idx + 1) / len(windows)
         yield percent_done
+
+    if resize_mult != 1:
+        matches = [_rescale(m, 1 / resize_mult) for m in matches]
 
     return matches
 
@@ -237,3 +251,19 @@ def load_predictor(cfg: Config) -> OCRPredictor:
         print("Running OCR models on CPU")
 
     return predictor
+
+
+def _rescale(match: OcrMatch, k: float) -> OcrMatch:
+    y1, x1, y2, x2 = match.bbox
+    y1 = int(y1 * k)
+    x1 = int(x1 * k)
+    y2 = int(y2 * k)
+    x2 = int(x2 * k)
+
+    bbox = (y1, x1, y2, x2)
+
+    return OcrMatch(
+        bbox,
+        match.confidence,
+        match.value,
+    )

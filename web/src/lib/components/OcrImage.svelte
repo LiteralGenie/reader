@@ -1,19 +1,16 @@
 <script lang="ts">
     import { page } from '$app/stores'
+    import type { OcrMatch } from '$lib/api/ocr'
     import type { MatchDto, PageDto } from '$lib/api/series'
 
     export let pg: PageDto
+    export let matches: OcrMatch[]
 
     $: ({ seriesId, chapterId } = $page.params)
 
-    let imgEl: HTMLImageElement | undefined
-
-    function bboxToAbsolutePos(
-        bbox: MatchDto['bbox'],
-        imgEl: HTMLImageElement | undefined
-    ) {
-        const w = imgEl?.naturalWidth ?? 1
-        const h = imgEl?.naturalHeight ?? 1
+    function bboxToAbsolutePos(bbox: MatchDto['bbox']) {
+        const w = pg.width
+        const h = pg.height
         const [y1, x1, y2, x2] = bbox
 
         const left = `${(100 * x1) / w}%`
@@ -26,15 +23,12 @@
 </script>
 
 <div class="relative">
-    <img
-        bind:this={imgEl}
-        src="/series/{seriesId}/{chapterId}/{pg.filename}"
-    />
+    <img src="/series/{seriesId}/{chapterId}/{pg.filename}" />
 
-    {#each pg.matches as m}
+    {#each matches as m}
         <div
             class="overlay absolute z-10"
-            style={bboxToAbsolutePos(m.bbox, imgEl)}
+            style={bboxToAbsolutePos(m.bbox)}
             title={m.value}
         >
             {m.value}

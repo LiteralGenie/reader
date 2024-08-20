@@ -100,7 +100,7 @@ def insert_page(db: ChapterDb, fp: Path) -> dict:
 def get_ocr_data(db: ChapterDb, filename: str) -> dict | None:
     r = db.execute(
         """
-        SELECT filename, data
+        SELECT data
         FROM ocr_data
         WHERE filename = ?
         """,
@@ -110,10 +110,7 @@ def get_ocr_data(db: ChapterDb, filename: str) -> dict | None:
     if not r:
         return None
 
-    return dict(
-        filename=r["filename"],
-        data=json.loads(r["data"]),
-    )
+    return json.loads(r["data"])
 
 
 def _check_version(db: ChapterDb):
