@@ -2,7 +2,7 @@ from jamo import h2j, j2hcj
 from konlpy.tag import Kkma
 from nltk import edit_distance
 
-from .db.dictionary_db import load_dictionary_db, select_words
+from .db.dictionary_db import load_dictionary_db, select_examples, select_words
 
 
 def get_pos_by_word(kkma: Kkma, text: str) -> list[list[dict]]:
@@ -40,7 +40,7 @@ def _to_jamo(text: str) -> list[str]:
     return [char for char in j2hcj(h2j(text))]
 
 
-def get_defs(word: str, kkma_pos=""):
+def get_defs(word: str, kkma_pos: str) -> list[dict]:
     db = load_dictionary_db()
 
     check_ending = kkma_pos.startswith("J")
@@ -52,12 +52,34 @@ def get_defs(word: str, kkma_pos=""):
         check_verb=check_verb,
     )
 
-    matches.sort(key=lambda d: _score_match(word, kkma_pos, d))
+    matches.sort(key=lambda d: _score_definition_match(word, kkma_pos, d))
 
     return matches
 
 
-def _score_match(text: str, kkma_pos: str, data: dict):
+def get_examples(word: str, kkma_pos: str) -> list[dict]:
+    db = load_dictionary_db()
+
+    check_ending = kkma_pos.startswith("J")
+    check_verb = kkma_pos.startswith("V")
+    matches = select_words(
+        db,
+        word,
+        check_ending=check_ending,
+        check_verb=check_verb,
+    )
+
+    words = list(set(m["word"] for m in matches))
+    words.sort(key=lambda w: edit_distance(word, w))
+
+    examples = []
+    for w in words:
+        examples.extend(select_examples(db, w))
+
+    return examples
+
+
+def _score_definition_match(text: str, kkma_pos: str, data: dict):
     char_dist = edit_distance(text, data["word"])
 
     pos_dist = float("inf")

@@ -46,3 +46,22 @@ def select_words(
             to_check,
         )
     ]
+
+
+def select_examples(
+    db: DictionaryDb,
+    word: str,
+) -> list[dict]:
+    return [
+        dict(r)
+        for r in db.execute(
+            f"""
+            SELECT we.word, e.korean, e.english
+            FROM words_examples we
+            INNER JOIN examples e
+                ON e.id = we.id_example
+            WHERE we.word = ?
+            """,
+            [word],
+        )
+    ]

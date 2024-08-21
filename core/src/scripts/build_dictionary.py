@@ -25,6 +25,8 @@ def main():
     export_wiktionary(db)
     export_ted_talks(db)
 
+    build_words_examples_table(db)
+
 
 def init_db():
     db = sqlite3.connect(DICTIONARY_FILE)
@@ -53,6 +55,7 @@ def init_db():
         )
         """
     )
+    db.execute("CREATE INDEX IF NOT EXISTS words_word on words (word)")
 
     db.execute(
         """
@@ -68,7 +71,20 @@ def init_db():
         """
     )
 
-    db.execute("CREATE INDEX IF NOT EXISTS words_word on words (word)")
+    db.execute(
+        """
+        CREATE TABLE IF NOT EXISTS words_examples (
+            word        TEXT        NOT NULL,
+            id_example  INTEGER     NOT NULL,
+
+            PRIMARY KEY (word, id_example),
+            FOREIGN KEY (id_example) REFERENCES examples (id)
+        )
+        """
+    )
+    db.execute(
+        "CREATE INDEX IF NOT EXISTS words_examples_word on words_examples (word)"
+    )
 
     return db
 
@@ -140,6 +156,28 @@ def export_ted_talks(db: DictionaryDb):
         )
 
     _set_done(db, source)
+    db.commit()
+
+
+def build_words_examples_table(db: DictionaryDb):
+    words = [r["word"] for r in db.execute("SELECT DISTINCT word FROM words")]
+
+    for idx, w in tqdm(enumerate(words), desc="Analyzing examples..."):
+        db.execute(
+            f"""
+            INSERT OR IGNORE INTO words_examples 
+                ( word, id_example ) 
+            SELECT 
+                ?, id
+            FROM examples
+            WHERE korean LIKE ?
+            """,
+            [w, f"%{w}%"],
+        )
+
+        if idx % 1_000 == 0:
+            db.commit()
+
     db.commit()
 
 
