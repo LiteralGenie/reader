@@ -7,6 +7,7 @@ import json
 import sqlite3
 
 import requests
+from datasets import load_dataset
 from lib.db.dictionary_db import DictionaryDb
 from lib.paths import DICTIONARY_FILE, RAW_DATA_DIR
 from tqdm import tqdm
@@ -22,60 +23,7 @@ def main():
     db = init_db()
 
     export_wiktionary(db)
-
-
-def download_wiktionary():
-    if FP_WIKTIONARY.exists():
-        print("Raw wiktionary data already exists. Skipping download.")
-        return
-
-    print("Downloading wiktionary data...")
-    url = "https://kaikki.org/dictionary/Korean/kaikki.org-dictionary-Korean.jsonl"
-    with requests.get(url, stream=True) as resp:
-        resp.raise_for_status()
-        with open(FP_WIKTIONARY, "wb") as file:
-            for chunk in resp.iter_content(chunk_size=8192):
-                file.write(chunk)
-
-
-def export_wiktionary(db: DictionaryDb):
-    is_done = db.execute(
-        """
-        SELECT done FROM metadata WHERE source = 'wiktionary' AND done = 1
-        """
-    ).fetchone()
-
-    if is_done:
-        return
-
-    data = [(json.loads(ln)) for ln in FP_WIKTIONARY.read_text().splitlines()]
-    pbar = tqdm(data, desc="Exporting wiktionary data to SQLite...")
-    for d in pbar:
-        for sense in d["senses"]:
-            for gloss in sense.get("glosses", []):
-                db.execute(
-                    """
-                    INSERT OR IGNORE INTO words (
-                        source, word, pos, definition
-                    ) VALUES (
-                        ?, ?, ?, ?
-                    )
-                    """,
-                    ["wiktionary", d["word"], d["pos"], gloss],
-                )
-
-    db.execute(
-        """
-        INSERT OR REPLACE INTO metadata (
-            source, done
-        ) VALUES (
-            ?, ?
-        )
-        """,
-        ["wiktionary", 1],
-    )
-
-    db.commit()
+    export_ted_talks(db)
 
 
 def init_db():
@@ -106,9 +54,119 @@ def init_db():
         """
     )
 
+    db.execute(
+        """
+        CREATE TABLE IF NOT EXISTS examples (
+            id          INTEGER     PRIMARY KEY,
+            source      TEXT        NOT NULL,
+
+            korean      TEXT        NOT NULL,
+            english     TEXT        NOT NULL,
+
+            UNIQUE (korean, english)
+        )
+        """
+    )
+
     db.execute("CREATE INDEX IF NOT EXISTS words_word on words (word)")
 
     return db
+
+
+def download_wiktionary():
+    if FP_WIKTIONARY.exists():
+        print("Raw wiktionary data already exists. Skipping download.")
+        return
+
+    print("Downloading wiktionary data...")
+    url = "https://kaikki.org/dictionary/Korean/kaikki.org-dictionary-Korean.jsonl"
+    with requests.get(url, stream=True) as resp:
+        resp.raise_for_status()
+        with open(FP_WIKTIONARY, "wb") as file:
+            for chunk in resp.iter_content(chunk_size=8192):
+                file.write(chunk)
+
+
+def export_wiktionary(db: DictionaryDb):
+    source = "wiktionary"
+
+    if _is_done(db, source):
+        print(f"Definitions from {source} already exported. Skipping.")
+        return
+
+    data = [(json.loads(ln)) for ln in FP_WIKTIONARY.read_text().splitlines()]
+    pbar = tqdm(data, desc="Exporting wiktionary data to SQLite...")
+    for d in pbar:
+        for sense in d["senses"]:
+            for gloss in sense.get("glosses", []):
+                db.execute(
+                    """
+                    INSERT OR IGNORE INTO words (
+                        source, word, pos, definition
+                    ) VALUES (
+                        ?, ?, ?, ?
+                    )
+                    """,
+                    [source, d["word"], d["pos"], gloss],
+                )
+
+    _set_done(db, source)
+    db.commit()
+
+
+def export_ted_talks(db: DictionaryDb):
+    source = "msarmi9_ted-talks"
+
+    if _is_done(db, source):
+        print(f"Examples from {source} already exported. Skipping.")
+        return
+
+    ds = load_dataset(
+        "msarmi9/korean-english-multitarget-ted-talks-task",
+        split="train",
+        streaming=True,
+    )
+    ds_iter = tqdm(ds, desc=f"Loading examples from {source}...")
+    for item in ds_iter:
+        db.execute(
+            """
+            INSERT OR IGNORE INTO examples (
+                source, korean, english
+            ) VALUES (
+                ?, ?, ?
+            )
+            """,
+            [source, item["korean"], item["english"]],
+        )
+
+    _set_done(db, source)
+    db.commit()
+
+
+def _is_done(db: DictionaryDb, source: str):
+    return db.execute(
+        """
+        SELECT done 
+        FROM metadata 
+        WHERE 
+            source = ? 
+            AND done = 1
+        """,
+        [source],
+    ).fetchone()
+
+
+def _set_done(db: DictionaryDb, source: str):
+    db.execute(
+        """
+        INSERT OR REPLACE INTO metadata (
+            source, done
+        ) VALUES (
+            ?, ?
+        )
+        """,
+        [source, 1],
+    )
 
 
 main()
