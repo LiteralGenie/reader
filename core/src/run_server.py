@@ -11,8 +11,9 @@ from fastapi.responses import FileResponse, StreamingResponse
 from konlpy.tag import Kkma
 from lib.config import Config
 from lib.db.chapter_db import get_ocr_data, load_chapter_db
+from lib.db.dictionary_db import count_examples, load_dictionary_db, select_examples
 from lib.db.reader_db import clear_jobs, load_reader_db
-from lib.nlp import get_defs, get_examples, get_pos_by_word
+from lib.nlp import get_defs, get_pos_by_word
 from lib.ocr import get_all_ocr_data, insert_page_job, start_page_job_worker
 from lib.series import get_all_chapters, get_all_pages, get_all_series
 from pathvalidate import sanitize_filename
@@ -160,9 +161,29 @@ def nlp(text: str):
     for grp in words:
         for info in grp:
             info["defs"] = get_defs(info["text"], info["pos"])
-            info["examples"] = get_examples(info["text"], info["pos"])
 
     return dict(pos=words)
+
+
+@app.get("/examples/{text}")
+def examples(
+    text: str,
+    offset: Annotated[str, Query()] = "0",
+    limit: Annotated[str, Query()] = "10",
+):
+    db = load_dictionary_db()
+
+    num_offset = int(offset)
+    num_limit = min(int(limit), 1000)
+
+    return select_examples(db, text, num_offset, num_limit)
+
+
+@app.get("/examples/{text}/count")
+def examples_count(text: str):
+    db = load_dictionary_db()
+
+    return count_examples(db, text)
 
 
 def _parse_args():

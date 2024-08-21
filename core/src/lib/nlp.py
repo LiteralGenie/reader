@@ -57,28 +57,6 @@ def get_defs(word: str, kkma_pos: str) -> list[dict]:
     return matches
 
 
-def get_examples(word: str, kkma_pos: str) -> list[dict]:
-    db = load_dictionary_db()
-
-    check_ending = kkma_pos.startswith("J")
-    check_verb = kkma_pos.startswith("V")
-    matches = select_words(
-        db,
-        word,
-        check_ending=check_ending,
-        check_verb=check_verb,
-    )
-
-    words = list(set(m["word"] for m in matches))
-    words.sort(key=lambda w: edit_distance(word, w))
-
-    examples = []
-    for w in words:
-        examples.extend(select_examples(db, w))
-
-    return examples
-
-
 def _score_definition_match(text: str, kkma_pos: str, data: dict):
     char_dist = edit_distance(text, data["word"])
 

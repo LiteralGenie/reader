@@ -1,3 +1,4 @@
+import random
 import sys
 from pathlib import Path
 
@@ -24,8 +25,7 @@ def main():
 
     export_wiktionary(db)
     export_ted_talks(db)
-
-    build_words_examples_table(db)
+    export_subtitles(db)
 
 
 def init_db():
@@ -69,21 +69,6 @@ def init_db():
             UNIQUE (korean, english)
         )
         """
-    )
-
-    db.execute(
-        """
-        CREATE TABLE IF NOT EXISTS words_examples (
-            word        TEXT        NOT NULL,
-            id_example  INTEGER     NOT NULL,
-
-            PRIMARY KEY (word, id_example),
-            FOREIGN KEY (id_example) REFERENCES examples (id)
-        )
-        """
-    )
-    db.execute(
-        "CREATE INDEX IF NOT EXISTS words_examples_word on words_examples (word)"
     )
 
     return db
@@ -159,25 +144,34 @@ def export_ted_talks(db: DictionaryDb):
     db.commit()
 
 
-def build_words_examples_table(db: DictionaryDb):
-    words = [r["word"] for r in db.execute("SELECT DISTINCT word FROM words")]
+def export_subtitles(db: DictionaryDb):
+    source = "Helsinki-NLP/open_subtitles"
 
-    for idx, w in tqdm(enumerate(words), desc="Analyzing examples..."):
+    if _is_done(db, source):
+        print(f"Examples from {source} already exported. Skipping.")
+        return
+
+    ds = load_dataset(
+        "Helsinki-NLP/open_subtitles",
+        split="train",
+        streaming=True,
+        lang1="en",
+        lang2="ko",
+    )
+    ds_iter = tqdm(ds, desc=f"Loading examples from {source}...", total=1_391_190)
+    for item in ds_iter:
         db.execute(
-            f"""
-            INSERT OR IGNORE INTO words_examples 
-                ( word, id_example ) 
-            SELECT 
-                ?, id
-            FROM examples
-            WHERE korean LIKE ?
+            """
+            INSERT OR IGNORE INTO examples (
+                source, korean, english
+            ) VALUES (
+                ?, ?, ?
+            )
             """,
-            [w, f"%{w}%"],
+            [source, item["translation"]["ko"], item["translation"]["en"]],
         )
 
-        if idx % 1_000 == 0:
-            db.commit()
-
+    _set_done(db, source)
     db.commit()
 
 

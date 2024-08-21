@@ -50,18 +50,33 @@ def select_words(
 
 def select_examples(
     db: DictionaryDb,
-    word: str,
+    text: str,
+    offset=0,
+    limit=10,
 ) -> list[dict]:
-    return [
-        dict(r)
-        for r in db.execute(
-            f"""
-            SELECT we.word, e.korean, e.english
-            FROM words_examples we
-            INNER JOIN examples e
-                ON e.id = we.id_example
-            WHERE we.word = ?
-            """,
-            [word],
-        )
-    ]
+
+    examples = db.execute(
+        f"""
+        SELECT korean, english
+        FROM examples
+        WHERE korean LIKE ?
+        LIMIT ?
+        OFFSET ?
+        """,
+        [f"%{text}%", limit, offset],
+    ).fetchall()
+
+    return [dict(r) for r in examples]
+
+
+def count_examples(db: DictionaryDb, text: str) -> int:
+    r = db.execute(
+        f"""
+        SELECT COUNT(*) count
+        FROM examples
+        WHERE korean LIKE ?
+        """,
+        [f"%{text}%"],
+    ).fetchone()
+
+    return r["count"]
