@@ -23,7 +23,7 @@ export class StitchedLine {
         const x1 = min(this.matches.map((m) => m.bbox[1]))!
         const y2 = max(this.matches.map((m) => m.bbox[2]))!
         const x2 = max(this.matches.map((m) => m.bbox[3]))!
-        return [y1, x2, y2, x1]
+        return [y1, x1, y2, x2]
     }
 
     get width() {
@@ -31,7 +31,7 @@ export class StitchedLine {
     }
 
     get height() {
-        return this.bbox[3] - this.bbox[1]
+        return this.bbox[2] - this.bbox[0]
     }
 
     get center() {
@@ -56,11 +56,11 @@ export class StitchedBlock {
     }
 
     get bbox(): Bbox {
-        const y1 = min(this.lines.map((m) => m.bbox[0]))!
-        const x1 = min(this.lines.map((m) => m.bbox[1]))!
-        const y2 = max(this.lines.map((m) => m.bbox[2]))!
-        const x2 = max(this.lines.map((m) => m.bbox[3]))!
-        return [y1, x2, y2, x1]
+        const y1 = min(this.lines.map((ln) => ln.bbox[0]))!
+        const x1 = min(this.lines.map((ln) => ln.bbox[1]))!
+        const y2 = max(this.lines.map((ln) => ln.bbox[2]))!
+        const x2 = max(this.lines.map((ln) => ln.bbox[3]))!
+        return [y1, x1, y2, x2]
     }
 }
 
@@ -72,7 +72,7 @@ export function stitchLines(
     /**
      * Group words into lines
      *
-     * The maximum edge-to-edge x-distance is (line_height * max_edge_dx)
+     * The maximum edge-to-edge x-distance is (line_height * maxEdgeDx)
      * The maximum center-to-center y-distance is (line_height * max_center_dy)
      **/
 
@@ -116,7 +116,9 @@ export function stitchLines(
                 ln.push(rem[idx])
             }
 
-            rem = rem.filter((m) => !ln.find((x) => x === m))
+            rem = rem.filter(
+                (_, idx) => toAdd.find((i) => i === idx) === undefined
+            )
         }
 
         ln = sort(ln, ({ bbox: [y1, x1, y2, x2] }) => x1)
@@ -135,8 +137,8 @@ export function stitchBlocks(
     /**
      * Group words into lines
      *
-     * The maximum edge-to-edge x-distance is (line_height * max_edge_dx)
-     * The maximum edge-to-edge y-distance is (line_height * max_edge_dy)
+     * The maximum edge-to-edge x-distance is (lineHeight * maxEdgeDx)
+     * The maximum edge-to-edge y-distance is (lineHeight * maxEdgeDy)
      **/
 
     const blocks: StitchedLine[][] = []
@@ -179,14 +181,16 @@ export function stitchBlocks(
                 blk.push(rem[idx])
             }
 
-            rem = rem.filter((ln) => !blk.find((x) => x === ln))
+            rem = rem.filter(
+                (_, idx) => toAdd.find((i) => i === idx) === undefined
+            )
         }
 
         blk = sort(blk, ({ bbox: [y1, x1, y2, x2] }) => y1)
         blocks.push(blk)
     }
 
-    const stitchedBlocks = blocks.map((ln) => new StitchedBlock(ln))
+    const stitchedBlocks = blocks.map((blk) => new StitchedBlock(blk))
     return stitchedBlocks
 }
 

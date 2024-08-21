@@ -2,16 +2,15 @@
     import { page } from '$app/stores'
     import type { OcrMatch } from '$lib/api/ocr'
     import type { MatchDto, PageDto } from '$lib/api/series'
+    import { stitchBlocks, stitchLines } from '$lib/stitch'
 
     export let pg: PageDto
     export let matches: OcrMatch[]
 
     $: ({ seriesId, chapterId } = $page.params)
 
-    // Pre-load all chunks
-    $: wordChunks = Object.fromEntries(
-        matches.map((m) => [m.value, getChunks(m.value)])
-    )
+    $: lines = stitchLines(matches)
+    $: blocks = stitchBlocks(lines)
 
     function bboxToAbsolutePos(bbox: MatchDto['bbox']) {
         const w = pg.width
@@ -25,27 +24,18 @@
 
         return `left: ${left}; right: ${right}; top: ${top}; bottom: ${bottom};`
     }
-
-    async function getChunks(word: string) {
-        const url = new URL($page.url)
-        url.pathname = `/chunk/${word}`
-
-        const resp = await fetch(url)
-        const data = await resp.json()
-        return data.map(([part, pos]: [string, string]) => part)
-    }
 </script>
 
 <div class="relative">
     <img src="/series/{seriesId}/{chapterId}/{pg.filename}" />
 
-    {#each matches as m}
+    {#each blocks as blk}
         <div
             class="overlay absolute z-10"
-            style={bboxToAbsolutePos(m.bbox)}
-            title={m.value}
+            style={bboxToAbsolutePos(blk.bbox)}
+            title={blk.value}
         >
-            <!-- {m.value} -->
+            <!-- {blk.value} -->
         </div>
     {/each}
 </div>
