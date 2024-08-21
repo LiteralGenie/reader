@@ -13,10 +13,10 @@ from comic_ocr.lib.label_utils import OcrMatch
 from doctr.models.predictor import OCRPredictor
 from PIL import Image
 
-from .chapter_db import get_ocr_data, load_chapter_db
 from .config import Config
+from .db.chapter_db import get_ocr_data, load_chapter_db
+from .db.reader_db import ReaderDb, load_reader_db
 from .misc_utils import dump_dataclass
-from .reader_db import ReaderDb, load_reader_db
 
 _JOB_TYPE = "page"
 

@@ -9,11 +9,11 @@ import uvicorn
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse, StreamingResponse
 from konlpy.tag import Kkma
-from lib.chapter_db import get_ocr_data, load_chapter_db
 from lib.config import Config
+from lib.db.chapter_db import get_ocr_data, load_chapter_db
+from lib.db.reader_db import clear_jobs, load_reader_db
 from lib.nlp import get_defs, get_pos_by_word
 from lib.ocr import get_all_ocr_data, insert_page_job, start_page_job_worker
-from lib.reader_db import clear_jobs, load_reader_db
 from lib.series import get_all_chapters, get_all_pages, get_all_series
 from pathvalidate import sanitize_filename
 

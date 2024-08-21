@@ -1,7 +1,7 @@
 import sqlite3
 from typing import TypeAlias
 
-from .paths import DATA_DIR
+from ..paths import DATA_DIR
 
 ReaderDb: TypeAlias = sqlite3.Connection
 
