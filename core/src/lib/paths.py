@@ -4,9 +4,9 @@ PROJ_DIR = Path(__file__).parent.parent.parent.parent
 
 DATA_DIR = PROJ_DIR / "data"
 
-DICTIONARY_DIR = DATA_DIR / "dictionaries"
+RAW_DATA_DIR = DATA_DIR / "raw"
 
-WIKTIONARY_DB_FILE = DICTIONARY_DIR / "kaikki.org-dictionary-Korean.sqlite"
+DICTIONARY_FILE = DATA_DIR / "dictionary.sqlite"
 
-for dir in [DATA_DIR, DICTIONARY_DIR]:
+for dir in [DATA_DIR, RAW_DATA_DIR]:
     dir.mkdir(exist_ok=True)
