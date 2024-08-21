@@ -43,12 +43,12 @@ def start_page_job_worker(cfg: Config, reader_db: ReaderDb):
         while True:
             todo = reader_db.execute(
                 """
-                    SELECT id 
-                    FROM jobs
-                    WHERE
-                        type = ?
-                        AND processing = 0
-                    """,
+                SELECT id 
+                FROM jobs
+                WHERE
+                    type = ?
+                    AND processing = 0
+                """,
                 [_JOB_TYPE],
             ).fetchall()
 

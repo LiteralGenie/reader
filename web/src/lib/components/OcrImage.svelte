@@ -8,6 +8,11 @@
 
     $: ({ seriesId, chapterId } = $page.params)
 
+    // Pre-load all chunks
+    $: wordChunks = Object.fromEntries(
+        matches.map((m) => [m.value, getChunks(m.value)])
+    )
+
     function bboxToAbsolutePos(bbox: MatchDto['bbox']) {
         const w = pg.width
         const h = pg.height
@@ -19,6 +24,15 @@
         const bottom = `${(100 * (h - y2)) / h}%`
 
         return `left: ${left}; right: ${right}; top: ${top}; bottom: ${bottom};`
+    }
+
+    async function getChunks(word: string) {
+        const url = new URL($page.url)
+        url.pathname = `/chunk/${word}`
+
+        const resp = await fetch(url)
+        const data = await resp.json()
+        return data.map(([part, pos]: [string, string]) => part)
     }
 </script>
 

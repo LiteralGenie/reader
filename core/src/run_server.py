@@ -1,7 +1,6 @@
 import argparse
 import asyncio
 import json
-import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Annotated
@@ -9,8 +8,10 @@ from typing import Annotated
 import uvicorn
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse, StreamingResponse
+from konlpy.tag import Kkma
 from lib.chapter_db import get_ocr_data, load_chapter_db
 from lib.config import Config
+from lib.nlp import get_pos_by_word, get_wikti_defs
 from lib.ocr import get_all_ocr_data, insert_page_job, start_page_job_worker
 from lib.reader_db import clear_jobs, load_reader_db
 from lib.series import get_all_chapters, get_all_pages, get_all_series
@@ -29,6 +30,9 @@ async def _lifespan(app: FastAPI):
     # cfg = Config.load_toml(args.config_file)
     cfg = Config.load_toml(CONFIG_FILE)
     app.state.cfg = cfg
+
+    app.state.kkma = Kkma()
+    app.state.kkma.pos("안녕, 세상")  # warm up whatever caches
 
     # Start job workers
     reader_db = load_reader_db()
@@ -105,7 +109,7 @@ def ocr_for_chapter(series: str, chapter: str):
 
 
 @app.get("/ocr/{series}/{chapter}/sse")
-def root(
+def poll_ocr(
     series: str,
     chapter: str,
     pages: Annotated[list[str], Query()],
@@ -147,6 +151,17 @@ def root(
         yield "data: close\n\n"
 
     return StreamingResponse(poll(), media_type="text/event-stream")
+
+
+@app.get("/nlp/{text}")
+def nlp(text: str):
+    words = get_pos_by_word(app.state.kkma, text)
+
+    for grp in words:
+        for info in grp:
+            info["defs"] = get_wikti_defs(info["text"], info["pos"])
+
+    return dict(pos=words)
 
 
 def _parse_args():
