@@ -1,5 +1,7 @@
 <script lang="ts">
+    import { browser } from '$app/environment'
     import { page } from '$app/stores'
+    import { type NlpDto } from '$lib/api/nlp'
     import type { OcrMatch } from '$lib/api/ocr'
     import type { MatchDto, PageDto } from '$lib/api/series'
     import { stitchBlocks, stitchLines } from '$lib/stitch'
@@ -7,10 +9,27 @@
     export let pg: PageDto
     export let matches: OcrMatch[]
 
+    const nlpData: Record<string, Promise<NlpDto[][]>> = {}
+
     $: ({ seriesId, chapterId } = $page.params)
 
     $: lines = stitchLines(matches)
     $: blocks = stitchBlocks(lines)
+
+    $: {
+        if (browser) {
+            for (let blk of blocks) {
+                if (blk.value in nlpData) {
+                    continue
+                }
+
+                const url = `/api/nlp/${blk.value}`
+                nlpData[blk.value] = fetch(url).then((resp) =>
+                    resp.json()
+                )
+            }
+        }
+    }
 
     function bboxToAbsolutePos(bbox: MatchDto['bbox']) {
         const w = pg.width

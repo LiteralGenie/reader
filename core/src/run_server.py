@@ -13,7 +13,7 @@ from lib.config import Config
 from lib.db.chapter_db import get_ocr_data, load_chapter_db
 from lib.db.dictionary_db import count_examples, load_dictionary_db, select_examples
 from lib.db.reader_db import clear_jobs, load_reader_db
-from lib.nlp import get_defs, get_pos_by_word
+from lib.nlp import get_defs, get_pos_by_word, get_pos_by_word_dumb
 from lib.ocr import get_all_ocr_data, insert_page_job, start_page_job_worker
 from lib.series import get_all_chapters, get_all_pages, get_all_series
 from pathvalidate import sanitize_filename
@@ -157,12 +157,15 @@ def poll_ocr(
 @app.get("/nlp/{text}")
 def nlp(text: str):
     words = get_pos_by_word(app.state.kkma, text)
+    if not words:
+        words = get_pos_by_word_dumb(app.state.kkma, text)
+        print(words)
 
     for grp in words:
         for info in grp:
             info["defs"] = get_defs(info["text"], info["pos"])
 
-    return dict(pos=words)
+    return words
 
 
 @app.get("/examples/{text}")

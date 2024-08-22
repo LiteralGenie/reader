@@ -16,7 +16,7 @@
 
         if (missingOcr.length) {
             const url = new URL(window.location.href)
-            url.pathname = `/ocr/${seriesId}/${chapterId}/sse`
+            url.pathname = `/api/ocr/${seriesId}/${chapterId}/sse`
             for (let pg of missingOcr) {
                 url.searchParams.append('pages', pg.filename)
             }
