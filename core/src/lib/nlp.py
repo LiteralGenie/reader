@@ -1,3 +1,6 @@
+import multiprocessing
+from multiprocessing.pool import Pool
+
 from jamo import h2j, j2hcj
 from konlpy.tag import Kkma
 from nltk import edit_distance
@@ -5,8 +8,8 @@ from nltk import edit_distance
 from .db.dictionary_db import load_dictionary_db, select_words
 
 
-def get_pos_by_word(kkma: Kkma, text: str) -> list[list[dict]] | None:
-    all_pos = kkma.pos(text)
+def get_pos_by_word(kkma_pool: Pool, text: str) -> list[list[dict]] | None:
+    all_pos = kkma_pool.apply(_pool_pos, [text])
     words = text.split()
 
     try:
@@ -42,14 +45,14 @@ def get_pos_by_word(kkma: Kkma, text: str) -> list[list[dict]] | None:
         return None
 
 
-def get_pos_by_word_dumb(kkma: Kkma, text: str) -> list[list[dict]]:
+def get_pos_by_word_dumb(kkma_pool: Pool, text: str) -> list[list[dict]]:
     pos_by_word = []
 
     words = text.split()
     for w in words:
         parts = []
 
-        pos = kkma.pos(w)
+        pos = kkma_pool.apply(_pool_pos, (w,))
         for chars, tag in pos:
             parts.append(
                 dict(
@@ -96,3 +99,28 @@ def _score_definition_match(text: str, kkma_pos: str, data: dict):
                 pos_dist = 1
 
     return (pos_dist, char_dist)
+
+
+# We need to run the konlpy tagger in a pool
+# because it will somehow break the llm inference if it's even initialized in the main process
+# (causes the jinja2 templating during inference to hang without errors)
+# ¯\_(ツ)_/¯
+def start_nlp_pool():
+    return multiprocessing.Pool(
+        1,
+        initializer=_init_pool_worker,
+    )
+
+
+_kkma: Kkma = None  # type: ignore
+
+
+def _init_pool_worker():
+    global _kkma
+    _kkma = Kkma()
+
+    _kkma.pos("안녕, 세상")  # warm up whatever caches
+
+
+def _pool_pos(text: str):
+    return _kkma.pos(text)

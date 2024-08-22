@@ -8,13 +8,14 @@ from typing import Annotated
 import uvicorn
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse, StreamingResponse
-from konlpy.tag import Kkma
 from lib.config import Config
 from lib.db.chapter_db import get_ocr_data, load_chapter_db
 from lib.db.dictionary_db import count_examples, load_dictionary_db, select_examples
+from lib.db.mtl_cache import load_mtl_cache, select_translation
 from lib.db.reader_db import clear_jobs, load_reader_db
-from lib.nlp import get_defs, get_pos_by_word, get_pos_by_word_dumb
-from lib.ocr import get_all_ocr_data, insert_page_job, start_page_job_worker
+from lib.mtl import insert_mtl_job, parse_mtl, start_mtl_job_worker
+from lib.nlp import get_defs, get_pos_by_word, get_pos_by_word_dumb, start_nlp_pool
+from lib.ocr import get_all_ocr_data, insert_ocr_job, start_ocr_job_worker
 from lib.series import get_all_chapters, get_all_pages, get_all_series
 from pathvalidate import sanitize_filename
 
@@ -24,21 +25,22 @@ CONFIG_FILE = Path(__file__).parent.parent.parent / "config.toml"
 
 @asynccontextmanager
 async def _lifespan(app: FastAPI):
-    # Load globals
+    # Global args
     args = _parse_args()
     app.state.args = args
 
+    # Global cfg
     # cfg = Config.load_toml(args.config_file)
     cfg = Config.load_toml(CONFIG_FILE)
     app.state.cfg = cfg
 
-    app.state.kkma = Kkma()
-    app.state.kkma.pos("안녕, 세상")  # warm up whatever caches
+    # Global nlp thing
+    app.state.kkma_pool = start_nlp_pool()
 
     # Start job workers
-    reader_db = load_reader_db()
-    clear_jobs(reader_db)
-    start_page_job_worker(cfg, reader_db)
+    clear_jobs(load_reader_db())
+    start_ocr_job_worker(cfg)
+    start_mtl_job_worker(cfg)
 
     yield
 
@@ -104,7 +106,7 @@ def ocr_for_chapter(series: str, chapter: str):
     missing = [fp_image for fp_image in data if data[fp_image] is None]
     missing.sort()
     for fp_image in missing:
-        insert_page_job(load_reader_db(), fp_image)
+        insert_ocr_job(load_reader_db(), fp_image)
 
     return {fp_image.name: pg_data for fp_image, pg_data in data.items()}
 
@@ -156,10 +158,9 @@ def poll_ocr(
 
 @app.get("/nlp/{text}")
 def nlp(text: str):
-    words = get_pos_by_word(app.state.kkma, text)
+    words = get_pos_by_word(app.state.kkma_pool, text)
     if not words:
-        words = get_pos_by_word_dumb(app.state.kkma, text)
-        print(words)
+        words = get_pos_by_word_dumb(app.state.kkma_pool, text)
 
     for grp in words:
         for info in grp:
@@ -187,6 +188,25 @@ def examples_count(text: str):
     db = load_dictionary_db()
 
     return count_examples(db, text)
+
+
+@app.get("/mtl/{text}")
+async def get_mtl(text: str):
+    if not app.state.cfg.use_llm:
+        return None
+
+    cache = load_mtl_cache()
+
+    translation = select_translation(cache, text)
+    if translation is None:
+        insert_mtl_job(load_reader_db(), text)
+
+    while not translation:
+        await asyncio.sleep(1)
+        translation = select_translation(cache, text)
+
+    parsed = parse_mtl(translation)
+    return parsed
 
 
 def _parse_args():

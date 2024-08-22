@@ -43,3 +43,16 @@ max_ocr_width = 1200
 
 # Set to true if a NVIDIA GPU (that supports CUDA) is available for inference
 use_gpu = false
+
+# Machine translations will not be enabled unless use_llm is true
+#  
+# llm_model_id should be the id of the hugging face repo hosting the model weights
+# llm_model_file should be the name of the weights file
+# 
+# For example, given the below repo link
+#     https://huggingface.co/lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF
+# the model id is lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF
+# and under the "Files and Versions" section, we can find a .gguf file named Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf
+use_llm = true
+llm_model_id = "lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF"
+llm_model_file = "Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf"

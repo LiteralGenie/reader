@@ -1,6 +1,7 @@
 config.toml
 data/raw/*
 data/dictionary.sqlite
+data/mtl_cache.sqlite
 data/reader.sqlite
 
 *.sqlite-wal

@@ -1,7 +1,5 @@
-import asyncio
 import json
 import traceback
-from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 from typing import Generator
 
@@ -16,9 +14,10 @@ from PIL import Image
 from .config import Config
 from .db.chapter_db import get_ocr_data, load_chapter_db
 from .db.reader_db import ReaderDb, load_reader_db
+from .job_utils import JobManager, start_job_worker
 from .misc_utils import dump_dataclass
 
-_JOB_TYPE = "page"
+_JOB_TYPE = "ocr"
 
 
 def get_all_ocr_data(chap_dir: Path) -> dict[Path, dict | None]:
@@ -36,162 +35,103 @@ def get_all_ocr_data(chap_dir: Path) -> dict[Path, dict | None]:
     return data
 
 
-def start_page_job_worker(cfg: Config, reader_db: ReaderDb):
-    exec = ProcessPoolExecutor(1)
-
-    async def fn():
-        while True:
-            todo = reader_db.execute(
-                """
-                SELECT id 
-                FROM jobs
-                WHERE
-                    type = ?
-                    AND processing = 0
-                """,
-                [_JOB_TYPE],
-            ).fetchall()
-
-            if not todo:
-                await asyncio.sleep(1)
-                continue
-
-            # Update processing status
-            reader_db.executemany(
-                """
-                UPDATE jobs 
-                SET processing = 1
-                WHERE 
-                    id = ?
-                    AND type = ?
-                """,
-                [(r["id"], _JOB_TYPE) for r in todo],
-            )
-            reader_db.commit()
-
-            loop = asyncio.get_running_loop()
-            await loop.run_in_executor(
-                exec,
-                process_all_page_jobs,
-                cfg,
-                [r["id"] for r in todo],
-            )
-
-    return asyncio.create_task(fn())
-
-
-def insert_page_job(db: ReaderDb, fp_image: Path):
-    print("Inserting page job for", fp_image)
-    data = dict(
-        fp_image=str(fp_image),
-        chap_dir=str(fp_image.parent),
+def start_ocr_job_worker(cfg: Config):
+    start_job_worker(
+        cfg,
+        _JOB_TYPE,
+        _process_all_jobs,
+        initializer=_init_worker,
+        initargs=(cfg,),
     )
 
-    db.execute(
-        """
-        INSERT OR IGNORE INTO jobs (
-            id, type, data, processing, progress
-        ) VALUES (
-            ?, ?, ?, ?, ?
-        )
-        """,
-        [str(fp_image), _JOB_TYPE, json.dumps(data), False, 0],
+
+def insert_ocr_job(db: ReaderDb, fp_image: Path):
+    print("Inserting ocr job for", fp_image)
+
+    jobber = JobManager(db, _JOB_TYPE)
+    jobber.insert(
+        str(fp_image),
+        dict(
+            fp_image=str(fp_image),
+            chap_dir=str(fp_image.parent),
+        ),
     )
     db.commit()
 
 
-def process_all_page_jobs(cfg: Config, job_ids: list[str]):
-    predictor = _load_predictor(cfg)
+def _process_all_jobs(cfg: Config, job_ids: list[str]):
+    reader_db = load_reader_db()
+    jobber = JobManager(reader_db, _JOB_TYPE)
 
     for id in job_ids:
-        _process_page_job(cfg, predictor, id)
+        try:
+            _process_job(
+                cfg,
+                _WORKER_PREDICTOR,
+                jobber,
+                id,
+            )
+        except:
+            # Delete job on error
+            traceback.print_exc()
+
+            jobber.delete(id)
+            reader_db.commit()
 
 
-def _process_page_job(
+_WORKER_PREDICTOR: OCRPredictor = None  # type: ignore
+
+
+def _init_worker(cfg: Config):
+    global _WORKER_PREDICTOR
+    _WORKER_PREDICTOR = _load_predictor(cfg)
+
+
+def _process_job(
     cfg: Config,
     predictor: OCRPredictor,
+    jobber: JobManager,
     job_id: str,
 ):
-    predictor = _load_predictor(cfg)
+    # Get job data
+    job = jobber.select(job_id)
+    print("Processing ocr job", job_id, job)
 
-    reader_db = load_reader_db()
+    # Generate OCR data
+    fp_image = Path(job["fp_image"])
+
+    ocr_iter = _ocr_page(
+        cfg,
+        predictor,
+        fp_image,
+    )
 
     try:
-        # Get job data
-        job = reader_db.execute(
-            """
-            SELECT data FROM jobs
-            WHERE
-                id = ?
-                AND type = ?
-            """,
-            [job_id, _JOB_TYPE],
-        ).fetchone()
+        while True:
+            progress = next(ocr_iter)
 
-        print("Processing page job", job_id, job["data"])
+            jobber.update_progress(job_id, progress)
+            jobber.db.commit()
 
-        job = json.loads(job["data"])
+            print(f"OCR job {job_id} at {progress:.0%}")
+    except StopIteration as e:
+        matches = e.value
 
-        # Generate OCR data
-        fp_image = Path(job["fp_image"])
+    # Insert OCR data
+    data = [dump_dataclass(m) for m in matches]
 
-        ocr_iter = _ocr_page(
-            cfg,
-            predictor,
-            fp_image,
-        )
-
-        try:
-            while True:
-                progress = next(ocr_iter)
-
-                reader_db.execute(
-                    """
-                        UPDATE jobs 
-                        SET progress = ?
-                        WHERE 
-                            id = ?
-                            AND type = ?
-                        """,
-                    [progress, job_id, _JOB_TYPE],
-                )
-                reader_db.commit()
-
-                print(f"OCR job {job_id} at {progress:.0%}")
-        except StopIteration as e:
-            matches = e.value
-
-        # Insert OCR data
-        data = [dump_dataclass(m) for m in matches]
-
-        chap_db = load_chapter_db(Path(job["chap_dir"]))
-        chap_db.execute(
-            """
+    chap_db = load_chapter_db(Path(job["chap_dir"]))
+    chap_db.execute(
+        """
             INSERT INTO ocr_data (
                 filename, data
             ) VALUES (
                 ?, ?
             )
             """,
-            [fp_image.name, json.dumps(data)],
-        )
-        chap_db.commit()
-    except:
-        # Delete job on error
-        traceback.print_exc()
-
-        reader_db.execute(
-            """
-            DELETE FROM jobs
-            WHERE
-                id = ?
-                AND type = ?
-            """,
-            [job_id, _JOB_TYPE],
-        )
-        reader_db.commit()
-
-        raise
+        [fp_image.name, json.dumps(data)],
+    )
+    chap_db.commit()
 
 
 def _ocr_page(

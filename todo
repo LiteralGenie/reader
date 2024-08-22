@@ -1,3 +1,7 @@
+series list
+chapter list
+dictionary page
+
 move worker init to outside web server (so that uvicorn can spawn multiple workers)
 display job status %
 rescan option

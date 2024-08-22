@@ -2,8 +2,10 @@ git+https://github.com/LiteralGenie/ocr_data.git@642716831f859e6bdae8a2f33395af5
 
 datasets
 fastapi
+huggingface-hub
 jamo
 konlpy
+llama-cpp-python
 nltk
 pathvalidate
 pillow

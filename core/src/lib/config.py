@@ -24,6 +24,10 @@ class Config:
 
     use_gpu: bool
 
+    use_llm: bool
+    llm_model_id: str
+    llm_model_file: str
+
     @classmethod
     def load(cls, data: dict) -> "Config":
         d = data.copy()
