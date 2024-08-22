@@ -45,7 +45,7 @@
 
 <div
     bind:this={containerEl}
-    class="flex flex-col h-full w-full text-left p-4"
+    class="flex flex-col h-full w-full text-left p-4 bg-gray-100 overflow-auto"
 >
     <div class="flex flex-col">
         <span class="font-bold">{value.text}</span>

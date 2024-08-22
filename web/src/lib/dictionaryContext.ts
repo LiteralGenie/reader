@@ -63,6 +63,10 @@ export function setDictionaryContext(
     return ctx
 
     function setValue(text: string | null) {
+        if (text === get(ctx.value)?.text) {
+            return
+        }
+
         if (text) {
             ctx.value.set({
                 text,

@@ -19,6 +19,7 @@
     $: blocks = stitchBlocks(lines)
 
     const ctx = getDictionaryContext()
+    $: dictValue = ctx.value
 
     function bboxToAbsolutePos(bbox: MatchDto['bbox']) {
         const w = pg.width
@@ -49,6 +50,7 @@
     {#each blocks as blk}
         <div
             class="overlay absolute z-10"
+            class:active={blk.value === $dictValue?.text}
             style={bboxToAbsolutePos(blk.bbox)}
             title={blk.value}
             on:click|stopPropagation={() => onClick(blk)}
@@ -61,6 +63,10 @@
 <style lang="postcss">
     .overlay {
         /**background-color: rgba(255, 0, 0, 0.5);**/
-        border: 4px solid rgba(255, 0, 0, 0.5);
+
+        &.active {
+            border: 8px solid
+                color-mix(in srgb, green, transparent 30%);
+        }
     }
 </style>
