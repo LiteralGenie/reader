@@ -1,6 +1,6 @@
-import random
 import sys
 from pathlib import Path
+from zipfile import ZipFile
 
 sys.path.append(str(Path(__file__).parent.parent))
 
@@ -15,15 +15,13 @@ from tqdm import tqdm
 
 __all__ = []
 
-FP_WIKTIONARY = RAW_DATA_DIR / "kaikki.org-dictionary-Korean.jsonl"
-
 
 def main():
-    download_wiktionary()
-
     db = init_db()
 
     export_wiktionary(db)
+    export_krdict(db)
+
     export_ted_talks(db)
     export_subtitles(db)
 
@@ -43,19 +41,19 @@ def init_db():
 
     db.execute(
         """
-        CREATE TABLE IF NOT EXISTS words (
+        CREATE TABLE IF NOT EXISTS definitions (
             id          INTEGER     PRIMARY KEY,
             source      TEXT        NOT NULL,
 
             word        TEXT        NOT NULL,
-            pos         TEXT        NOT NULL,
+            pos         TEXT,
             definition  TEXT        NOT NULL,
 
             UNIQUE (word, pos, definition)
         )
         """
     )
-    db.execute("CREATE INDEX IF NOT EXISTS words_word on words (word)")
+    db.execute("CREATE INDEX IF NOT EXISTS definitions_word on definitions (word)")
 
     db.execute(
         """
@@ -74,35 +72,31 @@ def init_db():
     return db
 
 
-def download_wiktionary():
-    if FP_WIKTIONARY.exists():
-        print("Raw wiktionary data already exists. Skipping download.")
-        return
-
-    print("Downloading wiktionary data...")
-    url = "https://kaikki.org/dictionary/Korean/kaikki.org-dictionary-Korean.jsonl"
-    with requests.get(url, stream=True) as resp:
-        resp.raise_for_status()
-        with open(FP_WIKTIONARY, "wb") as file:
-            for chunk in resp.iter_content(chunk_size=8192):
-                file.write(chunk)
-
-
 def export_wiktionary(db: DictionaryDb):
     source = "wiktionary"
+
+    fp_wiktionary = RAW_DATA_DIR / "kaikki.org-dictionary-Korean.jsonl"
+    if fp_wiktionary.exists():
+        print(f"Raw {source} data already exists. Skipping download.")
+    else:
+        print(f"Downloading {source} data...")
+        _download(
+            "https://kaikki.org/dictionary/Korean/kaikki.org-dictionary-Korean.jsonl",
+            fp_wiktionary,
+        )
 
     if _is_done(db, source):
         print(f"Definitions from {source} already exported. Skipping.")
         return
 
-    data = [(json.loads(ln)) for ln in FP_WIKTIONARY.read_text().splitlines()]
-    pbar = tqdm(data, desc="Exporting wiktionary data to SQLite...")
+    data = [(json.loads(ln)) for ln in fp_wiktionary.read_text().splitlines()]
+    pbar = tqdm(data, desc=f"Exporting {source} definitions to SQLite...")
     for d in pbar:
         for sense in d["senses"]:
             for gloss in sense.get("glosses", []):
                 db.execute(
                     """
-                    INSERT OR IGNORE INTO words (
+                    INSERT OR IGNORE INTO definitions (
                         source, word, pos, definition
                     ) VALUES (
                         ?, ?, ?, ?
@@ -110,6 +104,74 @@ def export_wiktionary(db: DictionaryDb):
                     """,
                     [source, d["word"], d["pos"], gloss],
                 )
+
+    _set_done(db, source)
+    db.commit()
+
+
+def export_krdict(db: DictionaryDb):
+    source = "krdict"
+
+    fp_krdict = RAW_DATA_DIR / "krdict.zip"
+    if fp_krdict.exists():
+        print("Raw krdict data already exists. Skipping download.")
+    else:
+        print("Downloading krdict data...")
+        _download("https://krdict.korean.go.kr/dicBatchDownload?seq=103", fp_krdict)
+
+    if _is_done(db, source):
+        print(f"Definitions from {source} already exported. Skipping.")
+        return
+
+    data: list[dict] = []
+    with ZipFile(fp_krdict) as zip:
+        for info in zip.infolist():
+            with zip.open(info.filename) as file:
+                data.append(json.load(file))
+
+    pbar = tqdm(data, desc=f"Exporting {source} definitions to SQLite...")
+    for d in pbar:
+        for lex in d["LexicalResource"]["Lexicon"]["LexicalEntry"]:
+            lemmas = lex["Lemma"]
+            if isinstance(lemmas, dict):
+                lemmas = [lemmas]
+
+            words = []
+            for lemma in lemmas:
+                if lemma["feat"]["att"] == "writtenForm":
+                    words.append(lemma["feat"]["val"])
+                elif lemma["feat"]["att"] == "variant":
+                    words.extend(lemma["feat"]["val"].split(", "))
+                else:
+                    raise Exception(lemma)
+
+            senses = lex["Sense"]
+            if isinstance(senses, dict):
+                senses = [senses]
+
+            for sense in senses:
+                equivalent = sense.get("Equivalent", [])
+                if isinstance(equivalent, dict):
+                    equivalent = [equivalent]
+
+                for equiv in equivalent:
+                    feats = {f["att"]: f["val"] for f in equiv["feat"]}
+                    if feats["language"] != "영어":
+                        continue
+
+                    definition = f"{feats['definition']} {feats['lemma']}"
+
+                    for w in words:
+                        db.execute(
+                            """
+                            INSERT OR IGNORE INTO definitions (
+                                source, word, pos, definition
+                            ) VALUES (
+                                ?, ?, ?, ?
+                            )
+                            """,
+                            [source, w, None, definition],
+                        )
 
     _set_done(db, source)
     db.commit()
@@ -127,7 +189,7 @@ def export_ted_talks(db: DictionaryDb):
         split="train",
         streaming=True,
     )
-    ds_iter = tqdm(ds, desc=f"Loading examples from {source}...")
+    ds_iter = tqdm(ds, desc=f"Loading examples from {source}...", total=166215)
     for item in ds_iter:
         db.execute(
             """
@@ -173,6 +235,14 @@ def export_subtitles(db: DictionaryDb):
 
     _set_done(db, source)
     db.commit()
+
+
+def _download(url: str, fp: Path):
+    with requests.get(url, stream=True) as resp:
+        resp.raise_for_status()
+        with open(fp, "wb") as file:
+            for chunk in resp.iter_content(chunk_size=8192):
+                file.write(chunk)
 
 
 def _is_done(db: DictionaryDb, source: str):

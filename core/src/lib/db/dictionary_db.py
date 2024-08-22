@@ -40,7 +40,7 @@ def select_words(
         for r in db.execute(
             f"""
             SELECT word, pos, definition
-            FROM words
+            FROM definitions
             {where_clause}
             """,
             to_check,
