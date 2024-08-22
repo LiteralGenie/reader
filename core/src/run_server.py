@@ -212,7 +212,12 @@ def examples(
 def examples_count(text: str):
     db = load_dictionary_db()
 
-    return count_examples(db, text)
+    return JSONResponse(
+        count_examples(db, text),
+        headers={
+            "Cache-Control": f"max-age={86400}",
+        },
+    )
 
 
 @app.get("/definitions/{text}")
@@ -233,7 +238,12 @@ def definitions(
 def definitions_count(text: str):
     db = load_dictionary_db()
 
-    return count_definitions(db, text)
+    return JSONResponse(
+        count_definitions(db, text),
+        headers={
+            "Cache-Control": f"max-age={86400}",
+        },
+    )
 
 
 @app.get("/mtl/{text}")
