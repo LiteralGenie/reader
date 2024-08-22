@@ -10,7 +10,13 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from lib.config import Config
 from lib.db.chapter_db import get_ocr_data, load_chapter_db
-from lib.db.dictionary_db import count_examples, load_dictionary_db, select_examples
+from lib.db.dictionary_db import (
+    count_definitions,
+    count_examples,
+    load_dictionary_db,
+    select_definitions,
+    select_examples,
+)
 from lib.db.mtl_cache import load_mtl_cache, select_translation
 from lib.db.reader_db import clear_jobs, load_reader_db
 from lib.mtl import insert_mtl_job, parse_mtl, start_mtl_job_worker
@@ -207,6 +213,27 @@ def examples_count(text: str):
     db = load_dictionary_db()
 
     return count_examples(db, text)
+
+
+@app.get("/definitions/{text}")
+def definitions(
+    text: str,
+    offset: Annotated[str, Query()] = "0",
+    limit: Annotated[str, Query()] = "10",
+):
+    db = load_dictionary_db()
+
+    num_offset = int(offset)
+    num_limit = min(int(limit), 1000)
+
+    return select_definitions(db, text, num_offset, num_limit)
+
+
+@app.get("/definitions/{text}/count")
+def definitions_count(text: str):
+    db = load_dictionary_db()
+
+    return count_definitions(db, text)
 
 
 @app.get("/mtl/{text}")

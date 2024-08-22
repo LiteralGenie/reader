@@ -1,6 +1,6 @@
 <script lang="ts">
     import { page } from '$app/stores'
-    import type { OcrMatch } from '$lib/api/ocr'
+    import type { OcrMatch } from '$lib/api/dtos'
     import DictionaryView from '$lib/components/dictionary-view/dictionary-view.svelte'
     import OcrImage from '$lib/components/ocr-image.svelte'
     import { setDictionaryContext } from '$lib/dictionaryContext'

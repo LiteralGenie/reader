@@ -1,6 +1,6 @@
 <script lang="ts">
+    import type { NlpDto } from '$lib/api/dtos'
     import type { DictionaryContextValue } from '$lib/dictionaryContext'
-    import type { NlpDto } from '../../api/nlp'
 
     export let value: DictionaryContextValue
 

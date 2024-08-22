@@ -1,5 +1,6 @@
 import json
 import sqlite3
+import time
 from typing import TypeAlias
 
 from numpy import where
@@ -54,7 +55,6 @@ def select_examples(
     offset=0,
     limit=10,
 ) -> list[dict]:
-
     examples = db.execute(
         f"""
         SELECT korean, english
@@ -75,6 +75,40 @@ def count_examples(db: DictionaryDb, text: str) -> int:
         SELECT COUNT(*) count
         FROM examples
         WHERE korean LIKE ?
+        """,
+        [f"%{text}%"],
+    ).fetchone()
+    time.sleep(3)
+
+    return r["count"]
+
+
+def select_definitions(
+    db: DictionaryDb,
+    text: str,
+    offset=0,
+    limit=10,
+) -> list[dict]:
+    rs = db.execute(
+        f"""
+        SELECT word, pos, definition, source
+        FROM definitions
+        WHERE word LIKE ?
+        LIMIT ?
+        OFFSET ?
+        """,
+        [f"%{text}%", limit, offset],
+    ).fetchall()
+
+    return [dict(r) for r in rs]
+
+
+def count_definitions(db: DictionaryDb, text: str) -> int:
+    r = db.execute(
+        f"""
+        SELECT COUNT(*) count
+        FROM definitions
+        WHERE word LIKE ?
         """,
         [f"%{text}%"],
     ).fetchone()

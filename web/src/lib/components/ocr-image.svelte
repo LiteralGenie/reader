@@ -1,6 +1,6 @@
 <script lang="ts">
     import { page } from '$app/stores'
-    import type { OcrMatch } from '$lib/api/ocr'
+    import type { OcrMatch } from '$lib/api/dtos'
     import type { MatchDto, PageDto } from '$lib/api/series'
     import { getDictionaryContext } from '$lib/dictionaryContext'
     import {

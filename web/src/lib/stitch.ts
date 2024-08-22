@@ -1,6 +1,6 @@
 import { max, min, sort, sum } from 'radash'
-import type { OcrMatch } from './api/ocr'
-import { abs } from './misc_utils'
+import type { OcrMatch } from './api/dtos'
+import { abs } from './miscUtils'
 
 type Bbox = [number, number, number, number]
 

@@ -1,11 +1,6 @@
 import { env } from '$env/dynamic/private'
 import { error } from '@sveltejs/kit'
-
-export interface OcrMatch {
-    bbox: [number, number, number, number]
-    confidence: number
-    value: string
-}
+import type { OcrMatch } from './dtos'
 
 export async function fetchAllOcrData(
     series: string,

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { MtlDto } from '$lib/api/mtl'
+    import type { MtlDto } from '$lib/api/dtos'
     import { newPromiseStore } from '$lib/promiseStore'
 
     export let text: string
