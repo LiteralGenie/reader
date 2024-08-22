@@ -7,7 +7,7 @@ from typing import Annotated
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from lib.config import Config
 from lib.db.chapter_db import get_ocr_data, load_chapter_db
 from lib.db.dictionary_db import count_examples, load_dictionary_db, select_examples
@@ -108,7 +108,21 @@ def ocr_for_chapter(series: str, chapter: str):
     for fp_image in missing:
         insert_ocr_job(load_reader_db(), fp_image)
 
-    return {fp_image.name: pg_data for fp_image, pg_data in data.items()}
+    resp = {fp_image.name: pg_data for fp_image, pg_data in data.items()}
+    if not missing:
+        return JSONResponse(
+            resp,
+            headers={
+                "Cache-Control": f"max-age={365*86400}",
+            },
+        )
+    else:
+        return JSONResponse(
+            resp,
+            headers={
+                "Cache-Control": f"no-cache",
+            },
+        )
 
 
 @app.get("/ocr/{series}/{chapter}/sse")
@@ -166,7 +180,12 @@ def nlp(text: str):
         for info in grp:
             info["defs"] = get_defs(info["text"], info["pos"])
 
-    return words
+    return JSONResponse(
+        words,
+        headers={
+            "Cache-Control": f"max-age={365*86400}",
+        },
+    )
 
 
 @app.get("/examples/{text}")

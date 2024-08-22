@@ -1,7 +1,5 @@
 <script lang="ts">
-    import { browser } from '$app/environment'
     import { page } from '$app/stores'
-    import { type NlpDto } from '$lib/api/nlp'
     import type { OcrMatch } from '$lib/api/ocr'
     import type { MatchDto, PageDto } from '$lib/api/series'
     import { getDictionaryContext } from '$lib/dictionaryContext'
@@ -10,6 +8,7 @@
         StitchedBlock,
         stitchLines
     } from '$lib/stitch'
+    import { max, min } from 'radash'
 
     export let pg: PageDto
     export let matches: OcrMatch[]
@@ -19,28 +18,17 @@
     $: lines = stitchLines(matches)
     $: blocks = stitchBlocks(lines)
 
-    const nlpData: Record<string, Promise<NlpDto[][]>> = {}
-    $: {
-        if (browser) {
-            for (let blk of blocks) {
-                if (blk.value in nlpData) {
-                    continue
-                }
-
-                const url = `/api/nlp/${blk.value}`
-                nlpData[blk.value] = fetch(url).then((resp) =>
-                    resp.json()
-                )
-            }
-        }
-    }
-
     const ctx = getDictionaryContext()
 
     function bboxToAbsolutePos(bbox: MatchDto['bbox']) {
         const w = pg.width
         const h = pg.height
-        const [y1, x1, y2, x2] = bbox
+
+        let [y1, x1, y2, x2] = bbox
+        x1 = max([x1 - 10, 0])!
+        y1 = max([y1 - 10, 0])!
+        x2 = min([x2 + 10, w])!
+        y2 = min([y2 + 10, h])!
 
         const left = `${(100 * x1) / w}%`
         const right = `${(100 * (w - x2)) / w}%`
@@ -51,10 +39,7 @@
     }
 
     function onClick(block: StitchedBlock) {
-        ctx.set({
-            sentence: block.value,
-            nlp: nlpData[block.value]
-        })
+        ctx.setValue(block.value)
     }
 </script>
 

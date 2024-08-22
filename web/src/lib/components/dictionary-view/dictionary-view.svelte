@@ -1,10 +1,14 @@
 <script lang="ts">
-    import type { DictionaryContext } from '$lib/dictionaryContext'
-    import type { NlpDto } from './nlp'
+    import type { DictionaryContextValue } from '$lib/dictionaryContext'
+    import type { NlpDto } from '../../api/nlp'
 
-    export let ctx: DictionaryContext
+    export let value: DictionaryContextValue
 
-    $: words = ctx.sentence.split(' ')
+    $: words = value.text.split(' ')
+    $: ({ mtl } = value)
+
+    let containerEl: HTMLDivElement | undefined
+    $: value && containerEl?.scrollTo({ top: 0 })
 
     function pickDefs(nlp: NlpDto) {
         const numPicks = 5
@@ -39,18 +43,38 @@
     }
 </script>
 
-<div class="flex flex-col h-full w-full text-left p-4">
-    <div>
-        {ctx.sentence}
+<div
+    bind:this={containerEl}
+    class="flex flex-col h-full w-full text-left p-4"
+>
+    <div class="flex flex-col">
+        <span class="font-bold">{value.text}</span>
+
+        {#if $mtl}
+            <span class="italic mt-2">{$mtl.translation}</span>
+        {/if}
     </div>
 
     <hr class="my-4" />
 
     <div>
-        {#await ctx.nlp then nlp}
+        {#await value.nlp then nlp}
             {#each words as word, idx}
+                {@const wordMtl = $mtl?.words[word]}
+
                 <div class="mb-4">
-                    <h1 class="font-bold">[{word}]</h1>
+                    <div>
+                        <h1>
+                            <span class="font-bold">[{word}]</span>
+
+                            {#if wordMtl}
+                                <span class="italic">
+                                    = {wordMtl}
+                                </span>
+                            {/if}
+                        </h1>
+                    </div>
+
                     {#each nlp[idx] as part}
                         <div class="ml-2">
                             {part.text} ({part.pos})

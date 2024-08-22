@@ -4,5 +4,6 @@ data/dictionary.sqlite
 data/mtl_cache.sqlite
 data/reader.sqlite
 
+*.log
 *.sqlite-wal
 *.sqlite-shm
