@@ -4,18 +4,22 @@
     import { type NlpDto } from '$lib/api/nlp'
     import type { OcrMatch } from '$lib/api/ocr'
     import type { MatchDto, PageDto } from '$lib/api/series'
-    import { stitchBlocks, stitchLines } from '$lib/stitch'
+    import { getDictionaryContext } from '$lib/dictionaryContext'
+    import {
+        stitchBlocks,
+        StitchedBlock,
+        stitchLines
+    } from '$lib/stitch'
 
     export let pg: PageDto
     export let matches: OcrMatch[]
-
-    const nlpData: Record<string, Promise<NlpDto[][]>> = {}
 
     $: ({ seriesId, chapterId } = $page.params)
 
     $: lines = stitchLines(matches)
     $: blocks = stitchBlocks(lines)
 
+    const nlpData: Record<string, Promise<NlpDto[][]>> = {}
     $: {
         if (browser) {
             for (let blk of blocks) {
@@ -31,6 +35,8 @@
         }
     }
 
+    const ctx = getDictionaryContext()
+
     function bboxToAbsolutePos(bbox: MatchDto['bbox']) {
         const w = pg.width
         const h = pg.height
@@ -43,6 +49,13 @@
 
         return `left: ${left}; right: ${right}; top: ${top}; bottom: ${bottom};`
     }
+
+    function onClick(block: StitchedBlock) {
+        ctx.set({
+            sentence: block.value,
+            nlp: nlpData[block.value]
+        })
+    }
 </script>
 
 <div class="relative">
@@ -53,6 +66,7 @@
             class="overlay absolute z-10"
             style={bboxToAbsolutePos(blk.bbox)}
             title={blk.value}
+            on:click|stopPropagation={() => onClick(blk)}
         >
             <!-- {blk.value} -->
         </div>

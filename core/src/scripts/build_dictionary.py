@@ -49,7 +49,7 @@ def init_db():
             pos         TEXT,
             definition  TEXT        NOT NULL,
 
-            UNIQUE (word, pos, definition)
+            UNIQUE (word, definition)
         )
         """
     )
@@ -159,19 +159,20 @@ def export_krdict(db: DictionaryDb):
                     if feats["language"] != "영어":
                         continue
 
-                    definition = f"{feats['definition']} {feats['lemma']}"
+                    definitions = [feats["definition"], feats["lemma"]]
 
                     for w in words:
-                        db.execute(
-                            """
-                            INSERT OR IGNORE INTO definitions (
-                                source, word, pos, definition
-                            ) VALUES (
-                                ?, ?, ?, ?
+                        for defn in definitions:
+                            db.execute(
+                                """
+                                INSERT OR IGNORE INTO definitions (
+                                    source, word, pos, definition
+                                ) VALUES (
+                                    ?, ?, ?, ?
+                                )
+                                """,
+                                [source, w, None, defn],
                             )
-                            """,
-                            [source, w, None, definition],
-                        )
 
     _set_done(db, source)
     db.commit()
