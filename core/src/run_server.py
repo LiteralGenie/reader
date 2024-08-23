@@ -229,7 +229,7 @@ def definitions_count(text: str):
 @app.get("/mtl/{text}")
 @cache()  # type: ignore
 async def get_mtl(text: str):
-    if not app.state.cfg.use_llm:
+    if not app.state.cfg.use_llm_for_mtl:
         return None
 
     cache = load_mtl_cache()
@@ -249,7 +249,7 @@ async def get_mtl(text: str):
 @app.get("/best_defs/{text}")
 @cache()  # type: ignore
 async def get_best_defs(text: str):
-    if not app.state.cfg.use_llm:
+    if not app.state.cfg.use_llm_for_definition_sort:
         return None
 
     cache = load_mtl_cache()

@@ -22,13 +22,17 @@ class Config:
 
     max_ocr_width: int
 
-    use_gpu: bool
+    use_gpu_for_ocr: bool
 
-    use_llm: bool
+    use_llm_for_mtl: bool
+    use_llm_for_definition_sort: bool
+
+    llm_num_definitions: int
+
     llm_model_id: str
     llm_model_file: str
 
-    llm_context_size: int
+    llm_num_gpu_layers: int
 
     @classmethod
     def load(cls, data: dict) -> "Config":

@@ -54,7 +54,11 @@ From the list below, pick the most relevant definition for "{{ TARGET }}"
 """.strip()
 
 
-def get_best_defs(llm: Llama, text: str, n_per_part=2) -> list[list[list[int]]]:
+def get_best_defs(
+    llm: Llama,
+    text: str,
+    num_defs_per_part: int,
+) -> list[list[list[int]]]:
     kkma = Kkma()
 
     words = get_pos_by_word(kkma, text)
@@ -70,7 +74,7 @@ def get_best_defs(llm: Llama, text: str, n_per_part=2) -> list[list[list[int]]]:
         for part in w:
             id_best = _get_n_best_defs(
                 llm,
-                n_per_part,
+                num_defs_per_part,
                 text,
                 word_text,
                 w,
@@ -107,7 +111,6 @@ def _get_n_best_defs(
             all_parts,
             rem,
         )
-        print("req", req)
 
         output = llm.create_chat_completion(
             messages=[
@@ -124,7 +127,6 @@ def _get_n_best_defs(
             continue
 
         defn = rem.pop(idx_selection)
-        print("defn", idx_selection, defn)
         best.append(defn["id"])
 
     return best

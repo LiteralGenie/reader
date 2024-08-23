@@ -51,7 +51,10 @@ def insert_llm_job(
 def _init_worker(cfg: Config):
     global _WORKER_LLM
     _WORKER_LLM = Llama.from_pretrained(
-        cfg.llm_model_id, cfg.llm_model_file, n_ctx=cfg.llm_context_size
+        cfg.llm_model_id,
+        cfg.llm_model_file,
+        n_ctx=2048,
+        n_gpu_layers=cfg.llm_num_gpu_layers,
     )
 
 
@@ -62,6 +65,7 @@ def _process_all_jobs(cfg: Config, job_ids: list[str]):
     for id in job_ids:
         try:
             _process_job(
+                cfg,
                 jobber,
                 _WORKER_LLM,
                 id,
@@ -77,6 +81,7 @@ def _process_all_jobs(cfg: Config, job_ids: list[str]):
 
 
 def _process_job(
+    cfg: Config,
     jobber: JobManager,
     llm: Llama,
     job_id: str,
@@ -91,7 +96,7 @@ def _process_job(
         translation = mtl(llm, job["text"])
         insert_translation(cache, job["text"], translation)
     else:
-        best_defs = get_best_defs(llm, job["text"])
+        best_defs = get_best_defs(llm, job["text"], cfg.llm_num_definitions)
         insert_best_defs(cache, job["text"], best_defs)
 
     cache.commit()
