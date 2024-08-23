@@ -31,11 +31,6 @@
                 (d) => !bestIds.find((id) => d.id === id)
             )
         ]
-        console.log(
-            data,
-            bestIds,
-            bestIds.map((id) => data.defs.find((d) => d.id === id)!)
-        )
 
         const picks = sorted.slice(0, numPicks)
         return picks.map((d) => {
@@ -109,7 +104,7 @@
 
 <div
     bind:this={containerEl}
-    class="flex flex-col h-full w-full text-left p-4 bg-card overflow-auto"
+    class="flex flex-col h-fit min-h-full w-full text-left p-4 bg-card"
 >
     <div class="flex flex-col">
         <span class="font-bold text-xl">

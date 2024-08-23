@@ -49,7 +49,7 @@
 
     {#each blocks as blk}
         <div
-            class="overlay absolute z-10"
+            class="overlay absolute z-10 select-none"
             class:active={blk.value === $dictValue?.text}
             style={bboxToAbsolutePos(blk.bbox)}
             title={blk.value}
