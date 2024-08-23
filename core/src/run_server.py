@@ -7,7 +7,10 @@ from typing import Annotated
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.inmemory import InMemoryBackend
+from fastapi_cache.decorator import cache
 from lib.config import Config
 from lib.db.chapter_db import get_ocr_data, load_chapter_db
 from lib.db.dictionary_db import (
@@ -31,6 +34,9 @@ CONFIG_FILE = Path(__file__).parent.parent.parent / "config.toml"
 
 @asynccontextmanager
 async def _lifespan(app: FastAPI):
+    # Cache
+    FastAPICache.init(InMemoryBackend(), expire=86400)
+
     # Global args
     args = _parse_args()
     app.state.args = args
@@ -115,20 +121,7 @@ def ocr_for_chapter(series: str, chapter: str):
         insert_ocr_job(load_reader_db(), fp_image)
 
     resp = {fp_image.name: pg_data for fp_image, pg_data in data.items()}
-    if not missing:
-        return JSONResponse(
-            resp,
-            headers={
-                "Cache-Control": f"public, max-age={365*86400}",
-            },
-        )
-    else:
-        return JSONResponse(
-            resp,
-            headers={
-                "Cache-Control": f"no-cache",
-            },
-        )
+    return resp
 
 
 @app.get("/ocr/{series}/{chapter}/sse")
@@ -177,6 +170,7 @@ def poll_ocr(
 
 
 @app.get("/nlp/{text}")
+@cache(expire=365 * 86400)  # type: ignore
 def nlp(text: str):
     words = get_pos_by_word(app.state.kkma_pool, text)
     if not words:
@@ -186,12 +180,7 @@ def nlp(text: str):
         for info in grp:
             info["defs"] = get_defs(info["text"], info["pos"])
 
-    return JSONResponse(
-        words,
-        headers={
-            "Cache-Control": f"public, max-age={365*86400}",
-        },
-    )
+    return words
 
 
 @app.get("/examples/{text}")
@@ -209,15 +198,10 @@ def examples(
 
 
 @app.get("/examples/{text}/count")
+@cache()  # type: ignore
 def examples_count(text: str):
     db = load_dictionary_db()
-
-    return JSONResponse(
-        count_examples(db, text),
-        headers={
-            "Cache-Control": f"public, max-age={86400}",
-        },
-    )
+    return count_examples(db, text)
 
 
 @app.get("/definitions/{text}")
@@ -235,15 +219,10 @@ def definitions(
 
 
 @app.get("/definitions/{text}/count")
+@cache()  # type: ignore
 def definitions_count(text: str):
     db = load_dictionary_db()
-
-    return JSONResponse(
-        count_definitions(db, text),
-        headers={
-            "Cache-Control": f"public, max-age={86400}",
-        },
-    )
+    return count_definitions(db, text)
 
 
 @app.get("/mtl/{text}")

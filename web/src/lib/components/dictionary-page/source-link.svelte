@@ -8,15 +8,15 @@
     function getLabel(source: string): string {
         switch (source) {
             case 'wiktionary':
-                return 'from Wiktionary'
+                return '- Wiktionary'
             case 'krdict':
-                return "from the Korean-English Learners' Dictionary"
+                return "- the Korean-English Learners' Dictionary"
             case 'Helsinki-NLP/open_subtitles':
-                return 'from OpenSubtitles.org'
+                return '- OpenSubtitles.org'
             case 'msarmi9_ted-talks':
-                return 'from TED Talks'
+                return '- TED Talks'
             default:
-                return `from ${source}`
+                return `- ${source}`
         }
     }
 
