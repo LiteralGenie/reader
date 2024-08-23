@@ -119,7 +119,7 @@ def ocr_for_chapter(series: str, chapter: str):
         return JSONResponse(
             resp,
             headers={
-                "Cache-Control": f"max-age={365*86400}",
+                "Cache-Control": f"public, max-age={365*86400}",
             },
         )
     else:
@@ -189,7 +189,7 @@ def nlp(text: str):
     return JSONResponse(
         words,
         headers={
-            "Cache-Control": f"max-age={365*86400}",
+            "Cache-Control": f"public, max-age={365*86400}",
         },
     )
 
@@ -215,7 +215,7 @@ def examples_count(text: str):
     return JSONResponse(
         count_examples(db, text),
         headers={
-            "Cache-Control": f"max-age={86400}",
+            "Cache-Control": f"public, max-age={86400}",
         },
     )
 
@@ -241,7 +241,7 @@ def definitions_count(text: str):
     return JSONResponse(
         count_definitions(db, text),
         headers={
-            "Cache-Control": f"max-age={86400}",
+            "Cache-Control": f"public, max-age={86400}",
         },
     )
 

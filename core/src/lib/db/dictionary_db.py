@@ -57,7 +57,7 @@ def select_examples(
 ) -> list[dict]:
     examples = db.execute(
         f"""
-        SELECT korean, english
+        SELECT korean, english, source
         FROM examples
         WHERE korean LIKE ?
         LIMIT ?

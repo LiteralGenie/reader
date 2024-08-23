@@ -35,4 +35,5 @@ export interface DefinitionDto {
 export interface ExampleDto {
     korean: string
     english: string
+    source: string
 }
