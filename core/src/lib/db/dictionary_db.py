@@ -22,17 +22,17 @@ def load_dictionary_db():
 def select_words(
     db: DictionaryDb,
     word: str,
-    check_ending=False,
-    check_verb=False,
+    check_dash_prefix=False,
+    check_suffix=False,
 ) -> list[dict]:
-    where_clause = "WHERE word = ?"
+    where_clause = "word = ?"
     to_check = [word]
 
-    if check_ending:
+    if check_dash_prefix:
         where_clause += " OR word = ?"
         to_check.append(f"-{word}")
 
-    if check_verb:
+    if check_suffix:
         where_clause += " OR word LIKE ?"
         to_check.append(f"{word}%")
 
@@ -42,7 +42,13 @@ def select_words(
             f"""
             SELECT word, pos, definition
             FROM definitions
-            {where_clause}
+            WHERE 
+                ({where_clause})
+
+                -- wiktionary quirk
+                AND definition NOT LIKE 'See the entry%'
+
+                AND pos != 'syllable'
             """,
             to_check,
         )
@@ -93,7 +99,10 @@ def select_definitions(
         f"""
         SELECT word, pos, definition, source
         FROM definitions
-        WHERE word LIKE ?
+        WHERE 
+            word LIKE ?
+            AND definition NOT LIKE 'See the entry%'
+            AND pos != 'syllable'
         LIMIT ?
         OFFSET ?
         """,
@@ -108,7 +117,10 @@ def count_definitions(db: DictionaryDb, text: str) -> int:
         f"""
         SELECT COUNT(*) count
         FROM definitions
-        WHERE word LIKE ?
+        WHERE 
+            word LIKE ?
+            AND definition NOT LIKE 'See the entry%'
+            AND pos != 'syllable'
         """,
         [f"%{text}%"],
     ).fetchone()

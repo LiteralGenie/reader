@@ -12,22 +12,9 @@
 
     function pickDefs(nlp: NlpDto) {
         const numPicks = 5
+        const maxChars = 125
 
-        const picks = nlp.defs
-            .filter((d) => d.definition.length < 50)
-            .slice(0, numPicks)
-
-        for (let d of nlp.defs) {
-            if (picks.length >= numPicks) {
-                break
-            }
-
-            if (picks.find((x) => x.definition === d.definition)) {
-                continue
-            }
-
-            picks.push(d)
-        }
+        const picks = nlp.defs.slice(0, numPicks)
 
         return picks.map((d) => {
             let text = ''
@@ -36,26 +23,83 @@
                 text += `(${d.word}) `
             }
 
-            text += d.definition
+            let defn = d.definition
+            if (defn.length > maxChars) {
+                defn = defn.slice(0, maxChars - 3) + '...'
+            }
+            text += defn
 
             return text
         })
+    }
+
+    function prettyPrintKkma(kkmaPos: string) {
+        if (kkmaPos.startsWith('N')) {
+            return '(noun)'
+        } else if (['VV', 'VCP', 'VCN'].includes(kkmaPos)) {
+            return '(verb)'
+        } else if (kkmaPos === 'VA') {
+            return '(adj.)'
+        } else if (kkmaPos === 'VXV') {
+            return '(aux. verb)'
+        } else if (kkmaPos === 'VXA') {
+            return '(aux. adj.)'
+        } else if (['MDN', 'MDT'].includes(kkmaPos)) {
+            return '(determiner)'
+        } else if (kkmaPos === 'MAG') {
+            return '(adverb)'
+        } else if (kkmaPos === 'MAC') {
+            return '(conjunction)'
+        } else if (kkmaPos === 'IC') {
+            return '(exclamation)'
+        } else if (kkmaPos.startsWith('J')) {
+            return '(particle)'
+        } else if (kkmaPos.startsWith('E')) {
+            return '(verb ending)'
+        } else if (kkmaPos === 'XPN') {
+            return '(prefix)'
+        } else if (kkmaPos === 'XPV') {
+            return '(verb prefix)'
+        } else if (kkmaPos === 'XSN') {
+            return '(suffix)'
+        } else if (kkmaPos === 'XSV') {
+            return '(verb suffix)'
+        } else if (kkmaPos === 'XSA') {
+            return '(adj. suffix)'
+        } else if (kkmaPos === 'XR') {
+            return '(stem)'
+        } else if (kkmaPos.startsWith('S')) {
+            // punctuation / symbols
+            return ''
+        } else if (kkmaPos === 'OL') {
+            return '(loan word)'
+        } else if (kkmaPos === 'ON') {
+            // number
+            return ''
+        } else if (kkmaPos === 'UN') {
+            // unknown
+            return '(unknown)'
+        } else {
+            return '(unknown)'
+        }
     }
 </script>
 
 <div
     bind:this={containerEl}
-    class="flex flex-col h-full w-full text-left p-4 bg-gray-100 overflow-auto"
+    class="flex flex-col h-full w-full text-left p-4 bg-card overflow-auto"
 >
     <div class="flex flex-col">
-        <span class="font-bold">{value.text}</span>
+        <span class="font-bold text-xl">
+            {value.text}
+        </span>
 
         {#if $mtl}
             <span class="italic mt-2">{$mtl.translation}</span>
         {/if}
     </div>
 
-    <hr class="my-4" />
+    <hr class="my-6" />
 
     <div>
         {#await value.nlp then nlp}
@@ -65,24 +109,33 @@
                 <div class="mb-4">
                     <div>
                         <h1>
-                            <span class="font-bold">[{word}]</span>
+                            <span
+                                class="font-bold text-lg text-accent-foreground"
+                            >
+                                [{word}]
+                            </span>
 
                             {#if wordMtl}
+                                <span> = </span>
+
                                 <span class="italic">
-                                    = {wordMtl}
+                                    {wordMtl}
                                 </span>
                             {/if}
                         </h1>
                     </div>
 
                     {#each nlp[idx] as part}
-                        <div class="ml-2">
-                            {part.text} ({part.pos})
+                        <div class="ml-4">
+                            <span>{part.text}</span>
+                            <span class="text-sm">
+                                {prettyPrintKkma(part.pos)}
+                            </span>
                         </div>
 
                         <ul>
                             {#each pickDefs(part) as def}
-                                <li class="ml-6">
+                                <li class="ml-8">
                                     - {def}
                                 </li>
                             {/each}

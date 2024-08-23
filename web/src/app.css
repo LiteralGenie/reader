@@ -13,7 +13,7 @@ body {
 }
 
 hr {
-    border-color: hsl(var(--muted));
+    border-color: hsl(var(--border));
 }
 
 @layer base {
@@ -30,7 +30,7 @@ hr {
         --card: 0 0% 100%;
         --card-foreground: 222.2 84% 4.9%;
 
-        --border: 0 0% 91.4%;
+        --border: 0 0% 81.4%;
         --input: 214.3 31.8% 91.4%;
 
         --primary: 222.2 47.4% 11.2%;
@@ -51,7 +51,7 @@ hr {
     }
 
     .dark {
-        --background: 0 0% 9.8%;
+        --background: 0 0% 4.9%;
         --foreground: 0 0% 100%;
 
         --muted: 0 0% 17.5%;
@@ -60,10 +60,10 @@ hr {
         --popover: 222.2 84% 4.9%;
         --popover-foreground: 210 40% 98%;
 
-        --card: 222.2 84% 4.9%;
+        --card: 0 0% 9.8%;
         --card-foreground: 210 40% 98%;
 
-        --border: 217.2 32.6% 17.5%;
+        --border: 217.2 0% 17.5%;
         --input: 217.2 32.6% 17.5%;
 
         --primary: 210 40% 98%;
@@ -73,7 +73,7 @@ hr {
         --secondary-foreground: 210 40% 98%;
 
         --accent: 217.2 32.6% 17.5%;
-        --accent-foreground: 210 40% 98%;
+        --accent-foreground: 0 74% 42%;
 
         --destructive: 0 62.8% 30.6%;
         --destructive-foreground: 210 40% 98%;

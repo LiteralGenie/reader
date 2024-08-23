@@ -9,3 +9,5 @@ logging
 image load priority
 fix spacing before nlp
 scroll to word in dictionary view
+
+sort definitions via llm

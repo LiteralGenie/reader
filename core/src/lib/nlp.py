@@ -73,13 +73,17 @@ def _to_jamo(text: str) -> list[str]:
 def get_defs(word: str, kkma_pos: str) -> list[dict]:
     db = load_dictionary_db()
 
-    check_ending = kkma_pos.startswith("J")
-    check_verb = kkma_pos.startswith("V")
+    check_dash_prefix = kkma_pos.startswith("J") or kkma_pos.startswith("E")
+    check_suffix = (
+        kkma_pos.startswith("V")
+        or kkma_pos in ["XSV", "XSA"]
+        or kkma_pos.startswith("E")
+    )
     matches = select_words(
         db,
         word,
-        check_ending=check_ending,
-        check_verb=check_verb,
+        check_dash_prefix=check_dash_prefix,
+        check_suffix=check_suffix,
     )
 
     matches.sort(key=lambda d: _score_definition_match(word, kkma_pos, d))
@@ -90,15 +94,80 @@ def get_defs(word: str, kkma_pos: str) -> list[dict]:
 def _score_definition_match(text: str, kkma_pos: str, data: dict):
     char_dist = edit_distance(text, data["word"])
 
+    # @TODO: wiktionary pos:
+    # character, symbol, noun, intj, root, name, num, verb, syllable, det, prefix, suffix, affix, particle, adv, pron, adj, counter, phrase, punct, proverb, interfix, romanization, conj
+
     pos_dist = float("inf")
     if kkma_pos.startswith("J"):
+        # particles
         match data["pos"]:
             case "particle":
                 pos_dist = 0
             case "suffix":
                 pos_dist = 1
+            case "affix":
+                pos_dist = 2
+    elif kkma_pos in ["VA", "VXA"]:
+        # adjectives
+        match data["pos"]:
+            case "adj":
+                pos_dist = 0
+    elif kkma_pos in ["VV", "VCP", "VCN", "VXV"]:
+        # verbs
+        match data["pos"]:
+            case "verb":
+                pos_dist = 0
+    elif kkma_pos in ["MAG"]:
+        # adverbs
+        match data["pos"]:
+            case "adv":
+                pos_dist = 0
+    elif kkma_pos in ["XSV"]:
+        # verb suffixes (eg 하다)
+        match data["pos"]:
+            case "suffix":
+                pos_dist = 0
+            case "affix":
+                pos_dist = 1
+            case "verb":
+                pos_dist = 2
+            case "particle":
+                pos_dist = 3
+    elif kkma_pos in ["XSA"]:
+        # adjective suffixes
+        match data["pos"]:
+            case "suffix":
+                pos_dist = 0
+            case "affix":
+                pos_dist = 1
+            case "adj":
+                pos_dist = 2
+            case "particle":
+                pos_dist = 3
+    elif kkma_pos in ["XSN"]:
+        # noun suffixes
+        match data["pos"]:
+            case "suffix":
+                pos_dist = 0
+            case "particle":
+                pos_dist = 1
+            case "affix":
+                pos_dist = 2
+    elif kkma_pos.startswith("E"):
+        # connective particles (eg -어(지다))
+        match data["pos"]:
+            case "suffix":
+                pos_dist = 0
+            case "prefix":
+                pos_dist = 0
+            case "affix":
+                pos_dist = 0
+            case "particle":
+                pos_dist = 1
 
-    return (pos_dist, char_dist)
+    length = len(data["definition"])
+
+    return (pos_dist, char_dist, length)
 
 
 # We need to run the konlpy tagger in a pool

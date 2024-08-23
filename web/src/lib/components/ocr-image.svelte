@@ -26,10 +26,10 @@
         const h = pg.height
 
         let [y1, x1, y2, x2] = bbox
-        x1 = max([x1 - 10, 0])!
-        y1 = max([y1 - 10, 0])!
-        x2 = min([x2 + 10, w])!
-        y2 = min([y2 + 10, h])!
+        x1 = max([x1 - 15, 0])!
+        y1 = max([y1 - 15, 0])!
+        x2 = min([x2 + 15, w])!
+        y2 = min([y2 + 15, h])!
 
         const left = `${(100 * x1) / w}%`
         const right = `${(100 * (w - x2)) / w}%`
@@ -65,8 +65,12 @@
         /**background-color: rgba(255, 0, 0, 0.5);**/
 
         &.active {
-            border: 8px solid
-                color-mix(in srgb, green, transparent 30%);
+            border: 6px solid
+                color-mix(
+                    in srgb,
+                    hsl(var(--accent-foreground)),
+                    transparent 20%
+                );
         }
     }
 </style>
