@@ -16,7 +16,7 @@
     }
 
     .disabled :global(a) {
-        @apply bg-gray-200;
+        @apply bg-muted;
     }
 
     /* .root :global(a) {

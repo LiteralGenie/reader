@@ -46,12 +46,16 @@
 </script>
 
 {#if hrefs.length === 1}
-    <a class="hover:underline" href={hrefs[0]}>{label}</a>
+    <a href={hrefs[0]} target="_blank" class="hover:underline">
+        {label}
+    </a>
 {:else if hrefs.length > 1}
     <span>
         <span>{label}</span>
         {#each hrefs as href, idx}
-            <a {href} class="hover:underline">[{idx}]</a>
+            <a {href} target="_blank" class="hover:underline">
+                [{idx}]
+            </a>
             <span></span>
         {/each}
     </span>

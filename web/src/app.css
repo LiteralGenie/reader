@@ -7,6 +7,15 @@ body {
     height: 100%;
 }
 
+body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+}
+
+hr {
+    border-color: hsl(var(--muted));
+}
+
 @layer base {
     :root {
         --background: 0 0% 100%;
@@ -21,7 +30,7 @@ body {
         --card: 0 0% 100%;
         --card-foreground: 222.2 84% 4.9%;
 
-        --border: 214.3 31.8% 91.4%;
+        --border: 0 0% 91.4%;
         --input: 214.3 31.8% 91.4%;
 
         --primary: 222.2 47.4% 11.2%;
@@ -42,11 +51,11 @@ body {
     }
 
     .dark {
-        --background: 222.2 84% 4.9%;
-        --foreground: 210 40% 98%;
+        --background: 0 0% 9.8%;
+        --foreground: 0 0% 100%;
 
-        --muted: 217.2 32.6% 17.5%;
-        --muted-foreground: 215 20.2% 65.1%;
+        --muted: 0 0% 17.5%;
+        --muted-foreground: 0 0% 65.1%;
 
         --popover: 222.2 84% 4.9%;
         --popover-foreground: 210 40% 98%;

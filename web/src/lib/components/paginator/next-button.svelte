@@ -8,7 +8,7 @@
 
 <div class:disabled>
     <Button variant="link" {href}>
-        <ArrowRight class="size-4 stroke-black stroke-1" />
+        <ArrowRight class="size-4 stroke-foreground stroke-1" />
     </Button>
 </div>
 

@@ -44,8 +44,10 @@
         {#each examples as ex, idx}
             <div class="flex flex-col gap-1 leading-tight">
                 <Highlight text={ex.korean} target={query} />
-                <div>{ex.english}</div>
-                <div class="text-sm italic text-gray-600">
+                <div class="english">{ex.english}</div>
+                <div
+                    class="text-sm italic text-muted-foreground self-end"
+                >
                     <SourceLink source={ex.source} />
                 </div>
             </div>
@@ -60,3 +62,9 @@
         <Paginator currentPage={idxPage} {maxPage} {hrefBuilder} />
     </div>
 </div>
+
+<style lang="postcss">
+    .english {
+        color: hsla(var(--foreground) / 0.8);
+    }
+</style>

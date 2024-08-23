@@ -21,7 +21,7 @@
         bind:this={inputEl}
         max={maxPage}
         placeholder="..."
-        class="rounded-md h-10 py-2 w-10 font-medium flex items-center justify-center text-center"
+        class="rounded-md h-10 py-2 w-10 font-medium flex items-center justify-center text-center bg-background"
         on:blur={onSubmit}
     />
 </form>
