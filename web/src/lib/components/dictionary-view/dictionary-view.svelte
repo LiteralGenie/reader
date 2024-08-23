@@ -1,25 +1,47 @@
 <script lang="ts">
-    import type { NlpDto } from '$lib/api/dtos'
+    import type { BestDefDto, NlpDto } from '$lib/api/dtos'
     import type { DictionaryContextValue } from '$lib/dictionaryContext'
 
     export let value: DictionaryContextValue
 
     $: words = value.text.split(' ')
-    $: ({ mtl } = value)
+    $: ({ mtl, bestDefs } = value)
 
     let containerEl: HTMLDivElement | undefined
     $: value && containerEl?.scrollTo({ top: 0 })
 
-    function pickDefs(nlp: NlpDto) {
+    function pickDefs(
+        nlp: NlpDto[][],
+        idxWord: number,
+        idxPart: number,
+        bestDefs: BestDefDto | null
+    ) {
         const numPicks = 5
         const maxChars = 125
 
-        const picks = nlp.defs.slice(0, numPicks)
+        const data = nlp[idxWord][idxPart]
 
+        // Prioritize LLM-picked defs
+        const bestIds = bestDefs?.[idxWord][idxPart] ?? []
+        const sorted = [
+            ...bestIds.map(
+                (id) => data.defs.find((d) => d.id === id)!
+            ),
+            ...data.defs.filter(
+                (d) => !bestIds.find((id) => d.id === id)
+            )
+        ]
+        console.log(
+            data,
+            bestIds,
+            bestIds.map((id) => data.defs.find((d) => d.id === id)!)
+        )
+
+        const picks = sorted.slice(0, numPicks)
         return picks.map((d) => {
             let text = ''
 
-            if (d.word != nlp.text) {
+            if (d.word != data.text) {
                 text += `(${d.word}) `
             }
 
@@ -103,7 +125,7 @@
 
     <div>
         {#await value.nlp then nlp}
-            {#each words as word, idx}
+            {#each words as word, idxWord}
                 {@const wordMtl = $mtl?.words[word]}
 
                 <div class="mb-4">
@@ -125,7 +147,7 @@
                         </h1>
                     </div>
 
-                    {#each nlp[idx] as part}
+                    {#each nlp[idxWord] as part, idxPart}
                         <div class="ml-4">
                             <span>{part.text}</span>
                             <span class="text-sm">
@@ -134,7 +156,7 @@
                         </div>
 
                         <ul>
-                            {#each pickDefs(part) as def}
+                            {#each pickDefs(nlp, idxWord, idxPart, $bestDefs) as def}
                                 <li class="ml-8">
                                     - {def}
                                 </li>

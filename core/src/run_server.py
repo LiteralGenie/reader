@@ -20,9 +20,10 @@ from lib.db.dictionary_db import (
     select_definitions,
     select_examples,
 )
-from lib.db.mtl_cache import load_mtl_cache, select_translation
+from lib.db.mtl_cache import load_mtl_cache, select_best_defs, select_translation
 from lib.db.reader_db import clear_jobs, load_reader_db
-from lib.mtl import insert_mtl_job, parse_mtl, start_mtl_job_worker
+from lib.llm.llm_worker import insert_llm_job, start_llm_job_worker
+from lib.llm.mtl import parse_mtl
 from lib.nlp import get_defs, get_pos_by_word, get_pos_by_word_dumb, start_nlp_pool
 from lib.ocr import get_all_ocr_data, insert_ocr_job, start_ocr_job_worker
 from lib.series import get_all_chapters, get_all_pages, get_all_series
@@ -52,7 +53,7 @@ async def _lifespan(app: FastAPI):
     # Start job workers
     clear_jobs(load_reader_db())
     start_ocr_job_worker(cfg)
-    start_mtl_job_worker(cfg)
+    start_llm_job_worker(cfg)
 
     yield
 
@@ -176,9 +177,9 @@ def nlp(text: str):
     if not words:
         words = get_pos_by_word_dumb(app.state.kkma_pool, text)
 
-    for grp in words:
-        for info in grp:
-            info["defs"] = get_defs(info["text"], info["pos"])
+    for w in words:
+        for part in w:
+            part["defs"] = get_defs(part["text"], part["pos"])
 
     return words
 
@@ -226,6 +227,7 @@ def definitions_count(text: str):
 
 
 @app.get("/mtl/{text}")
+@cache()  # type: ignore
 async def get_mtl(text: str):
     if not app.state.cfg.use_llm:
         return None
@@ -234,7 +236,7 @@ async def get_mtl(text: str):
 
     translation = select_translation(cache, text)
     if translation is None:
-        insert_mtl_job(load_reader_db(), text)
+        insert_llm_job(load_reader_db(), text, "mtl")
 
     while not translation:
         await asyncio.sleep(1)
@@ -242,6 +244,25 @@ async def get_mtl(text: str):
 
     parsed = parse_mtl(translation)
     return parsed
+
+
+@app.get("/best_defs/{text}")
+@cache()  # type: ignore
+async def get_best_defs(text: str):
+    if not app.state.cfg.use_llm:
+        return None
+
+    cache = load_mtl_cache()
+
+    best = select_best_defs(cache, text)
+    if best is None:
+        insert_llm_job(load_reader_db(), text, "best_defs")
+
+    while not best:
+        await asyncio.sleep(1)
+        best = select_best_defs(cache, text)
+
+    return best
 
 
 def _parse_args():

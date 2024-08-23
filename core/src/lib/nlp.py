@@ -8,8 +8,12 @@ from nltk import edit_distance
 from .db.dictionary_db import load_dictionary_db, select_words
 
 
-def get_pos_by_word(kkma_pool: Pool, text: str) -> list[list[dict]] | None:
-    all_pos = kkma_pool.apply(_pool_pos, [text])
+def get_pos_by_word(tagger: Kkma | Pool, text: str) -> list[list[dict]] | None:
+    if isinstance(tagger, Kkma):
+        all_pos = tagger.pos(text)
+    else:
+        all_pos = tagger.apply(_pool_pos, [text])
+
     words = text.split()
 
     try:
@@ -45,14 +49,18 @@ def get_pos_by_word(kkma_pool: Pool, text: str) -> list[list[dict]] | None:
         return None
 
 
-def get_pos_by_word_dumb(kkma_pool: Pool, text: str) -> list[list[dict]]:
+def get_pos_by_word_dumb(tagger: Pool | Kkma, text: str) -> list[list[dict]]:
     pos_by_word = []
 
     words = text.split()
     for w in words:
         parts = []
 
-        pos = kkma_pool.apply(_pool_pos, (w,))
+        if isinstance(tagger, Kkma):
+            pos = tagger.pos(w)
+        else:
+            pos = tagger.apply(_pool_pos, [w])
+
         for chars, tag in pos:
             parts.append(
                 dict(

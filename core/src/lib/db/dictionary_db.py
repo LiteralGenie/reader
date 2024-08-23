@@ -1,9 +1,6 @@
-import json
 import sqlite3
 import time
 from typing import TypeAlias
-
-from numpy import where
 
 from ..paths import DICTIONARY_FILE
 
@@ -40,7 +37,7 @@ def select_words(
         dict(r)
         for r in db.execute(
             f"""
-            SELECT word, pos, definition
+            SELECT id, word, pos, definition
             FROM definitions
             WHERE 
                 ({where_clause})
@@ -97,7 +94,7 @@ def select_definitions(
 ) -> list[dict]:
     rs = db.execute(
         f"""
-        SELECT word, pos, definition, source
+        SELECT id, word, pos, definition, source
         FROM definitions
         WHERE 
             word LIKE ?

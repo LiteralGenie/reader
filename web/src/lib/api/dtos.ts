@@ -14,6 +14,7 @@ export interface NlpDto {
 }
 
 export interface DefDto {
+    id: number
     word: string
     pos: string
     definition: string
@@ -26,6 +27,7 @@ export interface OcrMatch {
 }
 
 export interface DefinitionDto {
+    id: number
     word: string
     pos: string
     definition: string
@@ -37,3 +39,5 @@ export interface ExampleDto {
     english: string
     source: string
 }
+
+export type BestDefDto = number[][][]

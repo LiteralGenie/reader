@@ -56,3 +56,5 @@ use_gpu = false
 use_llm = true
 llm_model_id = "lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF"
 llm_model_file = "Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf"
+
+llm_context_size = 2048

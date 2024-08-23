@@ -28,6 +28,8 @@ class Config:
     llm_model_id: str
     llm_model_file: str
 
+    llm_context_size: int
+
     @classmethod
     def load(cls, data: dict) -> "Config":
         d = data.copy()

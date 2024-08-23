@@ -15,8 +15,9 @@
     const {
         value: dictValue,
         setValue: setDictValue,
-        mtlPrefetchQueue,
-        nlpPrefetchQueue
+        nlpPrefetchQueue,
+        bestDefsPrefetchQueue,
+        mtlPrefetchQueue
     } = setDictionaryContext(null)
 
     onMount(() => {
@@ -30,8 +31,9 @@
             })
             .map((blk) => blk.value)
 
-        mtlPrefetchQueue.set(texts)
         nlpPrefetchQueue.set(texts)
+        bestDefsPrefetchQueue.set(texts)
+        mtlPrefetchQueue.set(texts)
 
         // Subscribe to missing ocr data
         const missingOcr = pages.filter(
@@ -61,11 +63,15 @@
                 const blocks = stitchBlocks(lines)
                 const texts = blocks.map((blk) => blk.value)
 
-                mtlPrefetchQueue.update((queue) => [
+                nlpPrefetchQueue.update((queue) => [
                     ...queue,
                     ...texts
                 ])
-                nlpPrefetchQueue.update((queue) => [
+                bestDefsPrefetchQueue.update((queue) => [
+                    ...queue,
+                    ...texts
+                ])
+                mtlPrefetchQueue.update((queue) => [
                     ...queue,
                     ...texts
                 ])
