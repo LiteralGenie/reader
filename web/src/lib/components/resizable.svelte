@@ -58,7 +58,7 @@
 <div
     style="height: {heightPercent}%"
     class:dragging={isDragging}
-    class="relative flex flex-col justify-center h-full w-full z-20 shadow-2xl"
+    class="root relative flex flex-col justify-center h-full w-full z-20"
 >
     <div
         draggable="false"
@@ -97,5 +97,9 @@
 
     .resize-bar {
         background-color: hsl(var(--border) / 75%);
+    }
+
+    .root {
+        box-shadow: 0px -10px 30px rgba(0, 0, 0, 50%);
     }
 </style>

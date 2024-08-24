@@ -1,6 +1,9 @@
 <script lang="ts">
     import type { BestDefDto, NlpDto } from '$lib/api/dtos'
     import type { DictionaryContextValue } from '$lib/contexts/dictionaryContext'
+    import Pencil from '$lib/icons/pencil.svelte'
+    import Trash from '$lib/icons/trash.svelte'
+    import Button from '../ui/button/button.svelte'
 
     export let value: DictionaryContextValue
 
@@ -104,62 +107,83 @@
 
 <div
     bind:this={containerEl}
-    class="flex flex-col h-fit min-h-full w-full text-left p-4 bg-card"
+    class="h-fit min-h-full w-full text-left p-4 bg-card m-auto"
 >
-    <div class="flex flex-col">
-        <span class="font-bold text-xl">
-            {value.text}
-        </span>
+    <div class="max-w-4xl m-auto flex flex-col">
+        <div class="flex flex-col">
+            <div class="flex flex-col">
+                <span class="font-bold text-xl">
+                    {value.text}
+                </span>
 
-        {#if $mtl}
-            <span class="italic mt-2">{$mtl.translation}</span>
-        {/if}
-    </div>
+                {#if $mtl}
+                    <span class="italic mt-2">{$mtl.translation}</span
+                    >
+                {/if}
+            </div>
 
-    <hr class="my-6" />
+            <div class="flex justify-end pr-2 pt-2">
+                <Button
+                    variant="ghost"
+                    class="rounded-full p-4 h-max w-max"
+                >
+                    <Trash class="size-5" />
+                </Button>
 
-    <div>
-        {#await value.nlp then nlp}
-            {#each words as word, idxWord}
-                {@const wordMtl = $mtl?.words[word]}
+                <Button
+                    variant="ghost"
+                    class="rounded-full p-4 h-max w-max"
+                >
+                    <Pencil class="size-5" />
+                </Button>
+            </div>
+        </div>
 
-                <div class="mb-4">
-                    <div>
-                        <h1>
-                            <span
-                                class="font-bold text-lg text-accent-foreground"
-                            >
-                                [{word}]
-                            </span>
+        <hr class="mb-6 mt-2" />
 
-                            {#if wordMtl}
-                                <span> = </span>
+        <div>
+            {#await value.nlp then nlp}
+                {#each words as word, idxWord}
+                    {@const wordMtl = $mtl?.words[word]}
 
-                                <span class="italic">
-                                    {wordMtl}
+                    <div class="mb-4">
+                        <div>
+                            <h1>
+                                <span
+                                    class="font-bold text-lg text-accent-foreground"
+                                >
+                                    [{word}]
                                 </span>
-                            {/if}
-                        </h1>
-                    </div>
 
-                    {#each nlp[idxWord] as part, idxPart}
-                        <div class="ml-4">
-                            <span>{part.text}</span>
-                            <span class="text-sm">
-                                {prettyPrintKkma(part.pos)}
-                            </span>
+                                {#if wordMtl}
+                                    <span> = </span>
+
+                                    <span class="italic">
+                                        {wordMtl}
+                                    </span>
+                                {/if}
+                            </h1>
                         </div>
 
-                        <ul>
-                            {#each pickDefs(nlp, idxWord, idxPart, $bestDefs) as def}
-                                <li class="ml-8">
-                                    - {def}
-                                </li>
-                            {/each}
-                        </ul>
-                    {/each}
-                </div>
-            {/each}
-        {/await}
+                        {#each nlp[idxWord] as part, idxPart}
+                            <div class="ml-4">
+                                <span>{part.text}</span>
+                                <span class="text-sm">
+                                    {prettyPrintKkma(part.pos)}
+                                </span>
+                            </div>
+
+                            <ul>
+                                {#each pickDefs(nlp, idxWord, idxPart, $bestDefs) as def}
+                                    <li class="ml-8">
+                                        - {def}
+                                    </li>
+                                {/each}
+                            </ul>
+                        {/each}
+                    </div>
+                {/each}
+            {/await}
+        </div>
     </div>
 </div>

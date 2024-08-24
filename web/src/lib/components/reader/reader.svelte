@@ -108,12 +108,14 @@
         class:overflow-hidden={isResizing}
         on:click={() => setDictValue(null)}
     >
-        <ReaderHeader
-            {seriesId}
-            on:settings={() => (showSettingsDialog = true)}
-        />
+        <div class="headers w-full flex flex-col">
+            <ReaderHeader
+                {seriesId}
+                on:settings={() => (showSettingsDialog = true)}
+            />
 
-        <ChapterHeader {seriesId} {chapterId} {chapters} />
+            <ChapterHeader {seriesId} {chapterId} {chapters} />
+        </div>
 
         {#each pages as pg}
             <OcrImage {pg} matches={ocrData[pg.filename] ?? []} />
@@ -135,3 +137,11 @@
     open={showSettingsDialog}
     on:close={() => (showSettingsDialog = false)}
 />
+
+<style lang="postcss">
+    .headers {
+        position: relative;
+        z-index: 20;
+        box-shadow: 0px 10px 150px rgba(0, 0, 0, 10%);
+    }
+</style>
