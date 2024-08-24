@@ -1,5 +1,8 @@
 <script>
-	import '../app.css';
+    import { createThemeContext } from '$lib/themeContext'
+    import '../app.css'
+
+    createThemeContext()
 </script>
 
 <slot />

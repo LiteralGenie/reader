@@ -1,7 +1,7 @@
 <script lang="ts">
     import ArrowLongLeft from '$lib/icons/arrow-long-left.svelte'
     import Cog_6 from '$lib/icons/cog-6.svelte'
-    import Sun from '$lib/icons/sun.svelte'
+    import ThemeToggle from '../theme-toggle.svelte'
     import Button from '../ui/button/button.svelte'
 
     export let seriesId: string
@@ -27,9 +27,7 @@
     </Button>
 
     <div class="pr-2 flex">
-        <Button variant="ghost" class="size-12 p-0">
-            <Sun class="size-6" />
-        </Button>
+        <ThemeToggle variant="ghost" class="size-12 p-0" />
 
         <Button variant="ghost" class="size-12 p-0">
             <Cog_6 class="size-6" />
