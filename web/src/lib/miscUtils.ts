@@ -17,3 +17,7 @@ export function clamp(x: number, mn: number, mx: number) {
     clamped = max([clamped, mn])!
     return clamped
 }
+
+export function contains<T>(xs: readonly T[], x: any): boolean {
+    return !!xs.find((y) => y === x)
+}

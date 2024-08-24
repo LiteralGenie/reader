@@ -1,13 +1,16 @@
 <script lang="ts">
     import type { OcrMatch } from '$lib/api/dtos'
-    import type { PageDto } from '$lib/api/series'
+    import type { ChapterDto, PageDto } from '$lib/api/series'
     import DictionaryView from '$lib/components/dictionary-view/dictionary-view.svelte'
     import OcrImage from '$lib/components/ocr-image.svelte'
-    import { setDictionaryContext } from '$lib/dictionaryContext'
+    import { createDictionaryContext } from '$lib/dictionaryContext'
     import { stitchBlocks, stitchLines } from '$lib/stitch'
     import { onMount } from 'svelte'
-    import Resizable from './resizable.svelte'
+    import Resizable from '../resizable.svelte'
+    import ChapterHeader from './chapter-header.svelte'
+    import ReaderHeader from './reader-header.svelte'
 
+    export let chapters: ChapterDto[]
     export let pages: PageDto[]
     export let ocrData: Record<string, OcrMatch[] | null>
     export let seriesId: string
@@ -19,7 +22,7 @@
         nlpPrefetchQueue,
         bestDefsPrefetchQueue,
         mtlPrefetchQueue
-    } = setDictionaryContext(null)
+    } = createDictionaryContext(null)
 
     let isResizing = false
 
@@ -94,13 +97,15 @@
     tabindex="-1"
     on:keydown={(ev) => onEscape(ev)}
 >
-    <h1>{chapterId}</h1>
-
     <div
         class="flex flex-col min-h-0 flex-1 overflow-auto w-full items-center"
         class:overflow-hidden={isResizing}
         on:click={() => setDictValue(null)}
     >
+        <ReaderHeader {seriesId} />
+
+        <ChapterHeader {seriesId} {chapterId} {chapters} />
+
         {#each pages as pg}
             <OcrImage {pg} matches={ocrData[pg.filename] ?? []} />
         {/each}
@@ -108,7 +113,7 @@
 
     {#if $dictValue}
         <Resizable
-            storageKey="DictionaryView"
+            storageKey="dict_view_height"
             on:resizestart={() => (isResizing = true)}
             on:resizeend={() => (isResizing = false)}
         >

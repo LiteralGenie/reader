@@ -45,7 +45,11 @@
 </script>
 
 <div class="relative">
-    <img src="/series/{seriesId}/{chapterId}/{pg.filename}" />
+    <img
+        height={pg.height}
+        width={pg.width}
+        src="/series/{seriesId}/{chapterId}/{pg.filename}"
+    />
 
     {#each blocks as blk}
         <div
@@ -65,6 +69,7 @@
         /**background-color: rgba(255, 0, 0, 0.5);**/
 
         &.active {
+            @apply rounded-md;
             border: 6px solid
                 color-mix(
                     in srgb,

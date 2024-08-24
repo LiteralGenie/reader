@@ -1,8 +1,10 @@
 import { fetchAllOcrData } from '$lib/api/ocr'
-import { fetchChapterById } from '$lib/api/series'
+import { fetchChapterById, fetchSeriesById } from '$lib/api/series'
 import type { PageServerLoad } from './$types'
 
 export const load: PageServerLoad = async ({ params }) => {
+    const chapters = await fetchSeriesById(params.seriesId)
+
     const pages = await fetchChapterById(
         params.seriesId,
         params.chapterId
@@ -14,6 +16,7 @@ export const load: PageServerLoad = async ({ params }) => {
     )
 
     return {
+        chapters,
         pages,
         ocrData
     }

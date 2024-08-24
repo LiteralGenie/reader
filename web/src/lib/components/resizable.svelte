@@ -58,7 +58,7 @@
 <div
     style="height: {heightPercent}%"
     class:dragging={isDragging}
-    class="relative flex flex-col justify-center h-full w-full z-20"
+    class="relative flex flex-col justify-center h-full w-full z-20 shadow-2xl"
 >
     <div
         draggable="false"
@@ -72,7 +72,7 @@
         on:touchstart|preventDefault={onDragStart}
         on:touchend|preventDefault={onDragEnd}
         on:touchcancel={onDragEnd}
-        class="w-full flex justify-center cursor-ns-resize bg-background"
+        class="resize-bar w-full flex justify-center cursor-ns-resize"
     >
         <Bars_2 class="h-6 pointer-events-none" />
     </div>
@@ -93,5 +93,9 @@
     .dragging {
         position: absolute;
         bottom: 0;
+    }
+
+    .resize-bar {
+        background-color: hsl(var(--border) / 75%);
     }
 </style>

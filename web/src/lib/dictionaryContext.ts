@@ -25,7 +25,7 @@ export interface DictionaryContext {
     setValue: (text: string) => void
 }
 
-export function setDictionaryContext(
+export function createDictionaryContext(
     value: DictionaryContextValue | null
 ) {
     const ctx = {
