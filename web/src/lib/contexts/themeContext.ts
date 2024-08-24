@@ -5,7 +5,7 @@ import {
     type Writable,
     writable
 } from 'svelte/store'
-import { contains } from './miscUtils'
+import { contains, getWindow } from '../miscUtils'
 
 const CTX_KEY = 'theme'
 const STORAGE_KEY = 'theme'
@@ -56,7 +56,6 @@ export function createThemeContext() {
         } else {
             getWindow()?.document.body.classList.add('dark')
         }
-        console.log('set', theme)
     })
 
     const ctx = {
@@ -89,8 +88,4 @@ function getMediaTheme(): Theme | null {
     }
 
     return prefersDark ? 'dark' : 'light'
-}
-
-function getWindow(): Window | undefined {
-    return typeof window === 'undefined' ? undefined : window
 }

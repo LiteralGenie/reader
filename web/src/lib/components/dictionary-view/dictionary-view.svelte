@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { BestDefDto, NlpDto } from '$lib/api/dtos'
-    import type { DictionaryContextValue } from '$lib/dictionaryContext'
+    import type { DictionaryContextValue } from '$lib/contexts/dictionaryContext'
 
     export let value: DictionaryContextValue
 

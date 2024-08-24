@@ -1,5 +1,5 @@
 <script>
-    import { createThemeContext } from '$lib/themeContext'
+    import { createThemeContext } from '$lib/contexts/themeContext'
     import '../app.css'
 
     createThemeContext()

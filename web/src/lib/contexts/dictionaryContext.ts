@@ -5,8 +5,8 @@ import {
     type Writable,
     writable
 } from 'svelte/store'
-import type { BestDefDto, MtlDto, NlpDto } from './api/dtos'
-import { newPromiseStore } from './promiseStore'
+import type { BestDefDto, MtlDto, NlpDto } from '../api/dtos'
+import { newPromiseStore } from '../promiseStore'
 
 const KEY = 'dictionary'
 

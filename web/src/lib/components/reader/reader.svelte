@@ -3,12 +3,14 @@
     import type { ChapterDto, PageDto } from '$lib/api/series'
     import DictionaryView from '$lib/components/dictionary-view/dictionary-view.svelte'
     import OcrImage from '$lib/components/ocr-image.svelte'
-    import { createDictionaryContext } from '$lib/dictionaryContext'
+    import { createDictionaryContext } from '$lib/contexts/dictionaryContext'
+    import { createReaderSettingsContext } from '$lib/contexts/readerSettingsContext'
     import { stitchBlocks, stitchLines } from '$lib/stitch'
     import { onMount } from 'svelte'
     import Resizable from '../resizable.svelte'
     import ChapterHeader from './chapter-header.svelte'
     import ReaderHeader from './reader-header.svelte'
+    import ReaderSettingsDialog from './reader-settings-dialog.svelte'
 
     export let chapters: ChapterDto[]
     export let pages: PageDto[]
@@ -24,7 +26,11 @@
         mtlPrefetchQueue
     } = createDictionaryContext(null)
 
+    createReaderSettingsContext()
+
     let isResizing = false
+
+    let showSettingsDialog = false
 
     onMount(() => {
         // Prefetch stuff
@@ -102,7 +108,10 @@
         class:overflow-hidden={isResizing}
         on:click={() => setDictValue(null)}
     >
-        <ReaderHeader {seriesId} />
+        <ReaderHeader
+            {seriesId}
+            on:settings={() => (showSettingsDialog = true)}
+        />
 
         <ChapterHeader {seriesId} {chapterId} {chapters} />
 
@@ -121,3 +130,8 @@
         </Resizable>
     {/if}
 </div>
+
+<ReaderSettingsDialog
+    open={showSettingsDialog}
+    on:close={() => (showSettingsDialog = false)}
+/>

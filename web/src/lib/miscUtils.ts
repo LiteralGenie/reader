@@ -21,3 +21,6 @@ export function clamp(x: number, mn: number, mx: number) {
 export function contains<T>(xs: readonly T[], x: any): boolean {
     return !!xs.find((y) => y === x)
 }
+export function getWindow(): Window | undefined {
+    return typeof window === 'undefined' ? undefined : window
+}

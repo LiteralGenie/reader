@@ -19,7 +19,7 @@
             class="w-[4em] h-[80%] p-0 bg-secondary"
         >
             <ChevronLeft
-                class="text-primary-foreground w-[2.75em] p-3 stroke-[4px] stroke-foreground"
+                class="text-secondary-foreground w-[2.75em] p-3 stroke-[4px] stroke-secondary-foreground"
             />
         </Button>
 
@@ -32,7 +32,7 @@
             class="w-[4em] h-[80%] p-0 bg-secondary"
         >
             <ChevronRight
-                class="text-primary-foreground w-[2.75em] p-3 stroke-[4px] stroke-foreground"
+                class="text-secondary-foreground w-[2.75em] p-3 stroke-[4px] stroke-secondary-foreground"
             />
         </Button>
     </div>

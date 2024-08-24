@@ -1,7 +1,7 @@
 <script>
+    import { getThemeContext } from '$lib/contexts/themeContext'
     import Moon from '$lib/icons/moon.svelte'
     import Sun from '$lib/icons/sun.svelte'
-    import { getThemeContext } from '$lib/themeContext'
     import Button from './ui/button/button.svelte'
 
     const { theme, setTheme } = getThemeContext()

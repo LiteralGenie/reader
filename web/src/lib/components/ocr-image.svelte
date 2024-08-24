@@ -2,7 +2,8 @@
     import { page } from '$app/stores'
     import type { OcrMatch } from '$lib/api/dtos'
     import type { MatchDto, PageDto } from '$lib/api/series'
-    import { getDictionaryContext } from '$lib/dictionaryContext'
+    import { getDictionaryContext } from '$lib/contexts/dictionaryContext'
+    import { getReaderSettingsContext } from '$lib/contexts/readerSettingsContext'
     import {
         stitchBlocks,
         StitchedBlock,
@@ -20,6 +21,8 @@
 
     const ctx = getDictionaryContext()
     $: dictValue = ctx.value
+
+    const { settings } = getReaderSettingsContext()
 
     function bboxToAbsolutePos(bbox: MatchDto['bbox']) {
         const w = pg.width
@@ -53,29 +56,32 @@
 
     {#each blocks as blk}
         <div
-            class="overlay absolute z-10 select-none"
-            class:active={blk.value === $dictValue?.text}
+            class="absolute z-10 select-none"
+            class:active={blk.value === $dictValue?.text ||
+                $settings.debugBboxs}
             style={bboxToAbsolutePos(blk.bbox)}
             title={blk.value}
             on:click|stopPropagation={() => onClick(blk)}
         >
-            <!-- {blk.value} -->
+            <!-- Hack to fix blurry images caused by scrollbar on desktop Chrome -->
+            <!-- https://issues.chromium.org/issues/361824001 -->
+            <div class="blurry-fix"></div>
         </div>
     {/each}
 </div>
 
 <style lang="postcss">
-    .overlay {
-        /**background-color: rgba(255, 0, 0, 0.5);**/
+    .active {
+        @apply rounded-md;
+        border: 6px solid hsl(var(--primary) / 69%);
+    }
 
-        &.active {
-            @apply rounded-md;
-            border: 6px solid
-                color-mix(
-                    in srgb,
-                    hsl(var(--accent-foreground)),
-                    transparent 20%
-                );
-        }
+    .blurry-fix {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        height: 1px;
+        width: 1px;
+        background-color: rgba(0, 0, 0, 1%);
     }
 </style>
