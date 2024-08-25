@@ -5,6 +5,7 @@
     import Trash from '$lib/icons/trash.svelte'
     import ConfirmDialog from '../confirm-dialog.svelte'
     import Button from '../ui/button/button.svelte'
+    import EditBlock from './edit-block.svelte'
 
     export let value: DictionaryContextValue
 
@@ -15,6 +16,8 @@
     $: value && containerEl?.scrollTo({ top: 0 })
 
     let showDeleteConfirmation = false
+
+    let showEdit = false
 
     function pickDefs(
         nlp: NlpDto[][],
@@ -111,6 +114,11 @@
         showDeleteConfirmation = false
         alert('todo')
     }
+
+    function onEdit(ev: CustomEvent<string>) {
+        showEdit = false
+        alert('edit ' + ev.detail)
+    }
 </script>
 
 <div
@@ -118,35 +126,46 @@
     class="h-fit min-h-full w-full text-left p-4 bg-card m-auto"
 >
     <div class="max-w-4xl m-auto flex flex-col">
-        <div class="flex flex-col">
+        {#if showEdit === false}
             <div class="flex flex-col">
-                <span class="font-bold text-xl">
-                    {value.text}
-                </span>
+                <div class="flex flex-col">
+                    <span class="font-bold text-xl">
+                        {value.text}
+                    </span>
 
-                {#if $mtl}
-                    <span class="italic mt-2">{$mtl.translation}</span
+                    {#if $mtl}
+                        <span class="italic mt-2"
+                            >{$mtl.translation}</span
+                        >
+                    {/if}
+                </div>
+
+                <div class="flex justify-end pr-2 pt-2">
+                    <Button
+                        variant="ghost"
+                        class="rounded-full p-4 h-max w-max"
+                        on:click={() =>
+                            (showDeleteConfirmation = true)}
                     >
-                {/if}
-            </div>
+                        <Trash class="size-5" />
+                    </Button>
 
-            <div class="flex justify-end pr-2 pt-2">
-                <Button
-                    variant="ghost"
-                    class="rounded-full p-4 h-max w-max"
-                    on:click={() => (showDeleteConfirmation = true)}
-                >
-                    <Trash class="size-5" />
-                </Button>
-
-                <Button
-                    variant="ghost"
-                    class="rounded-full p-4 h-max w-max"
-                >
-                    <Pencil class="size-5" />
-                </Button>
+                    <Button
+                        variant="ghost"
+                        class="rounded-full p-4 h-max w-max"
+                        on:click={() => (showEdit = true)}
+                    >
+                        <Pencil class="size-5" />
+                    </Button>
+                </div>
             </div>
-        </div>
+        {:else}
+            <EditBlock
+                value={value.text}
+                on:submit={(ev) => onEdit(ev)}
+                on:cancel={() => (showEdit = false)}
+            />
+        {/if}
 
         <hr class="mb-6 mt-2" />
 
@@ -207,8 +226,9 @@
 
         <br />
 
-        <span class="italic text-sm">
-            Note: Addition of new sections is currently not possible.
-        </span>
+        <p class="pt-2 italic text-sm leading-snug">
+            Note: Adding new sections is not currently possible, so
+            this is extra permanent.
+        </p>
     </div>
 </ConfirmDialog>
