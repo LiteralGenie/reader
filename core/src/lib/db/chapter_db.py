@@ -141,6 +141,7 @@ def get_ocr_data(db: ChapterDb, filename: str) -> dict | None:
         r["id"]: dict(
             id=r["id"],
             value=r["value"],
+            confidence=r["confidence"],
             bbox=[r["y1"], r["x1"], r["y2"], r["x2"]],
         )
         for r in rs

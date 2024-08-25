@@ -24,3 +24,8 @@ export function contains<T>(xs: readonly T[], x: any): boolean {
 export function getWindow(): Window | undefined {
     return typeof window === 'undefined' ? undefined : window
 }
+
+export function round(x: number, places = 2) {
+    const mult = 10 ** places
+    return Math.round(x * mult) / mult
+}

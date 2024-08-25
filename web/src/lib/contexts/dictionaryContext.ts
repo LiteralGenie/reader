@@ -24,7 +24,10 @@ export interface DictionaryContext {
     mtlPrefetchQueue: Writable<string[]>
     bestDefsPrefetchQueue: Writable<string[]>
     nlpPrefetchQueue: Writable<string[]>
-    setDict: (opts: SetValueArgs | null, forceUpdate: boolean) => void
+    setDict: (
+        opts: SetValueArgs | null,
+        forceUpdate?: boolean
+    ) => void
 }
 
 interface SetValueArgs {

@@ -6,7 +6,7 @@
         PageDto
     } from '$lib/api/dtos'
     import DictionaryView from '$lib/components/dictionary-view/dictionary-view.svelte'
-    import OcrImage from '$lib/components/ocr-image.svelte'
+    import OcrImage from '$lib/components/reader/ocr-image/ocr-image.svelte'
     import { createDictionaryContext } from '$lib/contexts/dictionaryContext'
     import { createReaderSettingsContext } from '$lib/contexts/readerSettingsContext'
     import { clone } from 'radash'

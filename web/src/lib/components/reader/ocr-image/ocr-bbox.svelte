@@ -1,23 +1,20 @@
 <script lang="ts">
-    import { page } from '$app/stores'
-    import type {
-        OcrMatchDto,
-        OcrPageDto,
-        PageDto
-    } from '$lib/api/dtos'
+    import type { OcrMatchDto, PageDto } from '$lib/api/dtos'
     import { getDictionaryContext } from '$lib/contexts/dictionaryContext'
     import { getReaderSettingsContext } from '$lib/contexts/readerSettingsContext'
+    import { round } from '$lib/miscUtils'
     import { max, min } from 'radash'
 
     export let pg: PageDto
-    export let ocr: OcrPageDto
-
-    $: ({ seriesId, chapterId } = $page.params)
+    export let match: OcrMatchDto
 
     const ctx = getDictionaryContext()
     $: dictValue = ctx.dict
 
     const { settings } = getReaderSettingsContext()
+
+    $: active = match.value === $dictValue?.match.value
+    $: visible = active || $settings.debugBboxs
 
     function bboxToAbsolutePos(bbox: OcrMatchDto['bbox']) {
         const w = pg.width
@@ -37,38 +34,41 @@
         return `left: ${left}; right: ${right}; top: ${top}; bottom: ${bottom};`
     }
 
-    function onClick(match: OcrMatchDto) {
+    function onClick() {
         ctx.setDict({ page: pg, match })
     }
 </script>
 
-<div class="relative">
-    <img
-        height={pg.height}
-        width={pg.width}
-        src="/series/{seriesId}/{chapterId}/{pg.filename}"
-    />
-
-    {#each Object.values(ocr) as m}
-        <div
-            class="absolute z-10 select-none"
-            class:active={m.value === $dictValue?.match.value ||
-                $settings.debugBboxs}
-            style={bboxToAbsolutePos(m.bbox)}
-            title={m.value}
-            on:click|stopPropagation={() => onClick(m)}
+<div
+    style={bboxToAbsolutePos(match.bbox)}
+    class="absolute z-10 select-none"
+    class:active
+    class:visible
+    on:click|stopPropagation={onClick}
+>
+    {#if $settings.debugBboxs}
+        <span
+            class="font-bold text-foreground bg-background absolute top-[-20px] left-0"
         >
-            <!-- Hack to fix blurry images caused by scrollbar on desktop Chrome -->
-            <!-- https://issues.chromium.org/issues/361824001 -->
-            <div class="blurry-fix"></div>
-        </div>
-    {/each}
+            {round(match.confidence, 3)}
+        </span>
+    {/if}
+
+    <!-- Hack to fix blurry images caused by scrollbar on desktop Chrome -->
+    <!-- https://issues.chromium.org/issues/361824001 -->
+    <div class="blurry-fix"></div>
 </div>
 
 <style lang="postcss">
-    .active {
+    .visible {
         @apply rounded-md;
-        border: 6px solid hsl(var(--primary) / 69%);
+        border-style: solid;
+        border-width: 6px;
+        border-color: hsl(var(--primary) / 33%);
+
+        &.active {
+            border-color: hsl(var(--primary) / 69%);
+        }
     }
 
     .blurry-fix {
