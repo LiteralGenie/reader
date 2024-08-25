@@ -1,18 +1,21 @@
 <script lang="ts">
     import { page } from '$app/stores'
-    import type { OcrMatchDto } from '$lib/api/dtos'
-    import type { PageDto } from '$lib/api/series'
+    import type {
+        OcrMatchDto,
+        OcrPageDto,
+        PageDto
+    } from '$lib/api/dtos'
     import { getDictionaryContext } from '$lib/contexts/dictionaryContext'
     import { getReaderSettingsContext } from '$lib/contexts/readerSettingsContext'
     import { max, min } from 'radash'
 
     export let pg: PageDto
-    export let matches: OcrMatchDto[]
+    export let ocr: OcrPageDto
 
     $: ({ seriesId, chapterId } = $page.params)
 
     const ctx = getDictionaryContext()
-    $: dictValue = ctx.value
+    $: dictValue = ctx.dict
 
     const { settings } = getReaderSettingsContext()
 
@@ -35,7 +38,7 @@
     }
 
     function onClick(match: OcrMatchDto) {
-        ctx.setValue(match.value)
+        ctx.setDict({ page: pg, match })
     }
 </script>
 
@@ -46,10 +49,10 @@
         src="/series/{seriesId}/{chapterId}/{pg.filename}"
     />
 
-    {#each matches as m}
+    {#each Object.values(ocr) as m}
         <div
             class="absolute z-10 select-none"
-            class:active={m.value === $dictValue?.text ||
+            class:active={m.value === $dictValue?.match.value ||
                 $settings.debugBboxs}
             style={bboxToAbsolutePos(m.bbox)}
             title={m.value}

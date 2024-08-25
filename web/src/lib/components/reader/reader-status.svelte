@@ -1,9 +1,9 @@
 <script lang="ts">
-    import type { OcrMatchDto } from '$lib/api/dtos'
+    import type { OcrPageDto } from '$lib/api/dtos'
     import { derived, type Readable } from 'svelte/store'
     import Loader from '../loader.svelte'
 
-    export let data: Readable<Record<string, OcrMatchDto[] | null>>
+    export let data: Readable<Record<string, OcrPageDto | null>>
 
     $: status = derived(data, (d) => {
         const total = Object.values(d).length

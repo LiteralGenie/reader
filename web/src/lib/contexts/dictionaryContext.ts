@@ -1,34 +1,46 @@
 import { getContext, setContext } from 'svelte'
 import { get, type Writable, writable } from 'svelte/store'
-import type { BestDefDto, MtlDto, NlpDto } from '../api/dtos'
+import type {
+    BestDefDto,
+    MtlDto,
+    NlpDto,
+    OcrMatchDto,
+    PageDto
+} from '../api/dtos'
 import { newPromiseStore, type PromiseStore } from '../promiseStore'
 
 const KEY = 'dictionary'
 
 export interface DictionaryContextValue {
-    text: string
+    page: PageDto
+    match: OcrMatchDto
     nlp: PromiseStore<NlpDto[][], null>
     bestDefs: PromiseStore<BestDefDto | null>
     mtl: PromiseStore<MtlDto | null>
 }
 
 export interface DictionaryContext {
-    value: Writable<DictionaryContextValue | null>
+    dict: Writable<DictionaryContextValue | null>
     mtlPrefetchQueue: Writable<string[]>
     bestDefsPrefetchQueue: Writable<string[]>
     nlpPrefetchQueue: Writable<string[]>
-    setValue: (text: string) => void
+    setDict: (opts: SetValueArgs | null) => void
+}
+
+interface SetValueArgs {
+    page: PageDto
+    match: OcrMatchDto
 }
 
 export function createDictionaryContext(
-    value: DictionaryContextValue | null
+    dict: DictionaryContextValue | null
 ) {
     const ctx = {
-        value: writable(value),
+        dict: writable(dict),
         nlpPrefetchQueue: writable<string[]>([]),
         bestDefsPrefetchQueue: writable<string[]>([]),
         mtlPrefetchQueue: writable<string[]>([]),
-        setValue
+        setDict
     }
 
     setContext<DictionaryContext>(KEY, ctx)
@@ -70,22 +82,25 @@ export function createDictionaryContext(
 
     return ctx
 
-    function setValue(text: string | null) {
-        if (text === get(ctx.value)?.text) {
+    function setDict(args: SetValueArgs | null) {
+        if (args?.match.id === get(ctx.dict)?.match.id) {
             return
         }
 
-        if (text) {
+        if (args) {
+            const text = args?.match.value
+
             // Order of entries determines fetch order
             // Leave it alone!
-            ctx.value.set({
-                text,
+            ctx.dict.set({
+                page: args.page,
+                match: args.match,
                 nlp: newPromiseStore(fetchNlpData(text), null),
                 mtl: newPromiseStore(fetchMtl(text), null),
                 bestDefs: newPromiseStore(fetchBestDefs(text), null)
             })
         } else {
-            ctx.value.set(null)
+            ctx.dict.set(null)
         }
     }
 

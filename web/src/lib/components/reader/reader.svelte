@@ -1,6 +1,10 @@
 <script lang="ts">
-    import type { OcrMatchDto } from '$lib/api/dtos'
-    import type { ChapterDto, PageDto } from '$lib/api/series'
+    import type {
+        ChapterDto,
+        OcrMatchDto,
+        OcrPageDto,
+        PageDto
+    } from '$lib/api/dtos'
     import DictionaryView from '$lib/components/dictionary-view/dictionary-view.svelte'
     import OcrImage from '$lib/components/ocr-image.svelte'
     import { createDictionaryContext } from '$lib/contexts/dictionaryContext'
@@ -15,13 +19,13 @@
 
     export let chapters: ChapterDto[]
     export let pages: PageDto[]
-    export let ocrData: Record<string, OcrMatchDto[] | null>
+    export let ocrData: Record<string, OcrPageDto | null>
     export let seriesId: string
     export let chapterId: string
 
     const {
-        value: dictValue,
-        setValue: setDictValue,
+        dict,
+        setDict,
         nlpPrefetchQueue,
         bestDefsPrefetchQueue,
         mtlPrefetchQueue
@@ -38,7 +42,9 @@
     onMount(() => {
         // Prefetch stuff
         const texts = pages
-            .flatMap((pg) => ocrData[pg.filename] ?? [])
+            .flatMap((pg) =>
+                Object.values(ocrData[pg.filename] ?? {})
+            )
             .map((m) => m.value)
 
         nlpPrefetchQueue.set(texts)
@@ -66,7 +72,7 @@
 
                 const update: {
                     filename: string
-                    data: OcrMatchDto[]
+                    data: OcrPageDto
                 } = JSON.parse(ev.data)
 
                 dataStore.update((curr) => ({
@@ -75,7 +81,9 @@
                 }))
 
                 // Add to prefetch queue
-                const texts = update.data.map((m) => m.value)
+                const texts = Object.values(update.data).map(
+                    (m) => m.value
+                )
                 nlpPrefetchQueue.update((queue) => [
                     ...queue,
                     ...texts
@@ -94,8 +102,29 @@
 
     function onEscape(ev: KeyboardEvent) {
         if (ev.key === 'Escape') {
-            setDictValue(null)
+            setDict(null)
         }
+    }
+
+    function onDelete({
+        detail
+    }: CustomEvent<{ page: PageDto; match: OcrMatchDto }>) {
+        dataStore.update((curr) => {
+            const {
+                page: { filename },
+                match
+            } = detail
+
+            const pg = { ...curr }[filename]!
+            delete pg[match.id]
+
+            return {
+                ...curr,
+                [filename]: pg
+            }
+        })
+
+        setDict(null)
     }
 </script>
 
@@ -107,7 +136,7 @@
     <div
         class="flex flex-col min-h-0 flex-1 overflow-auto w-full items-center"
         class:overflow-hidden={isResizing}
-        on:click={() => setDictValue(null)}
+        on:click={() => setDict(null)}
     >
         <div class="headers w-full flex flex-col">
             <ReaderHeader
@@ -121,17 +150,17 @@
         </div>
 
         {#each pages as pg}
-            <OcrImage {pg} matches={$dataStore[pg.filename] ?? []} />
+            <OcrImage {pg} ocr={$dataStore[pg.filename] ?? {}} />
         {/each}
     </div>
 
-    {#if $dictValue}
+    {#if $dict}
         <Resizable
             storageKey="dict_view_height"
             on:resizestart={() => (isResizing = true)}
             on:resizeend={() => (isResizing = false)}
         >
-            <DictionaryView value={$dictValue} />
+            <DictionaryView dict={$dict} on:delete={onDelete} />
         </Resizable>
     {/if}
 </div>

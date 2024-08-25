@@ -1,25 +1,29 @@
 <script lang="ts">
+    import { page } from '$app/stores'
     import type { BestDefDto, NlpDto } from '$lib/api/dtos'
-    import type { DictionaryContextValue } from '$lib/contexts/dictionaryContext'
+    import { type DictionaryContextValue } from '$lib/contexts/dictionaryContext'
     import Pencil from '$lib/icons/pencil.svelte'
     import Trash from '$lib/icons/trash.svelte'
+    import { createEventDispatcher } from 'svelte'
     import ConfirmDialog from '../confirm-dialog.svelte'
     import Button from '../ui/button/button.svelte'
     import DictionaryStatus from './dictionary-status.svelte'
     import EditBlock from './edit-block.svelte'
 
-    export let value: DictionaryContextValue
-    $: ({ nlp, bestDefs, mtl } = value)
+    export let dict: DictionaryContextValue
+    $: ({ nlp, bestDefs, mtl } = dict)
 
-    $: words = value.text.split(' ')
+    $: words = dict.match.value.split(' ')
 
     // Scroll to top on content change
     let containerEl: HTMLDivElement | undefined
-    $: value && containerEl?.scrollTo({ top: 0 })
+    $: dict && containerEl?.scrollTo({ top: 0 })
 
     let showDeleteConfirmation = false
 
     let showEdit = false
+
+    const dispatch = createEventDispatcher()
 
     function pickDefs(
         nlp: NlpDto[][],
@@ -112,9 +116,27 @@
         }
     }
 
-    function onDelete() {
+    async function onDelete() {
+        const resp = await fetch('/api/ocr/delete', {
+            method: 'POST',
+            body: JSON.stringify({
+                series: $page.params.seriesId,
+                chapter: $page.params.chapterId,
+                page: dict.page.filename,
+                block: dict.match.id
+            })
+        })
+
+        if (resp.status !== 200) {
+            console.error(resp)
+            alert(`Error: ${resp.statusText}`)
+
+            showDeleteConfirmation = false
+            return
+        }
+
+        dispatch('delete', { page: dict.page, match: dict.match })
         showDeleteConfirmation = false
-        alert('todo')
     }
 
     function onEdit(ev: CustomEvent<string>) {
@@ -124,7 +146,7 @@
 </script>
 
 <div bind:this={containerEl}>
-    <DictionaryStatus {value} />
+    <DictionaryStatus value={dict} />
 
     <div class="h-fit min-h-full w-full text-left p-4 bg-card m-auto">
         <div class="max-w-4xl m-auto flex flex-col">
@@ -132,7 +154,7 @@
                 <div class="flex flex-col">
                     <div class="flex flex-col">
                         <span class="font-bold text-xl">
-                            {value.text}
+                            {dict.match.value}
                         </span>
 
                         {#if $mtl.data}
@@ -163,7 +185,7 @@
                 </div>
             {:else}
                 <EditBlock
-                    value={value.text}
+                    value={dict.match.value}
                     on:submit={(ev) => onEdit(ev)}
                     on:cancel={() => (showEdit = false)}
                 />
@@ -222,16 +244,16 @@
 <ConfirmDialog
     open={showDeleteConfirmation}
     on:close={() => (showDeleteConfirmation = false)}
-    on:confirm={onDelete}
+    on:confirm={() => onDelete()}
 >
-    <div class="text-left pb-4">
-        <span class="text-lg"> Delete this section? </span>
+    <div class="text-left pb-4 flex flex-col gap-2">
+        <span class="text-lg font-bold"> Delete this block? </span>
 
-        <br />
+        <span> {dict.match.value} </span>
 
-        <p class="pt-2 italic text-sm leading-snug">
-            Note: Adding new sections is not currently possible, so
-            this is extra permanent.
+        <p class="italic text-sm leading-snug">
+            Note: Adding new blocks is currently not possible, so this
+            is extra permanent!
         </p>
     </div>
 </ConfirmDialog>

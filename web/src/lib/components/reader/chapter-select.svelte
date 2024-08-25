@@ -1,6 +1,6 @@
 <script lang="ts">
     import { goto } from '$app/navigation'
-    import type { ChapterDto } from '$lib/api/series'
+    import type { ChapterDto } from '$lib/api/dtos'
     import * as Select from '$lib/components/ui/select/index.js'
 
     export let seriesId: string

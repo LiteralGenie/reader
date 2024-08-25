@@ -5,10 +5,10 @@ from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
-from fastapi_cache.decorator import cache
 from pathvalidate import sanitize_filename
+from pydantic import BaseModel
 
-from ..db.chapter_db import get_ocr_data, load_chapter_db
+from ..db.chapter_db import delete_ocr_data, get_ocr_data, load_chapter_db
 from ..db.reader_db import load_reader_db
 from ..ocr import get_all_ocr_data, insert_ocr_job
 
@@ -28,6 +28,7 @@ def ocr_for_chapter(req: Request, series: str, chapter: str):
 
     missing = [fp_image for fp_image in data if data[fp_image] is None]
     missing.sort()
+    print("missing", missing)
     for fp_image in missing:
         insert_ocr_job(load_reader_db(), fp_image)
 
@@ -79,3 +80,23 @@ def poll_ocr(
         yield "data: close\n\n"
 
     return StreamingResponse(poll(), media_type="text/event-stream")
+
+
+class DeleteBlockRequest(BaseModel):
+    series: str
+    chapter: str
+    page: str
+    block: str
+
+
+@router.post("/ocr/delete")
+def delete_block(req: Request, data: DeleteBlockRequest):
+    chap_dir: Path = req.app.state.cfg.series_folder / data.series / data.chapter
+    try:
+        db = load_chapter_db(chap_dir, raise_on_missing=True)
+    except FileNotFoundError:
+        raise HTTPException(400)
+
+    delete_ocr_data(db, data.block)
+
+    return "ok"

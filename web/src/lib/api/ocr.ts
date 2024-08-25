@@ -1,6 +1,6 @@
 import { env } from '$env/dynamic/private'
 import { error } from '@sveltejs/kit'
-import type { OcrMatchDto } from './dtos'
+import type { OcrMatchDto, OcrPageDto } from './dtos'
 
 export async function fetchAllOcrData(
     series: string,
@@ -23,7 +23,7 @@ export async function fetchOcrData(
     series: string,
     chapter: string,
     page: string
-): Promise<OcrMatchDto[] | null> {
+): Promise<OcrPageDto | null> {
     const url =
         // @ts-ignore
         env.config.apiUrl + `/ocr/${series}/${chapter}/${page}`

@@ -1,4 +1,15 @@
-export type Bbox = [number, number, number, number]
+export interface SeriesDto {
+    filename: string
+}
+export interface ChapterDto {
+    filename: string
+}
+export interface PageDto {
+    filename: string
+    sha256: string
+    width: number
+    height: number
+}
 
 export type JSONResponse<T> = Response & {
     json: () => Promise<T>
@@ -22,11 +33,16 @@ export interface DefDto {
     definition: string
 }
 
+export type OcrPageDto = Record<string, OcrMatchDto>
+
 export interface OcrMatchDto {
+    id: string
     bbox: Bbox
     confidence: number
     value: string
 }
+
+export type Bbox = [number, number, number, number]
 
 export interface DefinitionDto {
     id: number

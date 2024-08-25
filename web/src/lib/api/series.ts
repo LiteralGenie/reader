@@ -1,20 +1,6 @@
 import { env } from '$env/dynamic/private'
 import { error } from '@sveltejs/kit'
-
-export interface SeriesDto {
-    filename: string
-}
-
-export interface ChapterDto {
-    filename: string
-}
-
-export interface PageDto {
-    filename: string
-    sha256: string
-    width: number
-    height: number
-}
+import type { ChapterDto, PageDto, SeriesDto } from './dtos'
 
 export async function fetchAllSeries(): Promise<SeriesDto[]> {
     // @ts-ignore

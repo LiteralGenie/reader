@@ -2,6 +2,7 @@ import json
 import traceback
 from pathlib import Path
 from typing import Generator
+from uuid import uuid4
 
 import doctr
 import torch
@@ -12,7 +13,7 @@ from doctr.models.predictor import OCRPredictor
 from PIL import Image
 
 from .config import Config
-from .db.chapter_db import get_ocr_data, load_chapter_db
+from .db.chapter_db import get_ocr_data, insert_ocr_data, load_chapter_db
 from .db.reader_db import ReaderDb, load_reader_db
 from .job_utils import JobManager, start_job_worker
 
@@ -121,26 +122,20 @@ def _process_job(
     blocks = stitch_blocks(lines)
 
     # Insert OCR data
-    data = [
-        dict(
-            value=blk.value.replace("\n", " "),
-            bbox=blk.bbox,
-            confidence=blk.confidence,
-        )
-        for blk in blocks
-    ]
-
     chap_db = load_chapter_db(Path(job["chap_dir"]))
+
+    for blk in blocks:
+        insert_ocr_data(chap_db, fp_image.name, blk)
+
     chap_db.execute(
         """
-            INSERT INTO ocr_data (
-                filename, data
-            ) VALUES (
-                ?, ?
-            )
-            """,
-        [fp_image.name, json.dumps(data)],
+        UPDATE pages
+        SET done_ocr = 1
+        WHERE filename = ?
+        """,
+        [fp_image.name],
     )
+
     chap_db.commit()
 
 

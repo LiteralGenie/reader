@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { ChapterDto } from '$lib/api/series'
+    import type { ChapterDto } from '$lib/api/dtos'
     import ChevronLeft from '$lib/icons/chevron-left.svelte'
     import ChevronRight from '$lib/icons/chevron-right.svelte'
     import Button from '../ui/button/button.svelte'
