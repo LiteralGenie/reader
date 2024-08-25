@@ -5,14 +5,15 @@
     import Trash from '$lib/icons/trash.svelte'
     import ConfirmDialog from '../confirm-dialog.svelte'
     import Button from '../ui/button/button.svelte'
+    import DictionaryStatus from './dictionary-status.svelte'
     import EditBlock from './edit-block.svelte'
 
     export let value: DictionaryContextValue
+    $: ({ nlp, bestDefs, mtl } = value)
 
     $: words = value.text.split(' ')
-    $: ({ mtl, bestDefs } = value)
-    value.nlp.then(console.log)
 
+    // Scroll to top on content change
     let containerEl: HTMLDivElement | undefined
     $: value && containerEl?.scrollTo({ top: 0 })
 
@@ -122,97 +123,98 @@
     }
 </script>
 
-<div
-    bind:this={containerEl}
-    class="h-fit min-h-full w-full text-left p-4 bg-card m-auto"
->
-    <div class="max-w-4xl m-auto flex flex-col">
-        {#if showEdit === false}
-            <div class="flex flex-col">
+<div bind:this={containerEl}>
+    <DictionaryStatus {value} />
+
+    <div class="h-fit min-h-full w-full text-left p-4 bg-card m-auto">
+        <div class="max-w-4xl m-auto flex flex-col">
+            {#if showEdit === false}
                 <div class="flex flex-col">
-                    <span class="font-bold text-xl">
-                        {value.text}
-                    </span>
+                    <div class="flex flex-col">
+                        <span class="font-bold text-xl">
+                            {value.text}
+                        </span>
 
-                    {#if $mtl}
-                        <span class="italic mt-2"
-                            >{$mtl.translation}</span
+                        {#if $mtl.data}
+                            <span class="italic mt-2"
+                                >{$mtl.data.translation}</span
+                            >
+                        {/if}
+                    </div>
+
+                    <div class="flex justify-end pr-2 pt-2">
+                        <Button
+                            variant="ghost"
+                            class="rounded-full p-4 h-max w-max"
+                            on:click={() =>
+                                (showDeleteConfirmation = true)}
                         >
-                    {/if}
+                            <Trash class="size-5" />
+                        </Button>
+
+                        <Button
+                            variant="ghost"
+                            class="rounded-full p-4 h-max w-max"
+                            on:click={() => (showEdit = true)}
+                        >
+                            <Pencil class="size-5" />
+                        </Button>
+                    </div>
                 </div>
+            {:else}
+                <EditBlock
+                    value={value.text}
+                    on:submit={(ev) => onEdit(ev)}
+                    on:cancel={() => (showEdit = false)}
+                />
+            {/if}
 
-                <div class="flex justify-end pr-2 pt-2">
-                    <Button
-                        variant="ghost"
-                        class="rounded-full p-4 h-max w-max"
-                        on:click={() =>
-                            (showDeleteConfirmation = true)}
-                    >
-                        <Trash class="size-5" />
-                    </Button>
+            <hr class="mb-6 mt-2" />
 
-                    <Button
-                        variant="ghost"
-                        class="rounded-full p-4 h-max w-max"
-                        on:click={() => (showEdit = true)}
-                    >
-                        <Pencil class="size-5" />
-                    </Button>
-                </div>
-            </div>
-        {:else}
-            <EditBlock
-                value={value.text}
-                on:submit={(ev) => onEdit(ev)}
-                on:cancel={() => (showEdit = false)}
-            />
-        {/if}
+            <div>
+                {#if $nlp.status !== 'pending'}
+                    {#each words as word, idxWord}
+                        {@const wordMtl = $mtl.data?.words[word]}
 
-        <hr class="mb-6 mt-2" />
-
-        <div>
-            {#await value.nlp then nlp}
-                {#each words as word, idxWord}
-                    {@const wordMtl = $mtl?.words[word]}
-
-                    <div class="mb-4">
-                        <div>
-                            <h1>
-                                <span
-                                    class="font-bold text-lg text-accent-foreground"
-                                >
-                                    [{word}]
-                                </span>
-
-                                {#if wordMtl}
-                                    <span> = </span>
-
-                                    <span class="italic">
-                                        {wordMtl}
+                        <div class="mb-4">
+                            <div>
+                                <h1>
+                                    <span
+                                        class="font-bold text-lg text-accent-foreground"
+                                    >
+                                        [{word}]
                                     </span>
-                                {/if}
-                            </h1>
-                        </div>
 
-                        {#each nlp[idxWord] as part, idxPart}
-                            <div class="ml-4">
-                                <span>{part.text}</span>
-                                <span class="text-sm">
-                                    {prettyPrintKkma(part.pos)}
-                                </span>
+                                    {#if wordMtl}
+                                        <span> = </span>
+
+                                        <span class="italic">
+                                            {wordMtl}
+                                        </span>
+                                    {/if}
+                                </h1>
                             </div>
 
-                            <ul>
-                                {#each pickDefs(nlp, idxWord, idxPart, $bestDefs) as def}
-                                    <li class="ml-8">
-                                        - {def}
-                                    </li>
-                                {/each}
-                            </ul>
-                        {/each}
-                    </div>
-                {/each}
-            {/await}
+                            {#each $nlp.data[idxWord] as part, idxPart}
+                                <div class="ml-4">
+                                    <span>{part.text}</span>
+                                    <span class="text-sm">
+                                        {prettyPrintKkma(part.pos)}
+                                    </span>
+                                </div>
+
+                                <ul>
+                                    {#each pickDefs($nlp.data, idxWord, idxPart, $bestDefs.data) as def}
+                                        <li class="ml-8">
+                                            - {def}
+                                        </li>
+                                    {/each}
+                                </ul>
+                            {/each}
+                        </div>
+                    {/each}
+                {/if}
+            </div>
         </div>
     </div>
 </div>

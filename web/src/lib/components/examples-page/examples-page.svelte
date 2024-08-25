@@ -14,7 +14,7 @@
     export let count: Promise<number>
 
     const countVal = newPromiseStore(count, idxPage)
-    $: maxPage = Math.ceil($countVal / EXAMPLE_PAGE_SIZE)
+    $: maxPage = Math.ceil($countVal.data / EXAMPLE_PAGE_SIZE)
 
     function hrefBuilder(idxPage: number) {
         const url = new URL($page.url)

@@ -1,20 +1,15 @@
 import { getContext, setContext } from 'svelte'
-import {
-    get,
-    type Readable,
-    type Writable,
-    writable
-} from 'svelte/store'
+import { get, type Writable, writable } from 'svelte/store'
 import type { BestDefDto, MtlDto, NlpDto } from '../api/dtos'
-import { newPromiseStore } from '../promiseStore'
+import { newPromiseStore, type PromiseStore } from '../promiseStore'
 
 const KEY = 'dictionary'
 
 export interface DictionaryContextValue {
     text: string
-    nlp: Promise<NlpDto[][]>
-    bestDefs: Readable<BestDefDto | null>
-    mtl: Readable<MtlDto | null>
+    nlp: PromiseStore<NlpDto[][], null>
+    bestDefs: PromiseStore<BestDefDto | null>
+    mtl: PromiseStore<MtlDto | null>
 }
 
 export interface DictionaryContext {
@@ -81,11 +76,13 @@ export function createDictionaryContext(
         }
 
         if (text) {
+            // Order of entries determines fetch order
+            // Leave it alone!
             ctx.value.set({
                 text,
-                nlp: fetchNlpData(text),
-                bestDefs: newPromiseStore(fetchBestDefs(text), null),
-                mtl: newPromiseStore(fetchMtl(text), null)
+                nlp: newPromiseStore(fetchNlpData(text), null),
+                mtl: newPromiseStore(fetchMtl(text), null),
+                bestDefs: newPromiseStore(fetchBestDefs(text), null)
             })
         } else {
             ctx.value.set(null)
