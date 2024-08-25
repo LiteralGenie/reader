@@ -3,6 +3,7 @@
     import type { DictionaryContextValue } from '$lib/contexts/dictionaryContext'
     import Pencil from '$lib/icons/pencil.svelte'
     import Trash from '$lib/icons/trash.svelte'
+    import ConfirmDialog from '../confirm-dialog.svelte'
     import Button from '../ui/button/button.svelte'
 
     export let value: DictionaryContextValue
@@ -12,6 +13,8 @@
 
     let containerEl: HTMLDivElement | undefined
     $: value && containerEl?.scrollTo({ top: 0 })
+
+    let showDeleteConfirmation = false
 
     function pickDefs(
         nlp: NlpDto[][],
@@ -103,6 +106,11 @@
             return '(unknown)'
         }
     }
+
+    function onDelete() {
+        showDeleteConfirmation = false
+        alert('todo')
+    }
 </script>
 
 <div
@@ -126,6 +134,7 @@
                 <Button
                     variant="ghost"
                     class="rounded-full p-4 h-max w-max"
+                    on:click={() => (showDeleteConfirmation = true)}
                 >
                     <Trash class="size-5" />
                 </Button>
@@ -187,3 +196,19 @@
         </div>
     </div>
 </div>
+
+<ConfirmDialog
+    open={showDeleteConfirmation}
+    on:close={() => (showDeleteConfirmation = false)}
+    on:confirm={onDelete}
+>
+    <div class="text-left pb-4">
+        <span class="text-lg"> Delete this section? </span>
+
+        <br />
+
+        <span class="italic text-sm">
+            Note: Addition of new sections is currently not possible.
+        </span>
+    </div>
+</ConfirmDialog>
