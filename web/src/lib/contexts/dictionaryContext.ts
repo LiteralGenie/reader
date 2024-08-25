@@ -24,7 +24,7 @@ export interface DictionaryContext {
     mtlPrefetchQueue: Writable<string[]>
     bestDefsPrefetchQueue: Writable<string[]>
     nlpPrefetchQueue: Writable<string[]>
-    setDict: (opts: SetValueArgs | null) => void
+    setDict: (opts: SetValueArgs | null, forceUpdate: boolean) => void
 }
 
 interface SetValueArgs {
@@ -82,8 +82,14 @@ export function createDictionaryContext(
 
     return ctx
 
-    function setDict(args: SetValueArgs | null) {
-        if (args?.match.id === get(ctx.dict)?.match.id) {
+    function setDict(
+        args: SetValueArgs | null,
+        forceUpdate: boolean = false
+    ) {
+        if (
+            args?.match.id === get(ctx.dict)?.match.id &&
+            forceUpdate === false
+        ) {
             return
         }
 

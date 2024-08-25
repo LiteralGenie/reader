@@ -9,6 +9,7 @@
     import OcrImage from '$lib/components/ocr-image.svelte'
     import { createDictionaryContext } from '$lib/contexts/dictionaryContext'
     import { createReaderSettingsContext } from '$lib/contexts/readerSettingsContext'
+    import { clone } from 'radash'
     import { onMount } from 'svelte'
     import { writable } from 'svelte/store'
     import Resizable from '../resizable.svelte'
@@ -126,6 +127,30 @@
 
         setDict(null)
     }
+
+    function onEdit({
+        detail
+    }: CustomEvent<{
+        page: PageDto
+        match: OcrMatchDto
+        value: string
+    }>) {
+        dataStore.update((curr) => {
+            const update = clone(curr)
+
+            const {
+                page: { filename },
+                match,
+                value
+            } = detail
+
+            update[filename]![match.id].value = value
+
+            return update
+        })
+
+        setDict(detail, true)
+    }
 </script>
 
 <div
@@ -160,7 +185,11 @@
             on:resizestart={() => (isResizing = true)}
             on:resizeend={() => (isResizing = false)}
         >
-            <DictionaryView dict={$dict} on:delete={onDelete} />
+            <DictionaryView
+                dict={$dict}
+                on:delete={onDelete}
+                on:edit={onEdit}
+            />
         </Resizable>
     {/if}
 </div>

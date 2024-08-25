@@ -164,6 +164,19 @@ def insert_ocr_data(db: ChapterDb, filename: str, block: StitchedBlock) -> dict 
     ).fetchone()
 
 
+def update_ocr_text(db: ChapterDb, id: str, value: str) -> dict | None:
+    db.execute(
+        """
+        UPDATE ocr_data
+        SET value = ?
+        WHERE id = ?
+        """,
+        [value, id],
+    ).fetchone()
+
+    db.commit()
+
+
 def delete_ocr_data(db: ChapterDb, id: str) -> dict | None:
     db.execute(
         """

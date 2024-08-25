@@ -1,8 +1,8 @@
 series list
 chapter list
 definitions page
-ocr crud
 series crud
+use template for llm definitions
 
 logging
 move worker init to outside web server (so that uvicorn can spawn multiple workers)
@@ -14,3 +14,4 @@ fix spacing before nlp
 scroll to word in dictionary view
 centralize css styles
 unload gpu memory when idle
+create ocr blocks

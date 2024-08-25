@@ -1,12 +1,12 @@
 import { env } from '$env/dynamic/private'
 import type { RequestHandler } from './$types'
 
-export const DELETE: RequestHandler = async ({ request }) => {
+export const PATCH: RequestHandler = async ({ request }) => {
     // @ts-ignore
-    const apiUrl = new URL(env.config.apiUrl + '/ocr/delete')
+    const apiUrl = new URL(env.config.apiUrl + '/ocr/text')
 
     return await fetch(apiUrl, {
-        method: 'DELETE',
+        method: 'PATCH',
         body: await request.text(),
         headers: {
             'Content-Type': 'application/json'

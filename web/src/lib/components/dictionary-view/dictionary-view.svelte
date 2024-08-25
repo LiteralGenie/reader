@@ -118,7 +118,7 @@
 
     async function onDelete() {
         const resp = await fetch('/api/ocr/delete', {
-            method: 'POST',
+            method: 'DELETE',
             body: JSON.stringify({
                 series: $page.params.seriesId,
                 chapter: $page.params.chapterId,
@@ -139,16 +139,39 @@
         showDeleteConfirmation = false
     }
 
-    function onEdit(ev: CustomEvent<string>) {
+    async function onEdit(ev: CustomEvent<string>) {
+        const resp = await fetch('/api/ocr/text', {
+            method: 'PATCH',
+            body: JSON.stringify({
+                series: $page.params.seriesId,
+                chapter: $page.params.chapterId,
+                page: dict.page.filename,
+                block: dict.match.id,
+                text: ev.detail
+            })
+        })
+
+        if (resp.status !== 200) {
+            console.error(resp)
+            alert(`Error: ${resp.statusText}`)
+
+            showEdit = false
+            return
+        }
+
+        dispatch('edit', {
+            page: dict.page,
+            match: dict.match,
+            value: ev.detail
+        })
         showEdit = false
-        alert('edit ' + ev.detail)
     }
 </script>
 
-<div bind:this={containerEl}>
+<div class="h-full" bind:this={containerEl}>
     <DictionaryStatus value={dict} />
 
-    <div class="h-fit min-h-full w-full text-left p-4 bg-card m-auto">
+    <div class="min-h-full w-full text-left p-4 bg-card m-auto">
         <div class="max-w-4xl m-auto flex flex-col">
             {#if showEdit === false}
                 <div class="flex flex-col">
@@ -158,9 +181,9 @@
                         </span>
 
                         {#if $mtl.data}
-                            <span class="italic mt-2"
-                                >{$mtl.data.translation}</span
-                            >
+                            <span class="italic mt-2">
+                                {$mtl.data.translation}
+                            </span>
                         {/if}
                     </div>
 

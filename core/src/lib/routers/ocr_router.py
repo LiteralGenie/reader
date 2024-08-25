@@ -8,7 +8,12 @@ from fastapi.responses import StreamingResponse
 from pathvalidate import sanitize_filename
 from pydantic import BaseModel
 
-from ..db.chapter_db import delete_ocr_data, get_ocr_data, load_chapter_db
+from ..db.chapter_db import (
+    delete_ocr_data,
+    get_ocr_data,
+    load_chapter_db,
+    update_ocr_text,
+)
 from ..db.reader_db import load_reader_db
 from ..ocr import get_all_ocr_data, insert_ocr_job
 
@@ -82,6 +87,27 @@ def poll_ocr(
     return StreamingResponse(poll(), media_type="text/event-stream")
 
 
+class UpdateBlockTextRequest(BaseModel):
+    series: str
+    chapter: str
+    page: str
+    block: str
+    text: str
+
+
+@router.patch("/ocr/text")
+def update_block_text(req: Request, body: UpdateBlockTextRequest):
+    chap_dir: Path = req.app.state.cfg.series_folder / body.series / body.chapter
+    try:
+        db = load_chapter_db(chap_dir, raise_on_missing=True)
+    except FileNotFoundError:
+        raise HTTPException(400)
+
+    update_ocr_text(db, body.block, body.text)
+
+    return "ok"
+
+
 class DeleteBlockRequest(BaseModel):
     series: str
     chapter: str
@@ -89,14 +115,14 @@ class DeleteBlockRequest(BaseModel):
     block: str
 
 
-@router.post("/ocr/delete")
-def delete_block(req: Request, data: DeleteBlockRequest):
-    chap_dir: Path = req.app.state.cfg.series_folder / data.series / data.chapter
+@router.delete("/ocr/delete")
+def delete_block(req: Request, body: DeleteBlockRequest):
+    chap_dir: Path = req.app.state.cfg.series_folder / body.series / body.chapter
     try:
         db = load_chapter_db(chap_dir, raise_on_missing=True)
     except FileNotFoundError:
         raise HTTPException(400)
 
-    delete_ocr_data(db, data.block)
+    delete_ocr_data(db, body.block)
 
     return "ok"
