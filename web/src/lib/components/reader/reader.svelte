@@ -11,6 +11,7 @@
     import ChapterHeader from './chapter-header.svelte'
     import ReaderHeader from './reader-header.svelte'
     import ReaderSettingsDialog from './reader-settings-dialog.svelte'
+    import ReaderStatus from './reader-status.svelte'
 
     export let chapters: ChapterDto[]
     export let pages: PageDto[]
@@ -115,6 +116,8 @@
             />
 
             <ChapterHeader {seriesId} {chapterId} {chapters} />
+
+            <ReaderStatus data={dataStore} />
         </div>
 
         {#each pages as pg}
