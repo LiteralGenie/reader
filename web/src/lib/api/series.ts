@@ -16,13 +16,6 @@ export interface PageDto {
     height: number
 }
 
-export interface MatchDto {
-    id: string
-    bbox: [number, number, number, number]
-    confidence: number
-    value: string
-}
-
 export async function fetchAllSeries(): Promise<SeriesDto[]> {
     // @ts-ignore
     const url = env.config.apiUrl + '/series'

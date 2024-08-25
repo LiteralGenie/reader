@@ -1,12 +1,12 @@
 <script lang="ts">
-    import type { OcrMatch } from '$lib/api/dtos'
+    import type { OcrMatchDto } from '$lib/api/dtos'
     import type { ChapterDto, PageDto } from '$lib/api/series'
     import DictionaryView from '$lib/components/dictionary-view/dictionary-view.svelte'
     import OcrImage from '$lib/components/ocr-image.svelte'
     import { createDictionaryContext } from '$lib/contexts/dictionaryContext'
     import { createReaderSettingsContext } from '$lib/contexts/readerSettingsContext'
-    import { stitchBlocks, stitchLines } from '$lib/stitch'
     import { onMount } from 'svelte'
+    import { writable } from 'svelte/store'
     import Resizable from '../resizable.svelte'
     import ChapterHeader from './chapter-header.svelte'
     import ReaderHeader from './reader-header.svelte'
@@ -14,7 +14,7 @@
 
     export let chapters: ChapterDto[]
     export let pages: PageDto[]
-    export let ocrData: Record<string, OcrMatch[] | null>
+    export let ocrData: Record<string, OcrMatchDto[] | null>
     export let seriesId: string
     export let chapterId: string
 
@@ -32,16 +32,13 @@
 
     let showSettingsDialog = false
 
+    $: dataStore = writable(ocrData)
+
     onMount(() => {
         // Prefetch stuff
         const texts = pages
-            .flatMap((pg) => {
-                const matches = ocrData[pg.filename] ?? []
-                const lines = stitchLines(matches)
-                const blocks = stitchBlocks(lines)
-                return blocks
-            })
-            .map((blk) => blk.value)
+            .flatMap((pg) => ocrData[pg.filename] ?? [])
+            .map((m) => m.value)
 
         nlpPrefetchQueue.set(texts)
         bestDefsPrefetchQueue.set(texts)
@@ -66,15 +63,18 @@
                     return
                 }
 
-                const data: { filename: string; data: OcrMatch[] } =
-                    JSON.parse(ev.data)
-                ocrData[data.filename] = data.data
+                const update: {
+                    filename: string
+                    data: OcrMatchDto[]
+                } = JSON.parse(ev.data)
+
+                dataStore.update((curr) => ({
+                    ...curr,
+                    [update.filename]: update.data
+                }))
 
                 // Add to prefetch queue
-                const lines = stitchLines(data.data)
-                const blocks = stitchBlocks(lines)
-                const texts = blocks.map((blk) => blk.value)
-
+                const texts = update.data.map((m) => m.value)
                 nlpPrefetchQueue.update((queue) => [
                     ...queue,
                     ...texts
@@ -118,7 +118,7 @@
         </div>
 
         {#each pages as pg}
-            <OcrImage {pg} matches={ocrData[pg.filename] ?? []} />
+            <OcrImage {pg} matches={$dataStore[pg.filename] ?? []} />
         {/each}
     </div>
 

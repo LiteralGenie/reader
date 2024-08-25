@@ -1,11 +1,11 @@
 import { env } from '$env/dynamic/private'
 import { error } from '@sveltejs/kit'
-import type { OcrMatch } from './dtos'
+import type { OcrMatchDto } from './dtos'
 
 export async function fetchAllOcrData(
     series: string,
     chapter: string
-): Promise<Record<string, OcrMatch[] | null>> {
+): Promise<Record<string, OcrMatchDto[] | null>> {
     const url =
         // @ts-ignore
         env.config.apiUrl + `/ocr/${series}/${chapter}/`
@@ -23,7 +23,7 @@ export async function fetchOcrData(
     series: string,
     chapter: string,
     page: string
-): Promise<OcrMatch[] | null> {
+): Promise<OcrMatchDto[] | null> {
     const url =
         // @ts-ignore
         env.config.apiUrl + `/ocr/${series}/${chapter}/${page}`

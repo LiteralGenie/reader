@@ -7,7 +7,7 @@ import doctr
 import torch
 from comic_ocr.lib.constants import KOREAN_ALPHABET
 from comic_ocr.lib.inference_utils import calc_windows, eval_window
-from comic_ocr.lib.label_utils import OcrMatch
+from comic_ocr.lib.label_utils import OcrMatch, stitch_blocks, stitch_lines
 from doctr.models.predictor import OCRPredictor
 from PIL import Image
 
@@ -15,7 +15,6 @@ from .config import Config
 from .db.chapter_db import get_ocr_data, load_chapter_db
 from .db.reader_db import ReaderDb, load_reader_db
 from .job_utils import JobManager, start_job_worker
-from .misc_utils import dump_dataclass
 
 _JOB_TYPE = "ocr"
 
@@ -117,8 +116,19 @@ def _process_job(
     except StopIteration as e:
         matches = e.value
 
+    # Group words into blocks (speech bubbles)
+    lines = stitch_lines(matches)
+    blocks = stitch_blocks(lines)
+
     # Insert OCR data
-    data = [dump_dataclass(m) for m in matches]
+    data = [
+        dict(
+            value=blk.value.replace("\n", " "),
+            bbox=blk.bbox,
+            confidence=blk.confidence,
+        )
+        for blk in blocks
+    ]
 
     chap_db = load_chapter_db(Path(job["chap_dir"]))
     chap_db.execute(
@@ -207,7 +217,7 @@ def _load_predictor(cfg: Config) -> OCRPredictor:
         reco_arch=reco_model,
     )
 
-    if cfg.use_gpu:
+    if cfg.use_gpu_for_ocr:
         predictor = predictor.cuda()
         print("Running OCR models on GPU")
     else:

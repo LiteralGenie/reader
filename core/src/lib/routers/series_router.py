@@ -11,17 +11,17 @@ router = APIRouter()
 
 
 @router.get("/series")
-def seriesr(request: Request):
-    data = get_all_series(request.app.state.cfg)
+def seriesr(req: Request):
+    data = get_all_series(req.app.state.cfg)
     return data
 
 
 @router.get("/series/{series}")
-def series_by_id(request: Request, series: str):
+def series_by_id(req: Request, series: str):
     series = sanitize_filename(series)
 
     try:
-        data = get_all_chapters(request.app.state.cfg, series)
+        data = get_all_chapters(req.app.state.cfg, series)
     except FileNotFoundError:
         raise HTTPException(404)
 
@@ -29,12 +29,12 @@ def series_by_id(request: Request, series: str):
 
 
 @router.get("/series/{series}/{chapter}")
-def chapter_by_id(request: Request, series: str, chapter: str):
+def chapter_by_id(req: Request, series: str, chapter: str):
     series = sanitize_filename(series)
     chapter = sanitize_filename(chapter)
 
     try:
-        data = get_all_pages(request.app.state.cfg, series, chapter)
+        data = get_all_pages(req.app.state.cfg, series, chapter)
     except FileNotFoundError:
         raise HTTPException(404)
 
@@ -42,12 +42,12 @@ def chapter_by_id(request: Request, series: str, chapter: str):
 
 
 @router.get("/series/{series}/{chapter}/{page}")
-def image_by_id(request: Request, series: str, chapter: str, page: str):
+def image_by_id(req: Request, series: str, chapter: str, page: str):
     series = sanitize_filename(series)
     chapter = sanitize_filename(chapter)
     page = sanitize_filename(page)
 
-    fp: Path = request.app.state.cfg.series_folder / series / chapter / page
+    fp: Path = req.app.state.cfg.series_folder / series / chapter / page
     if not fp.exists():
         raise HTTPException(404)
 

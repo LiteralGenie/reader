@@ -1,8 +1,8 @@
 series list
 chapter list
 definitions page
-edit ocr
-make blocks the ocr primitive instead of words
+ocr crud
+series crud
 
 logging
 move worker init to outside web server (so that uvicorn can spawn multiple workers)
@@ -13,3 +13,4 @@ image load priority
 fix spacing before nlp
 scroll to word in dictionary view
 centralize css styles
+unload gpu memory when idle

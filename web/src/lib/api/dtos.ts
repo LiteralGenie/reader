@@ -1,3 +1,5 @@
+export type Bbox = [number, number, number, number]
+
 export type JSONResponse<T> = Response & {
     json: () => Promise<T>
 }
@@ -20,8 +22,8 @@ export interface DefDto {
     definition: string
 }
 
-export interface OcrMatch {
-    bbox: [number, number, number, number]
+export interface OcrMatchDto {
+    bbox: Bbox
     confidence: number
     value: string
 }

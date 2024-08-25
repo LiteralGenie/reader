@@ -11,6 +11,7 @@
 
     $: words = value.text.split(' ')
     $: ({ mtl, bestDefs } = value)
+    value.nlp.then(console.log)
 
     let containerEl: HTMLDivElement | undefined
     $: value && containerEl?.scrollTo({ top: 0 })

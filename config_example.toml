@@ -41,7 +41,7 @@ margin_size = 100
 max_ocr_width = 1200
 
 # Set to true if a NVIDIA GPU that supports CUDA is available for OCR
-use_gpu_for_ocr = false
+use_gpu_for_ocr = true
 
 # Optional features that use a large language model (LLM):
 #   - machine translation (MTL)

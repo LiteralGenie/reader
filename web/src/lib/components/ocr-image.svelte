@@ -1,30 +1,22 @@
 <script lang="ts">
     import { page } from '$app/stores'
-    import type { OcrMatch } from '$lib/api/dtos'
-    import type { MatchDto, PageDto } from '$lib/api/series'
+    import type { OcrMatchDto } from '$lib/api/dtos'
+    import type { PageDto } from '$lib/api/series'
     import { getDictionaryContext } from '$lib/contexts/dictionaryContext'
     import { getReaderSettingsContext } from '$lib/contexts/readerSettingsContext'
-    import {
-        stitchBlocks,
-        StitchedBlock,
-        stitchLines
-    } from '$lib/stitch'
     import { max, min } from 'radash'
 
     export let pg: PageDto
-    export let matches: OcrMatch[]
+    export let matches: OcrMatchDto[]
 
     $: ({ seriesId, chapterId } = $page.params)
-
-    $: lines = stitchLines(matches)
-    $: blocks = stitchBlocks(lines)
 
     const ctx = getDictionaryContext()
     $: dictValue = ctx.value
 
     const { settings } = getReaderSettingsContext()
 
-    function bboxToAbsolutePos(bbox: MatchDto['bbox']) {
+    function bboxToAbsolutePos(bbox: OcrMatchDto['bbox']) {
         const w = pg.width
         const h = pg.height
 
@@ -42,8 +34,8 @@
         return `left: ${left}; right: ${right}; top: ${top}; bottom: ${bottom};`
     }
 
-    function onClick(block: StitchedBlock) {
-        ctx.setValue(block.value)
+    function onClick(match: OcrMatchDto) {
+        ctx.setValue(match.value)
     }
 </script>
 
@@ -54,14 +46,14 @@
         src="/series/{seriesId}/{chapterId}/{pg.filename}"
     />
 
-    {#each blocks as blk}
+    {#each matches as m}
         <div
             class="absolute z-10 select-none"
-            class:active={blk.value === $dictValue?.text ||
+            class:active={m.value === $dictValue?.text ||
                 $settings.debugBboxs}
-            style={bboxToAbsolutePos(blk.bbox)}
-            title={blk.value}
-            on:click|stopPropagation={() => onClick(blk)}
+            style={bboxToAbsolutePos(m.bbox)}
+            title={m.value}
+            on:click|stopPropagation={() => onClick(m)}
         >
             <!-- Hack to fix blurry images caused by scrollbar on desktop Chrome -->
             <!-- https://issues.chromium.org/issues/361824001 -->
