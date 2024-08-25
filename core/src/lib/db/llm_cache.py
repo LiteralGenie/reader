@@ -4,11 +4,11 @@ from typing import TypeAlias
 
 from ..paths import DATA_DIR
 
-MtlCache: TypeAlias = sqlite3.Connection
+LlmCache: TypeAlias = sqlite3.Connection
 
 
-def load_mtl_cache() -> MtlCache:
-    db = sqlite3.connect(DATA_DIR / "mtl_cache.sqlite")
+def load_llm_cache() -> LlmCache:
+    db = sqlite3.connect(DATA_DIR / "llm_cache.sqlite")
     db.row_factory = sqlite3.Row
 
     db.execute(
@@ -32,7 +32,7 @@ def load_mtl_cache() -> MtlCache:
     return db
 
 
-def select_translation(cache: MtlCache, korean: str) -> str | None:
+def select_translation(cache: LlmCache, korean: str) -> str | None:
     korean = korean.strip()
 
     r = cache.execute(
@@ -47,7 +47,7 @@ def select_translation(cache: MtlCache, korean: str) -> str | None:
     return r["english"] if r else None
 
 
-def insert_translation(cache: MtlCache, korean: str, english: str):
+def insert_translation(cache: LlmCache, korean: str, english: str):
     korean = korean.strip()
 
     cache.execute(
@@ -62,7 +62,7 @@ def insert_translation(cache: MtlCache, korean: str, english: str):
     )
 
 
-def select_best_defs(cache: MtlCache, text: str) -> list[list[list[int]]] | None:
+def select_best_defs(cache: LlmCache, text: str) -> list[list[list[int]]] | None:
     text = text.strip()
 
     r = cache.execute(
@@ -77,7 +77,7 @@ def select_best_defs(cache: MtlCache, text: str) -> list[list[list[int]]] | None
     return json.loads(r["best"]) if r else None
 
 
-def insert_best_defs(cache: MtlCache, text: str, best_defs: list[list[list[int]]]):
+def insert_best_defs(cache: LlmCache, text: str, best_defs: list[list[list[int]]]):
     text = text.strip()
 
     cache.execute(

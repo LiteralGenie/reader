@@ -20,7 +20,7 @@ from lib.db.dictionary_db import (
     select_definitions,
     select_examples,
 )
-from lib.db.mtl_cache import load_mtl_cache, select_best_defs, select_translation
+from lib.db.llm_cache import load_llm_cache, select_best_defs, select_translation
 from lib.db.reader_db import clear_jobs, load_reader_db
 from lib.llm.llm_worker import insert_llm_job, start_llm_job_worker
 from lib.llm.mtl import parse_mtl
@@ -232,7 +232,7 @@ async def get_mtl(text: str):
     if not app.state.cfg.use_llm_for_mtl:
         return None
 
-    cache = load_mtl_cache()
+    cache = load_llm_cache()
 
     translation = select_translation(cache, text)
     if translation is None:
@@ -252,7 +252,7 @@ async def get_best_defs(text: str):
     if not app.state.cfg.use_llm_for_definition_sort:
         return None
 
-    cache = load_mtl_cache()
+    cache = load_llm_cache()
 
     best = select_best_defs(cache, text)
     if best is None:

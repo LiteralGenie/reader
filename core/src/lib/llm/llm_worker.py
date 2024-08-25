@@ -4,7 +4,7 @@ from typing import Literal
 from llama_cpp import Llama
 
 from ..config import Config
-from ..db.mtl_cache import insert_best_defs, insert_translation, load_mtl_cache
+from ..db.llm_cache import insert_best_defs, insert_translation, load_llm_cache
 from ..db.reader_db import ReaderDb, load_reader_db
 from ..job_utils import JobManager, start_job_worker
 from .best_defs import get_best_defs
@@ -90,7 +90,7 @@ def _process_job(
     job = jobber.select(job_id)
     print("Processing llm job", job_id, job["text"])
 
-    cache = load_mtl_cache()
+    cache = load_llm_cache()
 
     if job["type"] == "mtl":
         translation = mtl(llm, job["text"])
