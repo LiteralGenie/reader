@@ -11,7 +11,7 @@ from PIL import Image
 
 ChapterDb: TypeAlias = sqlite3.Connection
 
-CHAPTER_DB_FILENAME = "_reader_data.sqlite"
+CHAPTER_DB_FILENAME = "_reader_chapter.sqlite"
 
 
 def load_chapter_db(chap_dir: Path, raise_on_missing=False) -> ChapterDb:
@@ -25,7 +25,8 @@ def load_chapter_db(chap_dir: Path, raise_on_missing=False) -> ChapterDb:
     db.execute(
         """
         CREATE TABLE IF NOT EXISTS metadata (
-            version     TEXT     PRIMARY KEY
+            version     TEXT,
+            name        TEXT
         )
         """
     )

@@ -1,17 +1,45 @@
 series list
 chapter list
 definitions page
-series crud
-use template for llm definitions
+create / edit series
+    name
+    author
+    cover
+    import from MU / MD
+delete series
+create chapter
+    from files
+    from archive
+    name
+edit chapter
+    
+delete chapter
 
+demo
+    resource blocks
+        as panic button enabled by env
+        ocr
+        mtl
+    resource limits
+        total image area
+        length llm input
+        length nlp input
+        disable prefetch
+        uploads per ip
+        cover size
+    hide custom uploads
+    lock default uploads
+        no ocr edits
+        no chapter edits
+        no chapter uploads
+        no series edits
+
+use template for llm definitions
 logging
-move worker init to outside web server (so that uvicorn can spawn multiple workers)
-display job status %
-rescan option
-logging
-image load priority
-fix spacing before nlp
-scroll to word in dictionary view
-centralize css styles
 unload gpu memory when idle
 create ocr blocks
+
+move worker init to outside web server (so that uvicorn can spawn multiple workers)
+image load priority
+fix spacing before nlp
+hide low confidence matches

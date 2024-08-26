@@ -1,3 +1,4 @@
+import { euc } from '$lib/miscUtils'
 import { getContext, setContext } from 'svelte'
 import { get, type Writable, writable } from 'svelte/store'
 import type {
@@ -114,13 +115,13 @@ export function createDictionaryContext(
     }
 
     async function fetchNlpData(text: string): Promise<NlpDto[][]> {
-        const url = `/api/nlp/${text}`
+        const url = `/api/nlp/${euc(text)}`
         const resp = await fetch(url)
         return await resp.json()
     }
 
     async function fetchMtl(text: string): Promise<MtlDto | null> {
-        const url = `/api/mtl/${text}`
+        const url = `/api/mtl/${euc(text)}`
         const resp = await fetch(url)
         return await resp.json()
     }
@@ -128,7 +129,7 @@ export function createDictionaryContext(
     async function fetchBestDefs(
         text: string
     ): Promise<BestDefDto | null> {
-        const url = `/api/best_defs/${text}`
+        const url = `/api/best_defs/${euc(text)}`
         const resp = await fetch(url)
         return await resp.json()
     }

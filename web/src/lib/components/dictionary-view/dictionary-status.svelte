@@ -7,7 +7,6 @@
 
     import type { DictionaryContextValue } from '$lib/contexts/dictionaryContext'
     import type { PromiseStoreValue } from '$lib/promiseStore'
-    import { onMount } from 'svelte'
     import Loader from '../loader.svelte'
 
     export let value: DictionaryContextValue
@@ -15,6 +14,10 @@
 
     let status = ''
     $: updateStatus($nlp, $mtl, $bestDefs)
+    $: setTimeout(
+        () => updateStatus($nlp, $mtl, $bestDefs),
+        STATUS_CHECK_DELAY
+    )
 
     function updateStatus(
         nlp: PromiseStoreValue<NlpDto[][] | null>,
@@ -27,6 +30,12 @@
                 Date.now() - p.initTime > STATUS_CHECK_DELAY * 0.9
             return pending && elapsed
         }
+        console.log(
+            'status',
+            isPending(nlp),
+            isPending(mtl),
+            isPending(bestDefs)
+        )
 
         if (isPending(nlp)) {
             status = 'Loading dictionary data...'
@@ -38,13 +47,6 @@
             status = ''
         }
     }
-
-    onMount(() => {
-        setTimeout(
-            () => updateStatus($nlp, $mtl, $bestDefs),
-            STATUS_CHECK_DELAY
-        )
-    })
 </script>
 
 {#if status}

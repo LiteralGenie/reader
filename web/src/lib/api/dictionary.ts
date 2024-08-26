@@ -1,4 +1,5 @@
 import { env } from '$env/dynamic/private'
+import { euc } from '$lib/miscUtils'
 import type { DefinitionDto, ExampleDto, JSONResponse } from './dtos'
 
 export async function fetchDefinitions(
@@ -6,8 +7,10 @@ export async function fetchDefinitions(
     offset: number,
     limit: number
 ): Promise<JSONResponse<DefinitionDto[]>> {
-    // @ts-ignore
-    const url = new URL(env.config.apiUrl + `/definitions/${text}`)
+    const url = new URL(
+        // @ts-ignore
+        env.config.apiUrl + `/definitions/${euc(text)}`
+    )
     url.searchParams.set('offset', String(offset))
     url.searchParams.set('limit', String(limit))
 
@@ -19,7 +22,7 @@ export async function countDefinitions(
 ): Promise<JSONResponse<number>> {
     const url = new URL(
         // @ts-ignore
-        env.config.apiUrl + `/definitions/${text}/count`
+        env.config.apiUrl + `/definitions/${euc(text)}/count`
     )
     return fetch(url)
 }
@@ -30,7 +33,7 @@ export async function fetchExamples(
     limit: number
 ): Promise<JSONResponse<ExampleDto[]>> {
     // @ts-ignore
-    const url = new URL(env.config.apiUrl + `/examples/${text}`)
+    const url = new URL(env.config.apiUrl + `/examples/${euc(text)}`)
     url.searchParams.set('offset', String(offset))
     url.searchParams.set('limit', String(limit))
 
@@ -40,7 +43,9 @@ export async function fetchExamples(
 export async function countExamples(
     text: string
 ): Promise<JSONResponse<number>> {
-    // @ts-ignore
-    const url = new URL(env.config.apiUrl + `/examples/${text}/count`)
+    const url = new URL(
+        // @ts-ignore
+        env.config.apiUrl + `/examples/${euc(text)}/count`
+    )
     return fetch(url)
 }

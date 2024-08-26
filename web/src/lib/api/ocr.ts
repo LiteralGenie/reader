@@ -1,14 +1,15 @@
 import { env } from '$env/dynamic/private'
+import { euc } from '$lib/miscUtils'
 import { error } from '@sveltejs/kit'
-import type { OcrMatchDto, OcrPageDto } from './dtos'
+import type { OcrPageDto } from './dtos'
 
 export async function fetchAllOcrData(
     series: string,
     chapter: string
-): Promise<Record<string, OcrMatchDto[] | null>> {
+): Promise<Record<string, OcrPageDto | null>> {
     const url =
         // @ts-ignore
-        env.config.apiUrl + `/ocr/${series}/${chapter}/`
+        env.config.apiUrl + `/ocr/${euc(series)}/${euc(chapter)}/`
 
     const resp = await fetch(url)
     if (resp.status !== 200) {
@@ -26,7 +27,8 @@ export async function fetchOcrData(
 ): Promise<OcrPageDto | null> {
     const url =
         // @ts-ignore
-        env.config.apiUrl + `/ocr/${series}/${chapter}/${page}`
+        env.config.apiUrl +
+        `/ocr/${euc(series)}/${chapter}/${euc(page)}`
 
     const resp = await fetch(url)
     if (resp.status !== 200) {

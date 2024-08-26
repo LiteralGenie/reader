@@ -3,7 +3,7 @@ import { fetchChapterById, fetchSeriesById } from '$lib/api/series'
 import type { PageServerLoad } from './$types'
 
 export const load: PageServerLoad = async ({ params }) => {
-    const chapters = await fetchSeriesById(params.seriesId)
+    const series = await fetchSeriesById(params.seriesId)
 
     const pages = await fetchChapterById(
         params.seriesId,
@@ -16,7 +16,7 @@ export const load: PageServerLoad = async ({ params }) => {
     )
 
     return {
-        chapters,
+        series,
         pages,
         ocrData
     }

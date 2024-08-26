@@ -1,6 +1,7 @@
 import { env } from '$env/dynamic/private'
+import { euc } from '$lib/miscUtils'
 import { error } from '@sveltejs/kit'
-import type { ChapterDto, PageDto, SeriesDto } from './dtos'
+import type { PageDto, SeriesDto, SeriesWithChapters } from './dtos'
 
 export async function fetchAllSeries(): Promise<SeriesDto[]> {
     // @ts-ignore
@@ -11,9 +12,9 @@ export async function fetchAllSeries(): Promise<SeriesDto[]> {
 
 export async function fetchSeriesById(
     series: string
-): Promise<ChapterDto[]> {
+): Promise<SeriesWithChapters> {
     // @ts-ignore
-    const url = env.config.apiUrl + `/series/${series}`
+    const url = env.config.apiUrl + `/series/${euc(series)}`
 
     const resp = await fetch(url)
     if (resp.status !== 200) {
@@ -28,8 +29,9 @@ export async function fetchChapterById(
     series: string,
     chapter: string
 ): Promise<PageDto[]> {
-    // @ts-ignore
-    const url = env.config.apiUrl + `/series/${series}/${chapter}`
+    const url =
+        // @ts-ignore
+        env.config.apiUrl + `/series/${euc(series)}/${euc(chapter)}`
 
     const resp = await fetch(url)
     if (resp.status !== 200) {

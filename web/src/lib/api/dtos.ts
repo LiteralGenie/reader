@@ -1,14 +1,23 @@
 export interface SeriesDto {
     filename: string
+    name: string
+    id_mangaupdates: string
+    id_mangadex: string
 }
+
 export interface ChapterDto {
     filename: string
 }
+
 export interface PageDto {
     filename: string
     sha256: string
     width: number
     height: number
+}
+
+export type SeriesWithChapters = SeriesDto & {
+    chapters: ChapterDto[]
 }
 
 export type JSONResponse<T> = Response & {

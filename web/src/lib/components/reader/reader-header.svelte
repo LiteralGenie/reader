@@ -1,13 +1,14 @@
 <script lang="ts">
     import ArrowLongLeft from '$lib/icons/arrow-long-left.svelte'
     import Cog_6 from '$lib/icons/cog-6.svelte'
+    import { euc } from '$lib/miscUtils'
     import { createEventDispatcher } from 'svelte'
     import ThemeToggle from '../theme-toggle.svelte'
     import Button from '../ui/button/button.svelte'
 
     export let seriesId: string
 
-    $: href = `/series/${seriesId}`
+    $: href = `/series/${euc(seriesId)}`
 
     const dispatch = createEventDispatcher()
 </script>

@@ -2,6 +2,7 @@
     import { goto } from '$app/navigation'
     import type { ChapterDto } from '$lib/api/dtos'
     import * as Select from '$lib/components/ui/select/index.js'
+    import { euc } from '$lib/miscUtils'
 
     export let seriesId: string
     export let chapters: ChapterDto[]
@@ -19,7 +20,7 @@
             return
         }
 
-        goto(`/series/${seriesId}/${ch.filename}`)
+        goto(`/series/${euc(seriesId)}/${euc(ch.filename)}`)
     }
 </script>
 

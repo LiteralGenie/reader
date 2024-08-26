@@ -13,7 +13,7 @@ def load_reader_db() -> ReaderDb:
     db.execute(
         """
         CREATE TABLE IF NOT EXISTS metadata (
-            version     TEXT     PRIMARY KEY
+            version     TEXT
         )
         """
     )

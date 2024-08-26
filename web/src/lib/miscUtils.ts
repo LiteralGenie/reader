@@ -29,3 +29,5 @@ export function round(x: number, places = 2) {
     const mult = 10 ** places
     return Math.round(x * mult) / mult
 }
+
+export const euc = encodeURIComponent
