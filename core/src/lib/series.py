@@ -1,6 +1,7 @@
 from itertools import chain
 from pathlib import Path
 
+from fastapi import HTTPException, UploadFile
 from PIL import Image
 
 from .config import Config
@@ -75,6 +76,8 @@ def upsert_cover(
     fp = series_dir / SERIES_COVER_FILENAME
     after_resize.save(fp)
 
+    return fp
+
 
 def get_chapter(cfg: Config, series: str, chapter: str):
     fp = cfg.root_image_folder / series / chapter
@@ -138,6 +141,8 @@ def get_all_pages(cfg: Config, series: str, chapter: str):
         if not d:
             d = insert_page(db, fp)
 
+        d["size"] = fp.stat().st_size
+
         pages.append(d)
     pages.sort(key=lambda d: d["filename"])
 
@@ -168,3 +173,16 @@ def count_file_types(fp: Path):
             tally["other"] += 1
 
     return tally
+
+
+def raise_on_size_limit(files: list[UploadFile], max_bytes: int):
+    sizes = []
+    for f in files:
+        if not f.size:
+            raise HTTPException(411)
+
+        sizes.append(f.size)
+
+    total = sum(sizes)
+    if total > max_bytes:
+        raise HTTPException(413)

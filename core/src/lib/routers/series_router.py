@@ -19,6 +19,7 @@ from ..series import (
     get_all_series,
     get_chapter,
     get_series,
+    raise_on_size_limit,
     upsert_cover,
 )
 
@@ -94,6 +95,10 @@ def create_series_(req: Request, body: CreateSeriesRequest):
 def upsert_series_cover(req: Request, series: str, cover: UploadFile):
     series = sanitize_or_raise_400(series)
 
+    cfg: Config = req.app.state.cfg
+
+    raise_on_size_limit([cover], cfg.max_cover_image_size_bytes)
+
     try:
         im = Image.open(cover.file)
         im.verify()
@@ -101,17 +106,18 @@ def upsert_series_cover(req: Request, series: str, cover: UploadFile):
         raise HTTPException(400)
 
     try:
-        upsert_cover(req.app.state.cfg, series, im)
+        fp = upsert_cover(req.app.state.cfg, series, im)
     except FileNotFoundError:
         raise HTTPException(404)
 
-    return "ok"
+    return fp.name
 
 
 @router.patch("/cover/{series}/auto")
 def upsert_series_cover_auto(req: Request, series: str):
-    cfg: Config = req.app.state.cfg
     series = sanitize_or_raise_400(series)
+
+    cfg: Config = req.app.state.cfg
 
     try:
         fp_im = None
@@ -189,6 +195,8 @@ def create_chapter(
     chapter_filename = sanitize_or_raise_400(chapter)
 
     cfg: Config = req.app.state.cfg
+
+    raise_on_size_limit(pages, cfg.max_chapter_size_bytes)
 
     series_dir = cfg.root_image_folder / series
     if not series_dir.exists():
@@ -299,6 +307,15 @@ def add_page(req: Request, series: str, chapter: str, page: UploadFile):
 
     cfg: Config = req.app.state.cfg
 
+    size = page.size
+    if not size:
+        raise HTTPException(411)
+
+    current_pages = get_all_pages(cfg, series, chapter)
+    rem_size = cfg.max_chapter_size_bytes - sum(pg["size"] for pg in current_pages)
+    if size > rem_size:
+        raise HTTPException(413)
+
     chap_dir = cfg.root_image_folder / series / chapter
 
     filename = (page.filename or "").split(".")[0]
@@ -308,8 +325,6 @@ def add_page(req: Request, series: str, chapter: str, page: UploadFile):
         if fp_page.exists():
             raise HTTPException(400)
     else:
-        current_pages = get_all_pages(cfg, series, chapter)
-
         fp_page = None
         while not fp_page or fp_page.exists():
             page_idx = len(current_pages) + 1

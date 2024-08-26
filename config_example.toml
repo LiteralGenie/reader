@@ -88,3 +88,6 @@ use_llm_for_mtl = true
 # Covers are automatically generated when a new series folder is detected
 max_auto_cover_x = 1000
 max_auto_cover_y = 1000
+
+max_chapter_size_bytes = 999_999_999
+max_cover_image_size_bytes = 99_999_999

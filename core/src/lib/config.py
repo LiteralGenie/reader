@@ -37,6 +37,9 @@ class Config:
     max_auto_cover_x: int
     max_auto_cover_y: int
 
+    max_chapter_size_bytes: int
+    max_cover_image_size_bytes: int
+
     @classmethod
     def load(cls, data: dict) -> "Config":
         d = data.copy()
