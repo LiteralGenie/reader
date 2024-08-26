@@ -2,6 +2,8 @@ from dataclasses import fields, is_dataclass
 from pathlib import Path
 
 import numpy as np
+from fastapi import HTTPException
+from pathvalidate import sanitize_filename
 
 
 def dump_dataclass(instance, exclude: list[str] | None = None) -> dict:
@@ -44,3 +46,11 @@ def _dump(x, exclude: list[str] | None):
         return None
     else:
         raise Exception()
+
+
+def sanitize_or_raise_400(filename: str):
+    result = sanitize_filename(filename).strip()
+    if not result:
+        raise HTTPException(400)
+
+    return result

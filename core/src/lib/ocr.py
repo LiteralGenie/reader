@@ -15,7 +15,7 @@ from PIL import Image
 
 from .config import Config
 from .constants import SUPPORTED_IMAGE_EXTENSIONS
-from .db.chapter_db import get_ocr_data, insert_ocr_data, load_chapter_db
+from .db.chapter_db import insert_ocr_data, load_chapter_db, select_ocr_data
 from .db.reader_db import ReaderDb, load_reader_db
 from .job_utils import JobManager, start_job_worker
 
@@ -30,7 +30,7 @@ def get_all_ocr_data(chap_dir: Path) -> dict[Path, dict | None]:
 
     data: dict[Path, dict | None] = dict()
     for fp in fp_images:
-        data[fp] = get_ocr_data(db, fp.name)
+        data[fp] = select_ocr_data(db, fp.name)
 
     return data
 

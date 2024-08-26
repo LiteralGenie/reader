@@ -5,7 +5,12 @@ from PIL import Image
 
 from .config import Config
 from .constants import SUPPORTED_IMAGE_EXTENSIONS
-from .db.chapter_db import CHAPTER_DB_FILENAME, get_page, insert_page, load_chapter_db
+from .db.chapter_db import (
+    CHAPTER_DB_FILENAME,
+    insert_page,
+    load_chapter_db,
+    select_page,
+)
 from .db.series_db import (
     SERIES_DB_FILENAME,
     SeriesDb,
@@ -15,67 +20,6 @@ from .db.series_db import (
 )
 
 SERIES_COVER_FILENAME = "_reader_cover.png"
-
-
-def get_all_series(cfg: Config) -> list[dict]:
-    series = []
-
-    for fp in cfg.root_image_folder.glob("*"):
-        if fp.is_file():
-            continue
-
-        info = get_series(cfg, fp.name)
-        info["filename"] = fp.name
-        series.append(info)
-
-    series.sort(key=lambda info: info["filename"])
-
-    return series
-
-
-def get_all_chapters(cfg: Config, series: str):
-    chaps = []
-
-    series_dir = cfg.root_image_folder / series
-    if not series_dir.exists():
-        raise FileNotFoundError()
-
-    for fp in series_dir.glob("*"):
-        if fp.is_file():
-            continue
-
-        chaps.append(
-            dict(
-                filename=fp.name,
-            )
-        )
-
-    chaps.sort(key=lambda d: d["filename"])
-
-    return chaps
-
-
-def get_all_pages(cfg: Config, series: str, chapter: str):
-    chap_dir = cfg.root_image_folder / series / chapter
-    if not chap_dir.exists():
-        raise FileNotFoundError()
-
-    globs = [chap_dir.glob(f"*{ext}") for ext in SUPPORTED_IMAGE_EXTENSIONS]
-    fp_images = list(chain(*globs))
-    fp_images.sort(key=lambda fp: fp.name)
-
-    db = load_chapter_db(chap_dir)
-
-    pages = []
-    for fp in fp_images:
-        d = get_page(db, fp.name)
-        if not d:
-            d = insert_page(db, fp)
-
-        pages.append(d)
-    pages.sort(key=lambda d: d["filename"])
-
-    return pages
 
 
 def get_series(cfg: Config, filename: str):
@@ -130,6 +74,74 @@ def upsert_cover(
 
     fp = series_dir / SERIES_COVER_FILENAME
     after_resize.save(fp)
+
+
+def get_chapter(cfg: Config, series: str, chapter: str):
+    fp = cfg.root_image_folder / series / chapter
+    db = load_chapter_db(fp)
+
+    info = select_series(db)
+    info["filename"] = chapter
+
+    return info
+
+
+def get_all_series(cfg: Config) -> list[dict]:
+    series = []
+
+    for fp in cfg.root_image_folder.glob("*"):
+        if fp.is_file():
+            continue
+
+        info = get_series(cfg, fp.name)
+        info["filename"] = fp.name
+        series.append(info)
+
+    series.sort(key=lambda info: info["filename"])
+
+    return series
+
+
+def get_all_chapters(cfg: Config, series: str):
+    chaps = []
+
+    series_dir = cfg.root_image_folder / series
+    if not series_dir.exists():
+        raise FileNotFoundError()
+
+    for fp in series_dir.glob("*"):
+        if fp.is_file():
+            continue
+
+        info = get_chapter(cfg, series, fp.name)
+        chaps.append(info)
+
+    chaps.sort(key=lambda info: info["filename"])
+
+    return chaps
+
+
+def get_all_pages(cfg: Config, series: str, chapter: str):
+    chap_dir = cfg.root_image_folder / series / chapter
+    if not chap_dir.exists():
+        raise FileNotFoundError()
+
+    globs = [chap_dir.glob(f"*{ext}") for ext in SUPPORTED_IMAGE_EXTENSIONS]
+    fp_images = list(chain(*globs))
+    fp_images.sort(key=lambda fp: fp.name)
+
+    db = load_chapter_db(chap_dir)
+
+    pages = []
+    for fp in fp_images:
+        d = select_page(db, fp.name)
+        if not d:
+            d = insert_page(db, fp)
+
+        pages.append(d)
+    pages.sort(key=lambda d: d["filename"])
+
+    return pages
 
 
 def count_file_types(fp: Path):

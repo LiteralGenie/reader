@@ -1,5 +1,4 @@
 import hashlib
-import json
 import sqlite3
 from pathlib import Path
 from typing import TypeAlias
@@ -26,7 +25,7 @@ def load_chapter_db(chap_dir: Path, raise_on_missing=False) -> ChapterDb:
         """
         CREATE TABLE IF NOT EXISTS metadata (
             version     TEXT,
-            name        TEXT
+            name        TEXT        NOT NULL    DEFAULT ''
         )
         """
     )
@@ -73,7 +72,7 @@ def load_chapter_db(chap_dir: Path, raise_on_missing=False) -> ChapterDb:
     return db
 
 
-def get_page(db: ChapterDb, filename: str) -> dict | None:
+def select_page(db: ChapterDb, filename: str) -> dict | None:
     r = db.execute(
         """
         SELECT filename, sha256, width, height
@@ -116,7 +115,7 @@ def insert_page(db: ChapterDb, fp: Path) -> dict:
     return data
 
 
-def get_ocr_data(db: ChapterDb, filename: str) -> dict | None:
+def select_ocr_data(db: ChapterDb, filename: str) -> dict | None:
     page_data = db.execute(
         """
         SELECT done_ocr
@@ -196,3 +195,30 @@ def _check_version(db: ChapterDb):
     if r is None:
         db.execute("INSERT INTO metadata (version) VALUES (?)", ["1"])
         db.commit()
+
+
+def update_chapter(
+    db: ChapterDb,
+    name: str,
+):
+    db.execute(
+        f"""
+        UPDATE metadata
+        SET name = ?
+        """,
+        [name],
+    )
+
+    db.commit()
+
+
+def select_chapter(db: ChapterDb) -> dict:
+    r = db.execute(
+        """
+        SELECT 
+            name
+        FROM metadata
+        """
+    ).fetchone()
+
+    return dict(r)

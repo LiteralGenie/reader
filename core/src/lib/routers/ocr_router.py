@@ -5,16 +5,16 @@ from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
-from pathvalidate import sanitize_filename
 from pydantic import BaseModel
 
 from ..db.chapter_db import (
     delete_ocr_data,
-    get_ocr_data,
     load_chapter_db,
+    select_ocr_data,
     update_ocr_text,
 )
 from ..db.reader_db import load_reader_db
+from ..misc_utils import sanitize_or_raise_400
 from ..ocr import get_all_ocr_data, insert_ocr_job
 
 router = APIRouter()
@@ -22,8 +22,8 @@ router = APIRouter()
 
 @router.get("/ocr/{series}/{chapter}")
 def ocr_for_chapter(req: Request, series: str, chapter: str):
-    series = sanitize_filename(series)
-    chapter = sanitize_filename(chapter)
+    series = sanitize_or_raise_400(series)
+    chapter = sanitize_or_raise_400(chapter)
 
     chap_dir: Path = req.app.state.cfg.root_image_folder / series / chapter
     if not chap_dir.exists():
@@ -48,8 +48,8 @@ def poll_ocr(
     chapter: str,
     pages: Annotated[list[str], Query()],
 ):
-    series = sanitize_filename(series)
-    chapter = sanitize_filename(chapter)
+    series = sanitize_or_raise_400(series)
+    chapter = sanitize_or_raise_400(chapter)
 
     chap_dir: Path = req.app.state.cfg.root_image_folder / series / chapter
     if not chap_dir.exists():
@@ -71,7 +71,7 @@ def poll_ocr(
         while pages_to_poll:
             fst = pages_to_poll[0]
 
-            data = get_ocr_data(db, fst)
+            data = select_ocr_data(db, fst)
             if not data:
                 await asyncio.sleep(1)
                 continue

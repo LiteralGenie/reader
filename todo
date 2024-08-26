@@ -2,18 +2,9 @@ series list
 chapter list
 definitions page
 create / edit series
-    name
-    author
-    cover
     import from MU / MD
-delete series
 create chapter
-    from files
     from archive
-    name
-edit chapter
-    
-delete chapter
 
 demo
     resource blocks
