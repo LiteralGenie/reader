@@ -3,8 +3,6 @@ chapter list
 definitions page
 create / edit series
     import from MU / MD
-create chapter
-    from archive
 
 demo
     resource blocks
@@ -29,6 +27,7 @@ use template for llm definitions
 logging
 unload gpu memory when idle
 create ocr blocks
+create chapter from archive
 
 move worker init to outside web server (so that uvicorn can spawn multiple workers)
 image load priority

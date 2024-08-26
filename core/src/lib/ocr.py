@@ -110,7 +110,7 @@ def _process_job(
         while True:
             progress = next(ocr_iter)
 
-            jobber.update_progress(job_id, progress)
+            jobber.update_progress(job_id, dict(progress=progress))
             jobber.db.commit()
 
             print(f"OCR job {job_id} at {progress:.0%}")

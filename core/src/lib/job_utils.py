@@ -52,7 +52,7 @@ class JobManager:
 
         return json.loads(r["data"])
 
-    def update_progress(self, id: str, progress: float):
+    def update_progress(self, id: str, progress: dict):
         self.db.execute(
             """
                 UPDATE jobs 
@@ -61,7 +61,7 @@ class JobManager:
                     id = ?
                     AND type = ?
                 """,
-            [progress, id, self.job_type],
+            [json.dumps(progress), id, self.job_type],
         )
 
     def delete(self, id: str):
@@ -79,12 +79,12 @@ class JobManager:
         self.db.execute(
             """
             INSERT OR IGNORE INTO jobs (
-                id, type, data, processing, progress
+                id, type, data, processing
             ) VALUES (
-                ?, ?, ?, ?, ?
+                ?, ?, ?, ?
             )
             """,
-            [id, self.job_type, json.dumps(data), False, 0],
+            [id, self.job_type, json.dumps(data), False],
         )
 
 

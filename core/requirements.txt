@@ -1,5 +1,6 @@
 git+https://github.com/LiteralGenie/ocr_data.git@642716831f859e6bdae8a2f33395af5d46cf3ce7
 
+bs4
 datasets
 fastapi
 fastapi-cache2

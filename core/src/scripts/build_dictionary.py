@@ -1,11 +1,11 @@
 import sys
 from pathlib import Path
-from zipfile import ZipFile
 
 sys.path.append(str(Path(__file__).parent.parent))
 
 import json
 import sqlite3
+from zipfile import ZipFile
 
 import requests
 from datasets import load_dataset

@@ -40,6 +40,10 @@ class Config:
     max_chapter_size_bytes: int
     max_cover_image_size_bytes: int
 
+    # Limits to apply when scanning for images from an url
+    max_import_requests_per_second: int
+    max_import_bytes_per_second: int
+
     @classmethod
     def load(cls, data: dict) -> "Config":
         d = data.copy()

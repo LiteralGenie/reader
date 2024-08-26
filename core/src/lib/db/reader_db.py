@@ -25,7 +25,7 @@ def load_reader_db() -> ReaderDb:
             type        TEXT     NOT NULL,
             data        TEXT     NOT NULL,
             processing  BOOLEAN  NOT NULL,
-            progress    REAL     NOT NULL,
+            progress    TEXT,
             result      TEXT,
 
             PRIMARY KEY (id, type)
