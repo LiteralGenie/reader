@@ -1,5 +1,6 @@
 import json
 import traceback
+from itertools import chain
 from pathlib import Path
 from typing import Generator
 from uuid import uuid4
@@ -13,6 +14,7 @@ from doctr.models.predictor import OCRPredictor
 from PIL import Image
 
 from .config import Config
+from .constants import SUPPORTED_IMAGE_EXTENSIONS
 from .db.chapter_db import get_ocr_data, insert_ocr_data, load_chapter_db
 from .db.reader_db import ReaderDb, load_reader_db
 from .job_utils import JobManager, start_job_worker
@@ -21,10 +23,8 @@ _JOB_TYPE = "ocr"
 
 
 def get_all_ocr_data(chap_dir: Path) -> dict[Path, dict | None]:
-    fp_images = [
-        *chap_dir.glob("*.jpg"),
-        *chap_dir.glob("*.png"),
-    ]
+    globs = [chap_dir.glob(f"*{ext}") for ext in SUPPORTED_IMAGE_EXTENSIONS]
+    fp_images = list(chain(*globs))
 
     db = load_chapter_db(chap_dir)
 

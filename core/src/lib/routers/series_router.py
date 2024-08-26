@@ -1,3 +1,5 @@
+import shutil
+import traceback
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Request, UploadFile
@@ -6,8 +8,10 @@ from pathvalidate import sanitize_filename
 from PIL import Image
 from pydantic import BaseModel
 
+from ..config import Config
 from ..db.series_db import load_series_db, update_series
 from ..series import (
+    count_file_types,
     create_series,
     get_all_chapters,
     get_all_pages,
@@ -57,7 +61,7 @@ def image_by_id(req: Request, series: str, chapter: str, page: str):
     chapter = sanitize_filename(chapter)
     page = sanitize_filename(page)
 
-    fp: Path = req.app.state.cfg.series_folder / series / chapter / page
+    fp: Path = req.app.state.cfg.root_image_folder / series / chapter / page
     if not fp.exists():
         raise HTTPException(404)
 
@@ -99,6 +103,27 @@ def upsert_series_cover(req: Request, series: str, cover: UploadFile):
     return "ok"
 
 
+@router.post("/series/{series}/cover/auto")
+def upsert_series_cover_auto(req: Request, series: str):
+    cfg: Config = req.app.state.cfg
+    series = sanitize_filename(series)
+
+    try:
+        fp_im = None
+        for ch in get_all_chapters(cfg, series):
+            pages = get_all_pages(cfg, series, ch["filename"])
+            fp_im = pages[0]["filename"]
+            break
+
+        if fp_im:
+            im = Image.open(fp_im)
+            upsert_cover(cfg, series, im, resize=True)
+    except FileNotFoundError:
+        raise HTTPException(404)
+
+    return "ok"
+
+
 class UpdateSeriesRequest(BaseModel):
     filename: str
     name: str | None
@@ -111,7 +136,7 @@ def update_series_(req: Request, body: UpdateSeriesRequest):
     filename = sanitize_filename(body.filename)
 
     try:
-        series_dir = req.app.state.cfg.series_folder / filename
+        series_dir = req.app.state.cfg.root_image_folder / filename
         db = load_series_db(series_dir, raise_on_missing=True)
     except FileNotFoundError:
         raise HTTPException(404)
@@ -125,3 +150,31 @@ def update_series_(req: Request, body: UpdateSeriesRequest):
 
     info = get_series(req.app.state.cfg, filename)
     return info
+
+
+@router.delete("/series/{series}")
+def delete_series_(req: Request, series: str):
+    filename = sanitize_filename(series)
+
+    series_dir = req.app.state.cfg.root_image_folder / filename
+    if not series_dir.exists():
+        raise HTTPException(404)
+
+    try:
+        shutil.rmtree(series_dir)
+    except:
+        traceback.print_exc()
+        raise HTTPException(500)
+
+    return "ok"
+
+
+@router.get("/count/{series}")
+def get_file_count(req: Request, series: str):
+    filename = sanitize_filename(series)
+
+    series_dir = req.app.state.cfg.root_image_folder / filename
+    if not series_dir.exists():
+        raise HTTPException(404)
+
+    return count_file_types(series_dir)

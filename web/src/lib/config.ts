@@ -49,7 +49,7 @@ export function loadConfig(): Config {
 
 export class Config {
     constructor(
-        public series_folder: string,
+        public root_image_folder: string,
         public api_port: number
     ) {}
 
@@ -62,7 +62,7 @@ export class Config {
     }
 
     static load(data: any) {
-        return new Config(data.series_folder, data.api_port)
+        return new Config(data.root_image_folder, data.api_port)
     }
 
     get apiUrl(): string {

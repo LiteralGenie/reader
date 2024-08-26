@@ -25,7 +25,7 @@ def ocr_for_chapter(req: Request, series: str, chapter: str):
     series = sanitize_filename(series)
     chapter = sanitize_filename(chapter)
 
-    chap_dir: Path = req.app.state.cfg.series_folder / series / chapter
+    chap_dir: Path = req.app.state.cfg.root_image_folder / series / chapter
     if not chap_dir.exists():
         raise HTTPException(404)
 
@@ -51,7 +51,7 @@ def poll_ocr(
     series = sanitize_filename(series)
     chapter = sanitize_filename(chapter)
 
-    chap_dir: Path = req.app.state.cfg.series_folder / series / chapter
+    chap_dir: Path = req.app.state.cfg.root_image_folder / series / chapter
     if not chap_dir.exists():
         raise HTTPException(404)
 
@@ -97,7 +97,7 @@ class UpdateBlockTextRequest(BaseModel):
 
 @router.patch("/ocr/text")
 def update_block_text(req: Request, body: UpdateBlockTextRequest):
-    chap_dir: Path = req.app.state.cfg.series_folder / body.series / body.chapter
+    chap_dir: Path = req.app.state.cfg.root_image_folder / body.series / body.chapter
     try:
         db = load_chapter_db(chap_dir, raise_on_missing=True)
     except FileNotFoundError:
@@ -117,7 +117,7 @@ class DeleteBlockRequest(BaseModel):
 
 @router.delete("/ocr/delete")
 def delete_block(req: Request, body: DeleteBlockRequest):
-    chap_dir: Path = req.app.state.cfg.series_folder / body.series / body.chapter
+    chap_dir: Path = req.app.state.cfg.root_image_folder / body.series / body.chapter
     try:
         db = load_chapter_db(chap_dir, raise_on_missing=True)
     except FileNotFoundError:

@@ -6,7 +6,7 @@ import toml
 
 @dataclass
 class Config:
-    series_folder: Path
+    root_image_folder: Path
 
     api_port: int
 
@@ -34,12 +34,15 @@ class Config:
 
     llm_num_gpu_layers: int
 
+    max_auto_cover_x: int
+    max_auto_cover_y: int
+
     @classmethod
     def load(cls, data: dict) -> "Config":
         d = data.copy()
 
         for fp_key in [
-            "series_folder",
+            "root_image_folder",
         ]:
             d[fp_key] = Path(d[fp_key])
 
