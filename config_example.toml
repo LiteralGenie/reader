@@ -85,9 +85,12 @@ llm_num_definitions = 2
 # If enabled, a machine translation is displayed for the overall sentence as well as each word
 use_llm_for_mtl = true
 
-# Covers are automatically generated when a new series folder is detected
-max_auto_cover_x = 9999
-max_auto_cover_y = 9999
+# A cover image for each series will be automatically generated from one of the first pages
+#   Images will be resized to fit max_auto_cover_x in width
+#   Images will also be cropped to fit max_auto_cover_y height
+# Set to 0 to disable
+max_auto_cover_x = 0
+max_auto_cover_y = 1000
 
 max_chapter_size_bytes = 999_999_999
 max_cover_image_size_bytes = 99_999_999

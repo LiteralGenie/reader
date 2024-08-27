@@ -1,7 +1,11 @@
 import { env } from '$env/dynamic/private'
 import { euc } from '$lib/miscUtils'
 import { error } from '@sveltejs/kit'
-import type { PageDto, SeriesDto, SeriesWithChapters } from './dtos'
+import type {
+    PageDto,
+    SeriesDto,
+    SeriesWithChaptersDto
+} from './dtos'
 
 export async function fetchAllSeries(): Promise<SeriesDto[]> {
     // @ts-ignore
@@ -12,7 +16,7 @@ export async function fetchAllSeries(): Promise<SeriesDto[]> {
 
 export async function fetchSeriesById(
     series: string
-): Promise<SeriesWithChapters> {
+): Promise<SeriesWithChaptersDto> {
     // @ts-ignore
     const url = env.config.apiUrl + `/series/${euc(series)}`
 

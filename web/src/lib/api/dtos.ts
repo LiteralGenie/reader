@@ -18,7 +18,7 @@ export interface PageDto {
     height: number
 }
 
-export type SeriesWithChapters = SeriesDto & {
+export type SeriesWithChaptersDto = SeriesDto & {
     chapters: ChapterDto[]
 }
 

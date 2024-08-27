@@ -12,11 +12,11 @@
     <AppHeader />
 
     <div class="flex justify-end p-4 pb-0">
-        <Button class="flex gap-1 px-8 ripple">
+        <Button class="flex gap-1 px-4 ripple">
             <Plus
                 class="size-4 stroke-[3px] stroke-primary-foreground"
             />
-            <span class="uppercase text-md font-bold"> Add </span>
+            <span class="uppercase font-bold"> Add Series </span>
         </Button>
     </div>
 

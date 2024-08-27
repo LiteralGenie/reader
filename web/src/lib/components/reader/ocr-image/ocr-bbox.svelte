@@ -20,11 +20,13 @@
         const w = pg.width
         const h = pg.height
 
+        const offset = (2 * w) / 100
+
         let [y1, x1, y2, x2] = bbox
-        x1 = max([x1 - 15, 0])!
-        y1 = max([y1 - 15, 0])!
-        x2 = min([x2 + 15, w])!
-        y2 = min([y2 + 15, h])!
+        x1 = max([x1 - offset, 0])!
+        y1 = max([y1 - offset, 0])!
+        x2 = min([x2 + offset, w])!
+        y2 = min([y2 + offset, h])!
 
         const left = `${(100 * x1) / w}%`
         const right = `${(100 * (w - x2)) / w}%`

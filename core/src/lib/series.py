@@ -60,28 +60,27 @@ def upsert_cover(
     if not series_dir.exists():
         raise FileNotFoundError()
 
-    after_resize = cover
     if resize:
+        scale = 1
         if cfg.max_auto_cover_x > 0:
-            scale_x = cover.size[0] / cfg.max_auto_cover_x
-        else:
-            scale_x = 1
+            scale = cover.size[0] / cfg.max_auto_cover_x
 
-        if cfg.max_auto_cover_y > 0:
-            scale_y = cover.size[1] / cfg.max_auto_cover_y
-        else:
-            scale_y = 1
-
-        scale = max(scale_x, scale_y)
-
+        print("scale", scale, cover.size)
         if scale > 1:
             w = int(cover.size[0] / scale)
             h = int(cover.size[1] / scale)
 
-            after_resize = cover.resize((w, h))
+            cover = cover.resize((w, h))
+
+        print("crop", cfg.max_auto_cover_y, cover.size)
+        if cfg.max_auto_cover_y > 0:
+            if cover.size[1] > cfg.max_auto_cover_y:
+                cover = cover.crop((0, 0, cover.size[0], cfg.max_auto_cover_y))
+
+        print("done", cover.size)
 
     fp = series_dir / SERIES_COVER_FILENAME
-    after_resize.save(fp)
+    cover.save(fp)
 
     return fp
 
