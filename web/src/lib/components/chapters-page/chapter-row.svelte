@@ -1,24 +1,39 @@
 <script lang="ts">
     import type { ChapterDto } from '$lib/api/dtos'
+    import Cog_6 from '$lib/icons/cog-6.svelte'
+    import Button from '../ui/button/button.svelte'
 
     export let seriesId: string
     export let chapter: ChapterDto
 </script>
 
-<a
-    href="/series/{seriesId}/{chapter.filename}"
-    class="ripple pl-2 py-4 h-full w-full rounded-r-md flex justify-between items-center"
->
-    <span class="flex items-center h-full">
-        {chapter.name || chapter.filename}
-    </span>
-
-    <div
-        class="w-24 flex flex-col text-sm text-muted-foreground leading-tight text-end pr-4"
+<div class="flex items-center">
+    <a
+        href="/series/{seriesId}/{chapter.filename}"
+        class="ripple pl-2 pr-4 py-4 h-full w-full rounded-r-md flex justify-between items-center"
     >
-        <span>100 pages</span>
-    </div>
-</a>
+        <span>
+            {chapter.name || chapter.filename}
+        </span>
+
+        <div class="flex gap-6 items-center text-muted-foreground">
+            <span>100 pages</span>
+        </div>
+    </a>
+
+    <hr class="py-3 px-1 border-l border-t-0 border-b-0" />
+
+    <Button
+        on:click={(ev) => {
+            ev.preventDefault()
+            ev.stopImmediatePropagation()
+        }}
+        variant="ghost"
+        class="px-3 border-muted ripple"
+    >
+        <Cog_6 class="size-5" />
+    </Button>
+</div>
 
 <style lang="postcss">
     .ripple:hover {

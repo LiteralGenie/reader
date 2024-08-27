@@ -2,7 +2,7 @@
     import { page } from '$app/stores'
     import type { BestDefDto, NlpDto } from '$lib/api/dtos'
     import { type DictionaryContextValue } from '$lib/contexts/dictionaryContext'
-    import Pencil from '$lib/icons/pencil.svelte'
+    import PencilSquare from '$lib/icons/pencil-square.svelte'
     import Trash from '$lib/icons/trash.svelte'
     import { createEventDispatcher } from 'svelte'
     import ConfirmDialog from '../confirm-dialog.svelte'
@@ -202,7 +202,7 @@
                             class="rounded-full p-4 h-max w-max"
                             on:click={() => (showEdit = true)}
                         >
-                            <Pencil class="size-5" />
+                            <PencilSquare class="size-5" />
                         </Button>
                     </div>
                 </div>

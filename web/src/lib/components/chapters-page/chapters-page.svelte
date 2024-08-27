@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { SeriesWithChaptersDto } from '$lib/api/dtos'
     import ChevronLeft from '$lib/icons/chevron-left.svelte'
+    import Cog_6 from '$lib/icons/cog-6.svelte'
     import Plus from '$lib/icons/plus.svelte'
     import AppHeader from '../app-header.svelte'
     import Button from '../ui/button/button.svelte'
@@ -9,7 +10,7 @@
     export let series: SeriesWithChaptersDto
 </script>
 
-<div class="flex flex-col">
+<div class="flex flex-col h-full">
     <AppHeader />
 
     <!-- Buttons -->
@@ -26,13 +27,23 @@
             <span class="font-bold">Back</span>
         </Button>
 
-        <!-- Add chapter button -->
-        <Button class="flex gap-1 px-4 ripple">
-            <Plus
-                class="size-4 stroke-[3px] stroke-primary-foreground"
-            />
-            <span class="uppercase font-bold"> Add Chapter </span>
-        </Button>
+        <div class="flex justify-end gap-4">
+            <!-- Edit Series button -->
+            <Button
+                class="flex gap-2 ripple bg-muted text-foreground"
+            >
+                <Cog_6 class="size-4" />
+                <span class="uppercase font-bold"> Edit </span>
+            </Button>
+
+            <!-- Add Chapter button -->
+            <Button class="flex gap-1 px-4 ripple">
+                <Plus
+                    class="size-4 stroke-[3px] stroke-primary-foreground"
+                />
+                <span class="uppercase font-bold"> Add Chapter </span>
+            </Button>
+        </div>
     </div>
 
     <!-- Info -->
@@ -52,7 +63,7 @@
     </div>
 
     <!-- Chapter list -->
-    <div class="pt-8 px-4">
+    <div class="pt-8 px-4 h-full">
         <h2 class="pb-2 font-semibold text-muted-foreground">
             Chapters
         </h2>
