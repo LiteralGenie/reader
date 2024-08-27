@@ -1,15 +1,15 @@
 <script lang="ts">
     import type { SeriesDto } from '$lib/api/dtos'
     import Plus from '$lib/icons/plus.svelte'
+    import AppHeader from '../app-header.svelte'
     import Button from '../ui/button/button.svelte'
-    import SeriesPageHeader from './series-page-header.svelte'
     import SeriesRow from './series-row.svelte'
 
     export let series: SeriesDto[]
 </script>
 
 <div class="flex flex-col h-full w-full">
-    <SeriesPageHeader />
+    <AppHeader />
 
     <div class="flex justify-end p-4 pb-0">
         <Button class="flex gap-1 px-8 ripple">

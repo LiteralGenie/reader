@@ -7,7 +7,6 @@
     const { theme, setTheme } = getThemeContext()
 
     function onClick() {
-        console.log('click', $theme)
         const nextTheme = $theme === 'light' ? 'dark' : 'light'
         setTheme(nextTheme)
     }
