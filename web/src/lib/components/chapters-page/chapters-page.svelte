@@ -40,7 +40,7 @@
         <!-- Image -->
         <img
             src="/api/cover/{series.filename}/{series.cover}"
-            class="object-cover max-w-[40vw]"
+            class="object-cover max-w-[40vw] shadow-lg"
         />
 
         <!-- Info -->
@@ -53,7 +53,9 @@
 
     <!-- Chapter list -->
     <div class="pt-8 px-4">
-        <h2 class="pb-2 font-bold">Chapters</h2>
+        <h2 class="pb-2 font-semibold text-muted-foreground">
+            Chapters
+        </h2>
         {#each series.chapters.toReversed() as chapter}
             <hr />
             <ChapterRow seriesId={series.filename} {chapter} />
@@ -78,9 +80,9 @@
 
         mask-image: linear-gradient(
             to bottom,
-            rgba(0, 0, 0, 0.1) 0%,
-            rgba(0, 0, 0, 0.075) 33%,
-            rgba(0, 0, 0, 0) 100%
+            hsla(var(--background) / 10%) 0%,
+            hsla(var(--background) / 7.5%) 33%,
+            hsla(var(--background) / 0%) 100%
         );
     }
 </style>
