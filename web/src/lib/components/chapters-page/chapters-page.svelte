@@ -19,17 +19,16 @@
         <Button
             variant="ghost"
             href="/series/"
-            class="flex gap-1 p-0 items-center pl-2 pr-4"
+            class="flex gap-1 p-0 items-center pl-2 pr-4 stroke-foreground text-foreground hover:stroke-primary hover:text-primary"
         >
-            <ChevronLeft
-                class="size-3 stroke-[4px] stroke-foreground text-foreground"
-            />
+            <ChevronLeft class="size-3 stroke-[4px]" />
             <span class="font-bold">Back</span>
         </Button>
 
         <div class="flex justify-end gap-4">
             <!-- Edit Series button -->
             <Button
+                variant="secondary"
                 class="flex gap-2 ripple bg-muted text-foreground"
             >
                 <Cog_6 class="size-4" />
