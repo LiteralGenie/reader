@@ -13,7 +13,7 @@
     const dispatch = createEventDispatcher()
 </script>
 
-<div class="w-full h-16 flex justify-between items-center">
+<div class="root w-full h-16 flex justify-between items-center">
     <Button
         variant="link"
         {href}
@@ -45,3 +45,9 @@
         </Button>
     </div>
 </div>
+
+<style lang="postcss">
+    .root {
+        background-color: var(--header);
+    }
+</style>

@@ -1,13 +1,8 @@
 <script lang="ts">
+    import SeriesPage from '$lib/components/series-page/series-page.svelte'
     import type { PageData } from './$types'
 
     export let data: PageData
 </script>
 
-<div class="flex flex-col">
-    {#each data.series as s}
-        <a class="underline text-blue-600" href="/series/{s.filename}">
-            {s.filename}
-        </a>
-    {/each}
-</div>
+<SeriesPage series={data.series} />

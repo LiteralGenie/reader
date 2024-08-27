@@ -3,6 +3,7 @@ export interface SeriesDto {
     name: string
     id_mangaupdates: string
     id_mangadex: string
+    cover: string | null
 }
 
 export interface ChapterDto {
