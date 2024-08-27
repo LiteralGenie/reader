@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 import json
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
@@ -52,6 +53,19 @@ class JobManager:
 
         return json.loads(r["data"])
 
+    def select_progress(self, id: str) -> dict | None:
+        r = self.db.execute(
+            """
+                SELECT progress FROM jobs
+                WHERE
+                    id = ?
+                    AND type = ?
+                """,
+            [id, self.job_type],
+        ).fetchone()
+
+        return json.loads(r["progress"]) if r else None
+
     def update_progress(self, id: str, progress: dict):
         self.db.execute(
             """
@@ -79,12 +93,34 @@ class JobManager:
         self.db.execute(
             """
             INSERT OR IGNORE INTO jobs (
-                id, type, data, processing
+                id, created_at, type, data, processing
             ) VALUES (
-                ?, ?, ?, ?
+                ?, ?, ?, ?, ?
             )
             """,
-            [id, self.job_type, json.dumps(data), False],
+            [
+                id,
+                datetime.datetime.now().isoformat(),
+                self.job_type,
+                json.dumps(data),
+                False,
+            ],
+        )
+
+    def set_result(self, id: str, result: dict):
+        self.db.execute(
+            """
+            UPDATE jobs
+            SET 
+                result = ?,
+                done_at = ?
+            WHERE id = ?
+            """,
+            [
+                json.dumps(result),
+                datetime.datetime.now().isoformat(),
+                id,
+            ],
         )
 
 
@@ -118,5 +154,29 @@ def start_job_worker(
 
             loop = asyncio.get_running_loop()
             await loop.run_in_executor(exec, consume_fn, cfg, todo)
+
+    return asyncio.create_task(fn())
+
+
+def start_job_purge_worker(
+    age_seconds=600,
+    check_freq_seconds=60,
+):
+    async def fn():
+        db = load_reader_db()
+
+        while True:
+            cutoff = datetime.datetime.now() - datetime.timedelta(minutes=age_seconds)
+
+            db.execute(
+                """
+                DELETE FROM jobs
+                WHERE done_at < ?
+                """,
+                [cutoff],
+            )
+            db.commit()
+
+            await asyncio.sleep(check_freq_seconds)
 
     return asyncio.create_task(fn())

@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 from ..config import Config
 from ..db.chapter_db import load_chapter_db, update_chapter
+from ..db.reader_db import load_reader_db
 from ..db.series_db import load_series_db, update_series
 from ..misc_utils import sanitize_or_raise_400
 from ..series import (
@@ -22,6 +23,7 @@ from ..series import (
     raise_on_size_limit,
     upsert_cover,
 )
+from ..url_import import get_import_job_progress, insert_import_job
 
 router = APIRouter()
 
@@ -441,3 +443,40 @@ def get_file_count_chapter(req: Request, series: str, chapter: str):
         raise HTTPException(404)
 
     return count_file_types(fp)
+
+
+class ImportChapterRequest(BaseModel):
+    series: str
+    chapter: str
+    chapter_name: str
+    urls: list[str]
+
+
+@router.post("/import_chapter")
+def import_chapter(req: Request, body: ImportChapterRequest):
+    series = sanitize_or_raise_400(body.series)
+    chapter = sanitize_or_raise_400(body.chapter)
+
+    cfg: Config = req.app.state.cfg
+
+    chap_dir = cfg.root_image_folder / series / chapter
+    if chap_dir.exists():
+        raise HTTPException(400)
+
+    db = load_reader_db()
+    job_id = insert_import_job(
+        db,
+        body.urls,
+        chap_dir,
+        body.chapter_name,
+    )
+
+    return job_id, chapter
+
+
+@router.get("/import_chapter/{job_id}")
+def import_chapter_progress(req: Request, job_id: str):
+    db = load_reader_db()
+
+    progress = get_import_job_progress(db, job_id)
+    return progress

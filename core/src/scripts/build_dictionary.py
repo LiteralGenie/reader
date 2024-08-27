@@ -1,13 +1,14 @@
 import sys
 from pathlib import Path
 
+from lib.misc_utils import download_stream
+
 sys.path.append(str(Path(__file__).parent.parent))
 
 import json
 import sqlite3
 from zipfile import ZipFile
 
-import requests
 from datasets import load_dataset
 from lib.db.dictionary_db import DictionaryDb
 from lib.paths import DICTIONARY_FILE, RAW_DATA_DIR
@@ -80,7 +81,7 @@ def export_wiktionary(db: DictionaryDb):
         print(f"Raw {source} data already exists. Skipping download.")
     else:
         print(f"Downloading {source} data...")
-        _download(
+        download_stream(
             "https://kaikki.org/dictionary/Korean/kaikki.org-dictionary-Korean.jsonl",
             fp_wiktionary,
         )
@@ -117,7 +118,9 @@ def export_krdict(db: DictionaryDb):
         print("Raw krdict data already exists. Skipping download.")
     else:
         print("Downloading krdict data...")
-        _download("https://krdict.korean.go.kr/dicBatchDownload?seq=103", fp_krdict)
+        download_stream(
+            "https://krdict.korean.go.kr/dicBatchDownload?seq=103", fp_krdict
+        )
 
     if _is_done(db, source):
         print(f"Definitions from {source} already exported. Skipping.")
@@ -236,14 +239,6 @@ def export_subtitles(db: DictionaryDb):
 
     _set_done(db, source)
     db.commit()
-
-
-def _download(url: str, fp: Path):
-    with requests.get(url, stream=True) as resp:
-        resp.raise_for_status()
-        with open(fp, "wb") as file:
-            for chunk in resp.iter_content(chunk_size=8192):
-                file.write(chunk)
 
 
 def _is_done(db: DictionaryDb, source: str):

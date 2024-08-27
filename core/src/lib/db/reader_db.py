@@ -22,12 +22,16 @@ def load_reader_db() -> ReaderDb:
         """
         CREATE TABLE IF NOT EXISTS jobs (
             id          TEXT     NOT NULL,
+
+            created_at  TEXT     NOT NULL,
+            done_at     TEXT
+
             type        TEXT     NOT NULL,
             data        TEXT     NOT NULL,
             processing  BOOLEAN  NOT NULL,
             progress    TEXT,
             result      TEXT,
-
+            
             PRIMARY KEY (id, type)
         )
         """

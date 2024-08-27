@@ -2,6 +2,7 @@ from dataclasses import fields, is_dataclass
 from pathlib import Path
 
 import numpy as np
+import requests
 from fastapi import HTTPException
 from pathvalidate import sanitize_filename
 
@@ -54,3 +55,11 @@ def sanitize_or_raise_400(filename: str):
         raise HTTPException(400)
 
     return result
+
+
+def download_stream(url: str, fp: Path, chunk_size=8192):
+    with requests.get(url, stream=True) as resp:
+        resp.raise_for_status()
+        with open(fp, "wb") as file:
+            for chunk in resp.iter_content(chunk_size=chunk_size):
+                file.write(chunk)
