@@ -24,7 +24,7 @@ def load_reader_db() -> ReaderDb:
             id          TEXT     NOT NULL,
 
             created_at  TEXT     NOT NULL,
-            done_at     TEXT
+            done_at     TEXT,
 
             type        TEXT     NOT NULL,
             data        TEXT     NOT NULL,

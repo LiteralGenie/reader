@@ -30,12 +30,6 @@
                 Date.now() - p.initTime > STATUS_CHECK_DELAY * 0.9
             return pending && elapsed
         }
-        console.log(
-            'status',
-            isPending(nlp),
-            isPending(mtl),
-            isPending(bestDefs)
-        )
 
         if (isPending(nlp)) {
             status = 'Loading dictionary data...'

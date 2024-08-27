@@ -8,12 +8,11 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.inmemory import InMemoryBackend
 from lib.config import Config
 from lib.db.reader_db import clear_jobs, load_reader_db
+from lib.job_utils import start_job_purge_worker
 from lib.llm.llm_worker import start_llm_job_worker
 from lib.nlp import start_nlp_pool
 from lib.ocr import start_ocr_job_worker
 from lib.routers import dictionary_router, llm_router, ocr_router, series_router
-
-from .lib.job_utils import start_job_purge_worker
 
 # web gui doesn't support custom config so just hard code the config here too
 CONFIG_FILE = Path(__file__).parent.parent.parent / "config.toml"

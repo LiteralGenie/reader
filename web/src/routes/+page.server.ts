@@ -1,8 +1,6 @@
-import { fetchAllSeries } from '$lib/api/series'
+import { redirect } from '@sveltejs/kit'
 import type { PageServerLoad } from './$types'
 
 export const load: PageServerLoad = async () => {
-    return {
-        series: await fetchAllSeries()
-    }
+    throw redirect(302, '/series')
 }

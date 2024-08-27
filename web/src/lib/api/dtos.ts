@@ -7,6 +7,7 @@ export interface SeriesDto {
 
 export interface ChapterDto {
     filename: string
+    name: string
 }
 
 export interface PageDto {

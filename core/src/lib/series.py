@@ -10,6 +10,7 @@ from .db.chapter_db import (
     CHAPTER_DB_FILENAME,
     insert_page,
     load_chapter_db,
+    select_chapter,
     select_page,
 )
 from .db.series_db import (
@@ -89,7 +90,7 @@ def get_chapter(cfg: Config, series: str, chapter: str):
     fp = cfg.root_image_folder / series / chapter
     db = load_chapter_db(fp)
 
-    info = select_series(db)
+    info = select_chapter(db)
     info["filename"] = chapter
 
     return info
