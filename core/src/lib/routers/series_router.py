@@ -93,6 +93,20 @@ def create_series_(req: Request, body: CreateSeriesRequest):
     return get_series(req.app.state.cfg, filename)
 
 
+@router.get("/cover/{series}/{filename}")
+def get_series_cover(req: Request, series: str, filename: str):
+    series = sanitize_or_raise_400(series)
+    filename = sanitize_or_raise_400(filename)
+
+    cfg: Config = req.app.state.cfg
+
+    fp = cfg.root_image_folder / series / filename
+    if not fp.exists():
+        return HTTPException(404)
+
+    return FileResponse(fp)
+
+
 @router.patch("/cover/{series}")
 def upsert_series_cover(req: Request, series: str, cover: UploadFile):
     series = sanitize_or_raise_400(series)

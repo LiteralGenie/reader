@@ -16,11 +16,14 @@ from .db.series_db import (
     SERIES_DB_FILENAME,
     SeriesDb,
     load_series_db,
+    select_autogen_cover,
     select_series,
+    update_autogen_cover,
     update_series,
 )
 
 SERIES_COVER_FILENAME = "_reader_cover.png"
+SERIES_COVER_ALTERNATIVES = ["cover.png", "cover.jpg", "cover.jpeg"]
 
 
 def get_series(cfg: Config, filename: str):
@@ -29,6 +32,9 @@ def get_series(cfg: Config, filename: str):
 
     info = select_series(db)
     info["filename"] = filename
+
+    cover = get_cover(cfg, filename)
+    info["cover"] = cover.name if cover else None
 
     return info
 
@@ -100,7 +106,7 @@ def get_all_series(cfg: Config) -> list[dict]:
         info["filename"] = fp.name
         series.append(info)
 
-    series.sort(key=lambda info: info["filename"])
+    series.sort(key=lambda info: info["name"] or info["filename"])
 
     return series
 
@@ -119,7 +125,7 @@ def get_all_chapters(cfg: Config, series: str):
         info = get_chapter(cfg, series, fp.name)
         chaps.append(info)
 
-    chaps.sort(key=lambda info: info["filename"])
+    chaps.sort(key=lambda info: info["name"] or info["filename"])
 
     return chaps
 
@@ -186,3 +192,27 @@ def raise_on_size_limit(files: list[UploadFile], max_bytes: int):
     total = sum(sizes)
     if total > max_bytes:
         raise HTTPException(413)
+
+
+def get_cover(cfg: Config, series: str):
+    series_dir = cfg.root_image_folder / series
+    db = load_series_db(series_dir, raise_on_missing=True)
+
+    if select_autogen_cover(db):
+        chaps = get_all_chapters(cfg, series)
+
+        for ch in chaps:
+            pages = get_all_pages(cfg, series, ch["filename"])
+            if not pages:
+                continue
+
+            fp = series_dir / ch["filename"] / pages[0]["filename"]
+            im = Image.open(fp)
+            upsert_cover(cfg, series, im, resize=True)
+
+            update_autogen_cover(db, False)
+
+    for filename in [SERIES_COVER_FILENAME] + SERIES_COVER_ALTERNATIVES:
+        fp = series_dir / filename
+        if fp.exists():
+            return fp

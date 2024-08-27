@@ -21,6 +21,7 @@ def load_series_db(series_dir: Path, raise_on_missing=False) -> SeriesDb:
             version             TEXT        NOT NULL,
             
             name                TEXT        NOT NULL        DEFAULT '',
+            autogen_cover       BOOLEAN     NOT NULL        DEFAULT 1,
 
             id_mangaupdates     TEXT        NOT NULL        DEFAULT '',
             id_mangadex         TEXT        NOT NULL        DEFAULT ''
@@ -87,3 +88,27 @@ def select_series(db: SeriesDb) -> dict:
     ).fetchone()
 
     return dict(r)
+
+
+def select_autogen_cover(db: SeriesDb):
+    r = db.execute(
+        """
+        SELECT 
+            autogen_cover
+        FROM metadata
+        """
+    ).fetchone()
+
+    return bool(r["autogen_cover"])
+
+
+def update_autogen_cover(db: SeriesDb, autogen_cover: bool):
+    db.execute(
+        """
+        UPDATE metadata
+        SET autogen_cover = ?
+        """,
+        [autogen_cover],
+    ).fetchone()
+
+    db.commit()
