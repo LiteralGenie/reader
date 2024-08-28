@@ -4,8 +4,8 @@
     import Button from '$lib/components/ui/button/button.svelte'
     import Input from '$lib/components/ui/input/input.svelte'
     import Label from '$lib/components/ui/label/label.svelte'
-    import sanitize from 'sanitize-filename'
     import { createEventDispatcher } from 'svelte'
+    import { addSuffixUntilUnique } from './external-imports'
 
     const dispatch = createEventDispatcher()
 
@@ -22,17 +22,7 @@
             await fetch('/api/series')
         ).json()
 
-        const baseFilename = sanitize(name)
-        let nameIdx = 2
-
-        let filename = baseFilename
-        while (
-            filename === null ||
-            series.some((s) => s.filename === filename)
-        ) {
-            filename = `${baseFilename}_${nameIdx}`
-            nameIdx += 1
-        }
+        const filename = addSuffixUntilUnique(series, name)
 
         // Send request
         const postData = new FormData()

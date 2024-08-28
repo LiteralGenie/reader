@@ -1,3 +1,4 @@
+import base64
 import traceback
 
 import requests
@@ -22,7 +23,12 @@ def start_proxy_job_worker(cfg: Config):
     )
 
 
-def insert_proxy_job(db: ReaderDb, url: str, rate_limit: int):
+def insert_proxy_job(
+    db: ReaderDb,
+    url: str,
+    rate_limit: int,
+    user_agent: str | None = None,
+):
     print("Inserting proxy job for", url)
 
     id = f"{url}"
@@ -33,6 +39,7 @@ def insert_proxy_job(db: ReaderDb, url: str, rate_limit: int):
         dict(
             url=url,
             rate_limit=rate_limit,
+            user_agent=user_agent,
         ),
     )
     db.commit()
@@ -70,10 +77,15 @@ def _process_job(
 
     _REQ_LOG.wait_limit(job["url"], job["rate_limit"])
 
-    resp = requests.get(job["url"])
+    headers = dict()
+    if job["user_agent"]:
+        headers["User-Agent"] = job["user_agent"]
+
+    resp = requests.get(job["url"], headers=headers)
     _REQ_LOG.add(job["url"])
 
     return dict(
         status_code=resp.status_code,
-        text=resp.text,
+        body=base64.b64encode(resp.content).decode("ascii"),
+        headers=dict(resp.headers),
     )

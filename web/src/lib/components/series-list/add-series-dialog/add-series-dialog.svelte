@@ -1,9 +1,24 @@
 <script lang="ts">
+    import { goto } from '$app/navigation'
     import BasicDialog from '$lib/components/basic-dialog.svelte'
+    import { createEventDispatcher } from 'svelte'
     import ExternalImportForm from './external-import-form.svelte'
+    import { importMangadexSeries } from './external-imports'
     import ManualImportForm from './manual-import-form.svelte'
 
     export let open: boolean
+
+    const dispatch = createEventDispatcher()
+
+    async function onMangaDexImport(id: string) {
+        try {
+            const filename = await importMangadexSeries(id)
+            goto(`/series/${filename}`)
+            dispatch('close')
+        } catch (e) {
+            alert(String(e))
+        }
+    }
 </script>
 
 <BasicDialog
@@ -19,11 +34,14 @@
     <!-- Import from external source -->
     <div class="flex flex-col gap-4">
         <ExternalImportForm
-            label="Import from MangaDex"
+            on:submit={(ev) => onMangaDexImport(ev.detail)}
+            name="MangaDex"
+            href="https://mangadex.org/"
             placeholder="be06d561-1670-4f1e-a491-0608ba35ce00"
         />
         <ExternalImportForm
-            label="Import from MangaUpdates"
+            name="BakaUpdates"
+            href="https://www.mangaupdates.com/"
             placeholder="w1sb5f6"
         />
     </div>

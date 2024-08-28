@@ -18,9 +18,6 @@ export function clamp(x: number, mn: number, mx: number) {
     return clamped
 }
 
-export function contains<T>(xs: readonly T[], x: any): boolean {
-    return !!xs.find((y) => y === x)
-}
 export function getWindow(): Window | undefined {
     return typeof window === 'undefined' ? undefined : window
 }
@@ -34,4 +31,14 @@ export const euc = encodeURIComponent
 
 export function deepCopy<T>(x: T): T {
     return JSON.parse(JSON.stringify(x))
+}
+
+export function throwOnStatus(resp: Response, expected = [200]) {
+    const isError = !expected.includes(resp.status)
+    if (isError) {
+        console.error(resp)
+        throw new Error(resp.statusText)
+    }
+
+    return resp
 }

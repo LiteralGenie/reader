@@ -5,7 +5,7 @@ import {
     type Writable,
     writable
 } from 'svelte/store'
-import { contains, getWindow } from '../miscUtils'
+import { getWindow } from '../miscUtils'
 
 const CTX_KEY = 'theme'
 const STORAGE_KEY = 'theme'
@@ -25,7 +25,7 @@ export interface ThemeContext {
 export function createThemeContext() {
     const storageTheme =
         getWindow()?.localStorage.getItem(STORAGE_KEY)
-    const initTheme = contains(ALL_THEMES, storageTheme)
+    const initTheme = ALL_THEMES.includes(storageTheme as any)
         ? (storageTheme as RawTheme)
         : 'auto'
 

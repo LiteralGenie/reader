@@ -1,3 +1,4 @@
+import base64
 import shutil
 import time
 import traceback
@@ -497,16 +498,17 @@ def import_chapter_progress(req: Request, job_id: str):
     return progress
 
 
-@router.get("/proxy/mangadex/{md_id}")
-def proxy_mangadex_series(req: Request, md_id: str):
+@router.get("/proxy/mangadex/{rest:path}")
+def proxy_mangadex_api(req: Request, rest: str):
     db = load_reader_db()
     cfg: Config = req.app.state.cfg
 
-    url = f"https://api.mangadex.org/manga/{md_id}"
+    url = f"https://api.mangadex.org/{rest}"
     job_id = insert_proxy_job(
         db,
         url,
         cfg.max_mangadex_requests_per_second,
+        user_agent="https://github.com/LiteralGenie/reader",
     )
     result, error = wait_job(
         JobManager(db, PROXY_JOB_TYPE),
@@ -514,22 +516,54 @@ def proxy_mangadex_series(req: Request, md_id: str):
         delay=0.1,
     )
 
-    if result:
+    if result and result["status_code"] == 200:
         return Response(
-            content=result["text"],
             status_code=result["status_code"],
+            content=base64.b64decode(result["body"]),
+            # headers=result["headers"],
         )
+    elif result:
+        raise HTTPException(result["status_code"], result)
     else:
         raise HTTPException(500)
 
 
-@router.get("/proxy/mangaupdates/{mu_id}")
-def proxy_mangaupdates_series(req: Request, mu_id: str):
+@router.get("/proxy/mangadex_cover/{manga_id}/{cover_filename}")
+def proxy_mangadex_cover(req: Request, manga_id: str, cover_filename: str):
     db = load_reader_db()
     cfg: Config = req.app.state.cfg
 
-    real_id = int(mu_id, 36)
-    url = f"https://api.mangaupdates.com/v1/series/{real_id}"
+    url = f"https://uploads.mangadex.org/covers/{manga_id}/{cover_filename}"
+    job_id = insert_proxy_job(
+        db,
+        url,
+        cfg.max_mangadex_requests_per_second,
+        user_agent="https://github.com/LiteralGenie/reader",
+    )
+    result, error = wait_job(
+        JobManager(db, PROXY_JOB_TYPE),
+        job_id,
+        delay=0.1,
+    )
+
+    if result and result["status_code"] == 200:
+        return Response(
+            status_code=result["status_code"],
+            content=base64.b64decode(result["body"]),
+            headers=result["headers"],
+        )
+    elif result:
+        raise HTTPException(result["status_code"], result)
+    else:
+        raise HTTPException(500)
+
+
+@router.get("/proxy/mangaupdates/{rest:path}")
+def proxy_mangaupdates_api(req: Request, rest: str):
+    db = load_reader_db()
+    cfg: Config = req.app.state.cfg
+
+    url = f"https://api.mangaupdates.com/v1/{rest}"
     job_id = insert_proxy_job(
         db,
         url,
@@ -541,10 +575,13 @@ def proxy_mangaupdates_series(req: Request, mu_id: str):
         delay=0.1,
     )
 
-    if result:
+    if result and result["status_code"] == 200:
         return Response(
-            content=result["text"],
             status_code=result["status_code"],
+            content=base64.b64decode(result["body"]),
+            # headers=result["headers"],
         )
+    elif result:
+        raise HTTPException(result["status_code"], result)
     else:
         raise HTTPException(500)

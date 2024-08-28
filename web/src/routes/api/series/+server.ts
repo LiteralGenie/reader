@@ -1,6 +1,15 @@
 import { env } from '$env/dynamic/private'
 import type { RequestHandler } from './$types'
 
+export const GET: RequestHandler = async ({ request }) => {
+    // @ts-ignore
+    const url = env.config.apiUrl + `/series`
+    return await fetch(url, {
+        method: request.method,
+        headers: request.headers
+    })
+}
+
 export const POST: RequestHandler = async ({ request }) => {
     // @ts-ignore
     const url = env.config.apiUrl + `/series`
@@ -10,11 +19,11 @@ export const POST: RequestHandler = async ({ request }) => {
     })
 }
 
-export const GET: RequestHandler = async ({ request }) => {
+export const PATCH: RequestHandler = async ({ request }) => {
     // @ts-ignore
     const url = env.config.apiUrl + `/series`
     return await fetch(url, {
         method: request.method,
-        headers: request.headers
+        body: await request.formData()
     })
 }

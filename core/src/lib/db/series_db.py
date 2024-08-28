@@ -64,6 +64,9 @@ def update_series(
     if id_mangadex is not None:
         targets.append(("id_mangadex", id_mangadex))
 
+    if not targets:
+        return
+
     columns, values = zip(*targets)
     column_str = " , ".join(f"{c} = ?" for c in columns)
 

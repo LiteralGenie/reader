@@ -33,7 +33,7 @@
     class="bg-transparent"
 >
     <div
-        class="relative w-full h-full max-h-[85vh] max-w-[90vw] rounded-md bg-popover text-popover-foreground {$$props.class ??
+        class="relative rounded-md bg-popover text-popover-foreground {$$props.class ??
             ''}"
     >
         <Button
