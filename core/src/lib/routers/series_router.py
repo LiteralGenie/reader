@@ -84,6 +84,8 @@ def create_series_(
     filename: str = Form(),
     name: str = Form(),
     cover: UploadFile | None = File(None),
+    id_mangadex: str | None = Form(None),
+    id_mangaupdates: str | None = Form(None),
 ):
     filename = sanitize_or_raise_400(filename)
 
@@ -94,7 +96,13 @@ def create_series_(
         cover_im = validate_image_upload(cover, cfg.max_cover_image_size_bytes)
 
     try:
-        create_series(cfg, filename, name)
+        create_series(
+            cfg,
+            filename,
+            name,
+            id_mangadex=id_mangadex,
+            id_mangaupdates=id_mangaupdates,
+        )
     except FileExistsError:
         raise HTTPException(400)
 

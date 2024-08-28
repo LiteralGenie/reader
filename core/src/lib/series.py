@@ -40,12 +40,23 @@ def get_series(cfg: Config, filename: str):
     return info
 
 
-def create_series(cfg: Config, filename: str, name: str) -> SeriesDb:
+def create_series(
+    cfg: Config,
+    filename: str,
+    name: str,
+    id_mangadex: str | None = None,
+    id_mangaupdates: str | None = None,
+) -> SeriesDb:
     series_dir = cfg.root_image_folder / filename
     series_dir.mkdir()
 
     db = load_series_db(series_dir)
-    update_series(db, name=name)
+    update_series(
+        db,
+        name=name,
+        id_mangadex=id_mangadex,
+        id_mangaupdates=id_mangaupdates,
+    )
 
     return db
 

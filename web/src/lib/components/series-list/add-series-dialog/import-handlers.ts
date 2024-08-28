@@ -7,6 +7,8 @@ interface PostSeriesRequest {
     name: string
     coverBytes?: ArrayBuffer | null
     coverFile?: File | null
+    mangaDexId?: string | null
+    mangaUpdatesId?: string | null
 }
 
 async function postSeries(req: PostSeriesRequest) {
@@ -19,6 +21,14 @@ async function postSeries(req: PostSeriesRequest) {
         formData.set('cover', blob)
     } else if (req.coverFile && req.coverFile.size > 0) {
         formData.set('cover', req.coverFile)
+    }
+
+    if (req.mangaDexId) {
+        formData.set('id_mangadex', req.mangaDexId)
+    }
+
+    if (req.mangaUpdatesId) {
+        formData.set('id_mangadex', req.mangaUpdatesId)
     }
 
     const resp = await fetch('/api/series', {
@@ -56,7 +66,8 @@ export async function importMangaDexSeries(id: string) {
     const resp = await postSeries({
         filename,
         name: title,
-        coverBytes: coverBytes
+        coverBytes: coverBytes,
+        mangaDexId: id
     })
 
     return filename
@@ -85,15 +96,6 @@ async function fetchMdCover(id: string, info: any) {
     const imBytes = await fetchImageBytes(
         `/api/proxy/mangadex_cover/${id}/${fileName}`
     )
-    return imBytes
-}
-
-async function fetchImageBytes(url: string) {
-    const resp = await fetch(url)
-    throwOnStatus(resp)
-    console.log('Fetched image', resp)
-
-    const imBytes = await resp.arrayBuffer()
     return imBytes
 }
 
@@ -131,7 +133,8 @@ export async function importMangaUpdatesSeries(id: string) {
     const resp = await postSeries({
         filename,
         name: title,
-        coverBytes: coverBytes
+        coverBytes: coverBytes,
+        mangaUpdatesId: id
     })
 
     return filename
@@ -151,6 +154,15 @@ export function addSuffixUntilUnique(
     }
 
     return filename
+}
+
+async function fetchImageBytes(url: string) {
+    const resp = await fetch(url)
+    throwOnStatus(resp)
+    console.log('Fetched image', resp)
+
+    const imBytes = await resp.arrayBuffer()
+    return imBytes
 }
 
 export async function importManualSeries(data: FormData) {
