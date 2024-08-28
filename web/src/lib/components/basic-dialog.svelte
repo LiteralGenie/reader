@@ -5,6 +5,7 @@
 
     export let open = false
     export let closeIconSize = 'size-12 p-2'
+    export let preventClose = false
 
     let dispatch = createEventDispatcher()
 
@@ -12,6 +13,10 @@
     $: open ? dialogEl?.showModal() : dialogEl?.close()
 
     function handleBackdropClick(ev: MouseEvent) {
+        if (preventClose) {
+            return
+        }
+
         // This will only trigger on backdrop clicks, not dialog content clicks
         // Because in the latter case, the event target will be one of the inner elements
         if (ev.target === dialogEl) {
@@ -20,6 +25,10 @@
     }
 
     function handleCloseButtonClick() {
+        if (preventClose) {
+            return
+        }
+
         dispatch('close')
     }
 </script>
@@ -36,13 +45,15 @@
         class="relative rounded-md bg-popover text-popover-foreground {$$props.class ??
             ''}"
     >
-        <Button
-            variant="ghost"
-            class="absolute top-3 right-3 rounded-full p-0 h-max w-max"
-            on:click={handleCloseButtonClick}
-        >
-            <XIcon class={closeIconSize} />
-        </Button>
+        {#if !preventClose}
+            <Button
+                variant="ghost"
+                class="absolute top-3 right-3 rounded-full p-0 h-max w-max"
+                on:click={handleCloseButtonClick}
+            >
+                <XIcon class={closeIconSize} />
+            </Button>
+        {/if}
 
         <slot />
     </div>

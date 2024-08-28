@@ -1,11 +1,15 @@
 <script lang="ts">
     import { goto } from '$app/navigation'
     import type { SeriesDto } from '$lib/api/dtos'
+    import Loader from '$lib/components/loader.svelte'
     import Button from '$lib/components/ui/button/button.svelte'
     import Input from '$lib/components/ui/input/input.svelte'
     import Label from '$lib/components/ui/label/label.svelte'
     import { createEventDispatcher } from 'svelte'
-    import { addSuffixUntilUnique } from './external-imports'
+    import { addSuffixUntilUnique } from './import-handlers'
+
+    export let isSubmitting = false
+    export let showSpinner = false
 
     const dispatch = createEventDispatcher()
 
@@ -67,17 +71,38 @@
             accept="image/*"
             class="text-xs"
             placeholder="Knight Run"
+            disabled={isSubmitting}
         />
     </div>
 
     <div class="flex flex-col gap-1.5">
         <Label for="cover">Cover Image (optional)</Label>
-        <input name="cover" type="file" class="text-sm" />
+        <input
+            name="cover"
+            type="file"
+            class="text-sm"
+            disabled={isSubmitting}
+        />
     </div>
 
     <div class="pt-2 flex flex-col gap-4">
-        <Button on:click={onCancel} variant="secondary">Cancel</Button
+        <Button
+            disabled={isSubmitting}
+            on:click={onCancel}
+            variant="secondary">Cancel</Button
         >
-        <Button type="submit">Submit</Button>
+        <Button
+            disabled={isSubmitting}
+            type="submit"
+            class="flex gap-1"
+        >
+            <span>Submit</span>
+            {#if showSpinner}
+                <Loader
+                    class="size-1 stroke-primary-foreground text-primary-foreground"
+                    showTrack={false}
+                />
+            {/if}
+        </Button>
     </div>
 </form>

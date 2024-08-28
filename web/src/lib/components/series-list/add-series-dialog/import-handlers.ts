@@ -87,3 +87,35 @@ export function addSuffixUntilUnique(
 
     return filename
 }
+
+export async function importManualSeries(data: FormData) {
+    // Generate unique folder name
+    const name = data.get('name')
+    if (!name || typeof name !== 'string') {
+        return
+    }
+
+    const series: SeriesDto[] = await (
+        await fetch('/api/series')
+    ).json()
+
+    const filename = addSuffixUntilUnique(series, name)
+
+    // Send request
+    const postData = new FormData()
+    postData.set('filename', filename)
+    postData.set('name', name)
+
+    const cover = data.get('cover') as File
+    if (cover.size > 0) {
+        postData.set('cover', cover)
+    }
+
+    const resp = await fetch('/api/series', {
+        method: 'POST',
+        body: postData
+    })
+    throwOnStatus(resp)
+
+    return filename
+}
