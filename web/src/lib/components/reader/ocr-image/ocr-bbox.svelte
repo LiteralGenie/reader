@@ -43,7 +43,7 @@
 
 <div
     style={bboxToAbsolutePos(match.bbox)}
-    class="absolute z-10 select-none"
+    class="root absolute z-10 select-none cursor-pointer"
     class:active
     class:visible
     on:click|stopPropagation={onClick}
@@ -62,7 +62,8 @@
 </div>
 
 <style lang="postcss">
-    .visible {
+    .visible,
+    .root:hover {
         @apply rounded-md;
         border-style: solid;
         border-width: 6px;

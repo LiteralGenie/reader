@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 import json
+import time
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 from typing import Callable
@@ -114,14 +115,55 @@ class JobManager:
             SET 
                 result = ?,
                 done_at = ?
-            WHERE id = ?
+            WHERE
+                id = ?
+                AND type = ?
             """,
             [
                 json.dumps(result),
                 datetime.datetime.now().isoformat(),
                 id,
+                self.job_type,
             ],
         )
+
+    def set_error(self, id: str, error: dict):
+        self.db.execute(
+            """
+            UPDATE jobs
+            SET 
+                error = ?,
+                done_at = ?
+            WHERE
+                id = ?
+                AND type = ?
+            """,
+            [
+                json.dumps(error),
+                datetime.datetime.now().isoformat(),
+                id,
+                self.job_type,
+            ],
+        )
+
+    def get_done(self, id: str) -> tuple[dict | None, dict | None]:
+        r = self.db.execute(
+            """
+            SELECT result, error, done_at
+            FROM jobs
+            WHERE
+                id = ?
+                AND type = ?
+            """,
+            [id, self.job_type],
+        ).fetchone()
+
+        if not r["done_at"]:
+            return None, None
+
+        result = json.loads(r["result"]) if r["result"] else None
+        error = json.loads(r["error"]) if r["error"] else None
+        return result, error
 
 
 def start_job_worker(
@@ -130,6 +172,7 @@ def start_job_worker(
     consume_fn: Callable[[Config, list[str]], None],
     initializer: Callable | None = None,
     initargs=(),
+    delay: float = 1,
 ):
     exec = ProcessPoolExecutor(
         1,
@@ -145,7 +188,7 @@ def start_job_worker(
             todo = jobber.select_all_pending()
 
             if not todo:
-                await asyncio.sleep(1)
+                await asyncio.sleep(delay)
                 continue
 
             # Update processing status
@@ -158,7 +201,7 @@ def start_job_worker(
     return asyncio.create_task(fn())
 
 
-def start_job_purge_worker(
+def start_job_purge_task(
     age_seconds=600,
     check_freq_seconds=60,
 ):
@@ -180,3 +223,23 @@ def start_job_purge_worker(
             await asyncio.sleep(check_freq_seconds)
 
     return asyncio.create_task(fn())
+
+
+def wait_job(
+    jobber: JobManager,
+    id: str,
+    timeout: float | None = None,
+    delay=0.25,
+) -> tuple[dict, None] | tuple[None, dict]:
+    start = time.time()
+
+    result, error = None, None
+    while result is None and error is None:
+        result, error = jobber.get_done(id)
+
+        if timeout and (time.time() - start) > timeout:
+            raise TimeoutError()
+        else:
+            time.sleep(delay)
+
+    return result, error  # type: ignore

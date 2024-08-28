@@ -8,11 +8,12 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.inmemory import InMemoryBackend
 from lib.config import Config
 from lib.db.reader_db import clear_jobs, load_reader_db
-from lib.job_utils import start_job_purge_worker
+from lib.job_utils import start_job_purge_task
 from lib.llm.llm_worker import start_llm_job_worker
 from lib.misc_utils import log_422s
 from lib.nlp import start_nlp_pool
 from lib.ocr import start_ocr_job_worker
+from lib.proxy.proxy import start_proxy_job_worker
 from lib.routers import dictionary_router, llm_router, ocr_router, series_router
 
 # web gui doesn't support custom config so just hard code the config here too
@@ -38,10 +39,11 @@ async def _lifespan(app: FastAPI):
 
     # Start job workers
     clear_jobs(load_reader_db())
-    start_job_purge_worker()
+    start_job_purge_task()
 
     start_ocr_job_worker(cfg)
     start_llm_job_worker(cfg)
+    start_proxy_job_worker(cfg)
 
     yield
 

@@ -23,7 +23,7 @@
             placeholder="be06d561-1670-4f1e-a491-0608ba35ce00"
         />
         <ExternalImportForm
-            label="Import from MangaDex"
+            label="Import from MangaUpdates"
             placeholder="w1sb5f6"
         />
     </div>

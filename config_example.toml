@@ -98,3 +98,6 @@ max_cover_image_size_bytes = 99_999_999
 # Limits to apply when scanning for images from an url
 max_import_requests_per_second = 999_999
 max_import_bytes_per_second = 999_999_999
+
+max_mangadex_requests_per_second = 4
+max_bakaupdate_requests_per_second = 1

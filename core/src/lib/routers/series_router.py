@@ -1,8 +1,9 @@
 import shutil
+import time
 import traceback
 from pathlib import Path
 
-from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, Request, Response, UploadFile
 from fastapi.responses import FileResponse
 from PIL import Image
 from pydantic import BaseModel
@@ -11,7 +12,9 @@ from ..config import Config
 from ..db.chapter_db import load_chapter_db, update_chapter
 from ..db.reader_db import load_reader_db
 from ..db.series_db import load_series_db, update_series
+from ..job_utils import JobManager, wait_job
 from ..misc_utils import sanitize_or_raise_400
+from ..proxy.proxy import PROXY_JOB_TYPE, insert_proxy_job
 from ..series import (
     count_file_types,
     create_series,
@@ -492,3 +495,56 @@ def import_chapter_progress(req: Request, job_id: str):
 
     progress = get_import_job_progress(db, job_id)
     return progress
+
+
+@router.get("/proxy/mangadex/{md_id}")
+def proxy_mangadex_series(req: Request, md_id: str):
+    db = load_reader_db()
+    cfg: Config = req.app.state.cfg
+
+    url = f"https://api.mangadex.org/manga/{md_id}"
+    job_id = insert_proxy_job(
+        db,
+        url,
+        cfg.max_mangadex_requests_per_second,
+    )
+    result, error = wait_job(
+        JobManager(db, PROXY_JOB_TYPE),
+        job_id,
+        delay=0.1,
+    )
+
+    if result:
+        return Response(
+            content=result["text"],
+            status_code=result["status_code"],
+        )
+    else:
+        raise HTTPException(500)
+
+
+@router.get("/proxy/mangaupdates/{mu_id}")
+def proxy_mangaupdates_series(req: Request, mu_id: str):
+    db = load_reader_db()
+    cfg: Config = req.app.state.cfg
+
+    real_id = int(mu_id, 36)
+    url = f"https://api.mangaupdates.com/v1/series/{real_id}"
+    job_id = insert_proxy_job(
+        db,
+        url,
+        cfg.max_bakaupdate_requests_per_second,
+    )
+    result, error = wait_job(
+        JobManager(db, PROXY_JOB_TYPE),
+        job_id,
+        delay=0.1,
+    )
+
+    if result:
+        return Response(
+            content=result["text"],
+            status_code=result["status_code"],
+        )
+    else:
+        raise HTTPException(500)

@@ -46,7 +46,7 @@
 {#if status}
     <div class="w-full bg-muted">
         <div
-            class="max-w-4xl flex items-center justify-start m-auto w-full py-2 text-sm text-muted-foreground"
+            class="px-4 max-w-4xl flex items-center justify-start m-auto w-full py-2 text-sm text-muted-foreground"
         >
             <Loader class="size-3 mr-1 stroke-primary fill-primary" />
             <span> {status} </span>
