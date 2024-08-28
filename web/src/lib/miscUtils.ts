@@ -31,3 +31,7 @@ export function round(x: number, places = 2) {
 }
 
 export const euc = encodeURIComponent
+
+export function deepCopy<T>(x: T): T {
+    return JSON.parse(JSON.stringify(x))
+}
