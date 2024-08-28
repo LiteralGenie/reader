@@ -1,8 +1,11 @@
-series list
-chapter list
 definitions page
-create / edit series
+create series
     import from MU / MD
+edit series
+create chapter
+edit chapter
+page counts
+unload gpu memory when idle
 
 demo
     resource blocks
@@ -25,7 +28,6 @@ demo
 
 use template for llm definitions
 logging
-unload gpu memory when idle
 create ocr blocks
 create chapter from archive
 

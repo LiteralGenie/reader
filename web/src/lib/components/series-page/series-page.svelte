@@ -3,16 +3,22 @@
     import Plus from '$lib/icons/plus.svelte'
     import AppHeader from '../app-header.svelte'
     import Button from '../ui/button/button.svelte'
+    import AddSeriesDialog from './add-series-dialog/add-series-dialog.svelte'
     import SeriesRow from './series-row.svelte'
 
     export let series: SeriesDto[]
+
+    let showAddSeriesDialog = false
 </script>
 
 <div class="flex flex-col h-full w-full">
     <AppHeader />
 
     <div class="flex justify-end p-4 pb-0">
-        <Button class="flex gap-1 px-4 ripple">
+        <Button
+            on:click={() => (showAddSeriesDialog = true)}
+            class="flex gap-1 px-4 ripple"
+        >
             <Plus
                 class="size-4 stroke-[3px] stroke-primary-foreground"
             />
@@ -26,6 +32,11 @@
         {/each}
     </div>
 </div>
+
+<AddSeriesDialog
+    open={showAddSeriesDialog}
+    on:close={() => (showAddSeriesDialog = false)}
+/>
 
 <style lang="postcss">
     .list {

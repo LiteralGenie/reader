@@ -35,7 +35,6 @@
     <div
         class="relative w-full h-full max-h-[85vh] max-w-[90vw] rounded-md bg-popover text-popover-foreground {$$props.class ??
             ''}"
-        on:click|preventDefault={() => {}}
     >
         <Button
             variant="ghost"
