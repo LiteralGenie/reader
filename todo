@@ -6,6 +6,8 @@ create chapter
 edit chapter
 page counts
 unload gpu memory when idle
+null image
+zero chapters
 
 demo
     resource blocks

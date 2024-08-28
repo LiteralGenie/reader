@@ -50,7 +50,7 @@
         <!-- Image -->
         <img
             src="/api/cover/{series.filename}/{series.cover}"
-            class="object-cover max-w-[40vw] shadow-lg"
+            class="object-cover w-[40vw] max-w-md shadow-lg"
         />
 
         <!-- Info -->

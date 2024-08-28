@@ -65,19 +65,15 @@ def upsert_cover(
         if cfg.max_auto_cover_x > 0:
             scale = cover.size[0] / cfg.max_auto_cover_x
 
-        print("scale", scale, cover.size)
         if scale > 1:
             w = int(cover.size[0] / scale)
             h = int(cover.size[1] / scale)
 
             cover = cover.resize((w, h))
 
-        print("crop", cfg.max_auto_cover_y, cover.size)
         if cfg.max_auto_cover_y > 0:
             if cover.size[1] > cfg.max_auto_cover_y:
                 cover = cover.crop((0, 0, cover.size[0], cfg.max_auto_cover_y))
-
-        print("done", cover.size)
 
     fp = series_dir / SERIES_COVER_FILENAME
     cover.save(fp)
@@ -191,7 +187,7 @@ def raise_on_size_limit(files: list[UploadFile], max_bytes: int):
 
     total = sum(sizes)
     if total > max_bytes:
-        raise HTTPException(413)
+        raise HTTPException(413, "Image too large")
 
 
 def get_cover(cfg: Config, series: str):
@@ -216,3 +212,20 @@ def get_cover(cfg: Config, series: str):
         fp = series_dir / filename
         if fp.exists():
             return fp
+
+
+def validate_image_upload(
+    upload: UploadFile,
+    max_bytes: int | None,
+) -> Image.Image:
+    if max_bytes:
+        raise_on_size_limit([upload], max_bytes)
+
+    try:
+        im = Image.open(upload.file)
+        im.copy().verify()
+    except:
+        print("here")
+        raise HTTPException(400, "Invalid image file")
+
+    return im

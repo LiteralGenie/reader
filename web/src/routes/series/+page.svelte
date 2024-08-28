@@ -1,5 +1,5 @@
 <script lang="ts">
-    import SeriesPage from '$lib/components/series-page/series-page.svelte'
+    import SeriesPage from '$lib/components/series-list/series-list.svelte'
     import type { PageData } from './$types'
 
     export let data: PageData

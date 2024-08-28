@@ -195,7 +195,7 @@ def _download_image(url: str, fp: Path, max_size_bytes: int, chunk_size=8192) ->
                     return dict(success=False, size=len(buffer))
 
         im = Image.open(io.BytesIO(buffer))
-        im.verify()
+        im.copy().verify()
 
         im.save(fp)
         return dict(success=True, size=len(buffer))

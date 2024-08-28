@@ -1,9 +1,7 @@
 <script lang="ts">
     import BasicDialog from '$lib/components/basic-dialog.svelte'
-    import Button from '$lib/components/ui/button/button.svelte'
-    import Input from '$lib/components/ui/input/input.svelte'
-    import Label from '$lib/components/ui/label/label.svelte'
     import ExternalImportForm from './external-import-form.svelte'
+    import ManualImportForm from './manual-import-form.svelte'
 
     export let open: boolean
 </script>
@@ -40,22 +38,5 @@
     </div>
 
     <!-- Manual -->
-    <form class="flex flex-col gap-4">
-        <h2 class="font-bold text-lg">Manual Import</h2>
-
-        <div class="flex flex-col gap-2">
-            <Label for="email">Series Name *</Label>
-            <Input class="text-xs" placeholder="Knight Run" />
-        </div>
-
-        <div class="flex flex-col gap-1.5">
-            <Label for="email-2">Cover Image (optional)</Label>
-            <input type="file" class="text-sm" />
-        </div>
-
-        <div class="pt-2 flex flex-col gap-4">
-            <Button variant="secondary">Cancel</Button>
-            <Button>Submit</Button>
-        </div>
-    </form>
+    <ManualImportForm on:close />
 </BasicDialog>

@@ -6,6 +6,7 @@ export const GET: RequestHandler = async ({ params }) => {
     const url =
         // @ts-ignore
         env.config.apiUrl +
+        // @ts-ignore
         `/cover/${euc(params.seriesId)}/${euc(params.filename)}`
     return await fetch(url)
 }

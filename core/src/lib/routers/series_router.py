@@ -2,7 +2,7 @@ import shutil
 import traceback
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException, Request, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse
 from PIL import Image
 from pydantic import BaseModel
@@ -22,6 +22,7 @@ from ..series import (
     get_series,
     raise_on_size_limit,
     upsert_cover,
+    validate_image_upload,
 )
 from ..url_import import get_import_job_progress, insert_import_job
 
@@ -73,24 +74,30 @@ def image_by_id(req: Request, series: str, chapter: str, page: str):
     return FileResponse(fp)
 
 
-class CreateSeriesRequest(BaseModel):
-    filename: str
-    name: str
-
-
 @router.post("/series")
-def create_series_(req: Request, body: CreateSeriesRequest):
-    filename = sanitize_or_raise_400(body.filename)
+def create_series_(
+    req: Request,
+    filename: str = Form(),
+    name: str = Form(),
+    cover: UploadFile | None = File(None),
+):
+    filename = sanitize_or_raise_400(filename)
 
-    if "" in [filename]:
-        raise HTTPException(400)
+    cfg: Config = req.app.state.cfg
+
+    cover_im = None
+    if cover:
+        cover_im = validate_image_upload(cover, cfg.max_cover_image_size_bytes)
 
     try:
-        create_series(req.app.state.cfg, filename, body.name)
+        create_series(cfg, filename, name)
     except FileExistsError:
         raise HTTPException(400)
 
-    return get_series(req.app.state.cfg, filename)
+    if cover_im:
+        upsert_cover(cfg, filename, cover_im)
+
+    return get_series(cfg, filename)
 
 
 @router.get("/cover/{series}/{filename}")
@@ -105,28 +112,6 @@ def get_series_cover(req: Request, series: str, filename: str):
         return HTTPException(404)
 
     return FileResponse(fp)
-
-
-@router.patch("/cover/{series}")
-def upsert_series_cover(req: Request, series: str, cover: UploadFile):
-    series = sanitize_or_raise_400(series)
-
-    cfg: Config = req.app.state.cfg
-
-    raise_on_size_limit([cover], cfg.max_cover_image_size_bytes)
-
-    try:
-        im = Image.open(cover.file)
-        im.verify()
-    except:
-        raise HTTPException(400)
-
-    try:
-        fp = upsert_cover(req.app.state.cfg, series, im)
-    except FileNotFoundError:
-        raise HTTPException(404)
-
-    return fp.name
 
 
 @router.patch("/cover/{series}/auto")
@@ -158,21 +143,34 @@ class UpdateSeriesRequest(BaseModel):
     id_mangadex: str | None
 
 
-@router.post("/series/{series}")
-def update_series_(req: Request, body: UpdateSeriesRequest):
-    filename = sanitize_or_raise_400(body.filename)
+@router.patch("/series")
+def update_series_(
+    req: Request,
+    filename: str = Form(),
+    name: str | None = Form(None),
+    id_mangaupdates: str | None = Form(None),
+    id_mangadex: str | None = Form(None),
+    cover: UploadFile | None = Form(None),
+):
+    filename = sanitize_or_raise_400(filename)
+
+    cfg: Config = req.app.state.cfg
 
     try:
-        series_dir = req.app.state.cfg.root_image_folder / filename
+        series_dir = cfg.root_image_folder / filename
         db = load_series_db(series_dir, raise_on_missing=True)
     except FileNotFoundError:
         raise HTTPException(404)
 
+    if cover:
+        cover_im = validate_image_upload(cover, cfg.max_cover_image_size_bytes)
+        upsert_cover(cfg, filename, cover_im)
+
     update_series(
         db,
-        body.name,
-        body.id_mangaupdates,
-        body.id_mangadex,
+        name,
+        id_mangaupdates,
+        id_mangadex,
     )
 
     info = get_series(req.app.state.cfg, filename)
@@ -228,7 +226,7 @@ def create_chapter(
     for pg in pages:
         try:
             im = Image.open(pg.file)
-            im.verify()
+            im.copy().verify()
 
             filename = None
             if pg.filename:
@@ -348,7 +346,7 @@ def add_page(req: Request, series: str, chapter: str, page: UploadFile):
 
     try:
         im = Image.open(page.file)
-        im.verify()
+        im.copy().verify()
     except:
         raise HTTPException(400)
 
@@ -393,7 +391,7 @@ def rename_page(
     for tgt in targets:
         try:
             im = Image.open(fp_source)
-            im.verify()
+            im.copy().verify()
         except:
             raise HTTPException(400)
 

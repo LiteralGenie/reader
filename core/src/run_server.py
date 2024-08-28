@@ -10,6 +10,7 @@ from lib.config import Config
 from lib.db.reader_db import clear_jobs, load_reader_db
 from lib.job_utils import start_job_purge_worker
 from lib.llm.llm_worker import start_llm_job_worker
+from lib.misc_utils import log_422s
 from lib.nlp import start_nlp_pool
 from lib.ocr import start_ocr_job_worker
 from lib.routers import dictionary_router, llm_router, ocr_router, series_router
@@ -51,6 +52,8 @@ app.include_router(series_router.router)
 app.include_router(dictionary_router.router)
 app.include_router(ocr_router.router)
 app.include_router(llm_router.router)
+
+log_422s(app)
 
 
 def _parse_args():
