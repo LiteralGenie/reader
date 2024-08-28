@@ -4,7 +4,8 @@
     import { createEventDispatcher } from 'svelte'
     import ExternalImportForm from './external-import-form.svelte'
     import {
-        importMangadexSeries,
+        importMangaDexSeries,
+        importMangaUpdatesSeries,
         importManualSeries
     } from './import-handlers'
     import ManualImportForm from './manual-import-form.svelte'
@@ -21,7 +22,7 @@
         activeForm = 'mangadex'
 
         try {
-            const filename = await importMangadexSeries(id)
+            const filename = await importMangaDexSeries(id)
             goto(`/series/${filename}`)
             dispatch('close')
         } catch (e) {
@@ -32,7 +33,23 @@
         }
     }
 
-    async function onManualSubmit(data: FormData) {
+    async function onMangaUpdatesImport(id: string) {
+        isSubmitting = true
+        activeForm = 'mangaupdates'
+
+        try {
+            const filename = await importMangaUpdatesSeries(id)
+            goto(`/series/${filename}`)
+            dispatch('close')
+        } catch (e) {
+            alert(String(e))
+        } finally {
+            isSubmitting = false
+            activeForm = ''
+        }
+    }
+
+    async function onManualImport(data: FormData) {
         isSubmitting = true
         activeForm = 'manual'
 
@@ -63,14 +80,15 @@
     <!-- Import from external source -->
     <div class="flex flex-col gap-4">
         <ExternalImportForm
+            on:submit={(ev) => onMangaDexImport(ev.detail)}
             name="MangaDex"
             href="https://mangadex.org/"
             placeholder="be06d561-1670-4f1e-a491-0608ba35ce00"
-            on:submit={(ev) => onMangaDexImport(ev.detail)}
             {isSubmitting}
             showSpinner={isSubmitting && activeForm === 'mangadex'}
         />
         <ExternalImportForm
+            on:submit={(ev) => onMangaUpdatesImport(ev.detail)}
             name="BakaUpdates"
             href="https://www.mangaupdates.com/"
             placeholder="w1sb5f6"
@@ -91,6 +109,7 @@
 
     <!-- Manual -->
     <ManualImportForm
+        on:submit={(ev) => onManualImport(ev.detail)}
         on:close
         {isSubmitting}
         showSpinner={isSubmitting && activeForm === 'manual'}

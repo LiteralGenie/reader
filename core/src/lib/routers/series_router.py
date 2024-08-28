@@ -585,3 +585,32 @@ def proxy_mangaupdates_api(req: Request, rest: str):
         raise HTTPException(result["status_code"], result)
     else:
         raise HTTPException(500)
+
+
+@router.get("/proxy/mangaupdates_cover/{rest:path}")
+def proxy_mangaupdates_cover(req: Request, rest: str):
+    db = load_reader_db()
+    cfg: Config = req.app.state.cfg
+
+    url = f"https://cdn.mangaupdates.com/{rest}"
+    job_id = insert_proxy_job(
+        db,
+        url,
+        cfg.max_bakaupdate_requests_per_second,
+    )
+    result, error = wait_job(
+        JobManager(db, PROXY_JOB_TYPE),
+        job_id,
+        delay=0.1,
+    )
+
+    if result and result["status_code"] == 200:
+        return Response(
+            status_code=result["status_code"],
+            content=base64.b64decode(result["body"]),
+            headers=result["headers"],
+        )
+    elif result:
+        raise HTTPException(result["status_code"], result)
+    else:
+        raise HTTPException(500)
