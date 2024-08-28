@@ -1,6 +1,7 @@
 <script lang="ts">
     import { goto } from '$app/navigation'
     import BasicDialog from '$lib/components/basic-dialog.svelte'
+    import LabeledDivider from '$lib/components/labeled-divider.svelte'
     import { createEventDispatcher } from 'svelte'
     import ExternalImportForm from './external-import-form.svelte'
     import {
@@ -98,14 +99,7 @@
         />
     </div>
 
-    <!-- Divider -->
-    <div
-        class="flex w-full items-center text-muted-foreground pt-6 pb-4"
-    >
-        <hr class="flex-grow border-muted-foreground" />
-        <span class="px-2 uppercase text-sm">or</span>
-        <hr class="flex-grow border-muted-foreground" />
-    </div>
+    <LabeledDivider label="OR" class="pb-4 pt-6" />
 
     <!-- Manual -->
     <ManualImportForm

@@ -28,7 +28,14 @@ def start_import_job_worker(cfg: Config):
     )
 
 
-def insert_import_job(db: ReaderDb, urls: list[str], chap_dir: Path, chap_name: str):
+def insert_import_job(
+    db: ReaderDb,
+    urls: list[str],
+    chap_dir: Path,
+    chap_name: str,
+    min_width: int,
+    min_height: int,
+):
     print("Inserting import job for", urls)
 
     id = f"{urls}"
@@ -40,6 +47,8 @@ def insert_import_job(db: ReaderDb, urls: list[str], chap_dir: Path, chap_name: 
             urls=urls,
             chap_dir=chap_dir,
             chap_name=chap_name,
+            min_width=min_width,
+            min_height=min_height,
         ),
     )
     db.commit()
@@ -107,32 +116,54 @@ def _process_job(
         # Get html
         try:
             resp = requests.get(url)
-            history.append((time.time(), 0))
+            history.append((time.time(), len(resp.content)))
         except:
             traceback.print_exc()
             progress["failed"].append(url)
             continue
 
-        # Get <img> srcs
-        soup = BeautifulSoup(resp.text)
-        imgs = soup.find_all("img")
-
-        for el in imgs:
-            src = el.get("src")
-            if not src:
+        content_type = resp.headers.get("Content-Type") or ""
+        if content_type.lower().startswith("image"):
+            try:
+                im = Image.open(io.BytesIO(resp.content))
+                im.copy().verify()
+            except:
                 continue
 
-            _rate_limit(history, cfg)
+            matches_width = im.size[0] >= job["min_width"]
+            matches_height = im.size[0] >= job["min_height"]
+            if matches_width and matches_height:
+                fp_out = job["chap_dir"] / f"{idx_image:03}.png"
+                im.save(fp_out)
 
-            # Download image
-            fp_out = job["chap_dir"] / f"{idx_image:03}.png"
-            result = _download_image(src, fp_out, rem_bytes)
-            history.append((time.time(), result["size"]))
-            if not result["success"]:
-                continue
+                rem_bytes -= len(resp.content)
+                idx_image += 1
+        else:
+            # Get <img> srcs
+            soup = BeautifulSoup(resp.text)
+            imgs = soup.find_all("img")
 
-            rem_bytes -= result["size"]
-            idx_image += 1
+            for el in imgs:
+                src = el.get("src")
+                if not src:
+                    continue
+
+                _rate_limit(history, cfg)
+
+                # Download image
+                result = _download_image(src, fp_out, rem_bytes)
+                history.append((time.time(), result["size"]))
+                if not result["success"]:
+                    continue
+
+                matches_width = result["im"].size[0] >= job["min_width"]
+                matches_height = result["im"].size[0] >= job["min_height"]
+                if matches_width and matches_height:
+                    fp_out = job["chap_dir"] / f"{idx_image:03}.png"
+                    result["im"].save(fp_out)
+
+                rem_bytes -= result["size"]
+                idx_image += 1
 
         # Update progress
         progress["done"].append(url)
@@ -176,7 +207,7 @@ def _rate_limit(
     return
 
 
-def _download_image(url: str, fp: Path, max_size_bytes: int, chunk_size=8192) -> dict:
+def _download_image(url: str, max_size_bytes: int, chunk_size=8192) -> dict:
     print("downloading", url)
 
     try:
@@ -197,7 +228,6 @@ def _download_image(url: str, fp: Path, max_size_bytes: int, chunk_size=8192) ->
         im = Image.open(io.BytesIO(buffer))
         im.copy().verify()
 
-        im.save(fp)
-        return dict(success=True, size=len(buffer))
+        return dict(im=im, success=True, size=len(buffer))
     except:
         return dict(success=False, size=len(buffer))

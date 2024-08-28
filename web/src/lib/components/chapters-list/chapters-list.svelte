@@ -5,6 +5,7 @@
     import Plus from '$lib/icons/plus.svelte'
     import AppHeader from '../app-header.svelte'
     import Button from '../ui/button/button.svelte'
+    import AddChapterDialog from './add-chapter-dialog/add-chapter-dialog.svelte'
     import ChapterRow from './chapter-row.svelte'
 
     export let series: SeriesWithChaptersDto
@@ -76,6 +77,8 @@
 
 <!-- Fading background image -->
 <img src="/api/cover/{series.filename}/{series.cover}" class="bg" />
+
+<AddChapterDialog open={true} />
 
 <style lang="postcss">
     .bg {

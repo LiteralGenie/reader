@@ -23,7 +23,14 @@
 <form on:submit={onSubmit}>
     <div class="flex flex-col gap-2">
         <Label for="external-id">
-            <span>Import from <a {href}>{name}</a></span>
+            <span>
+                Import from <a
+                    {href}
+                    class="underline text-foreground inline-flex items-center gap-[0.25em] hover:text-primary"
+                >
+                    {name}
+                </a>
+            </span>
         </Label>
         <div class="flex gap-2">
             <Input

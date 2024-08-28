@@ -1,15 +1,13 @@
-definitions page
-create series
-    import from MU / MD
-edit series
 create chapter
-edit chapter
+edit series
 page counts
+docker
+edit chapter
 unload gpu memory when idle
 null image
 zero chapters
 nav menu
-docker
+definitions page
 
 demo
     resource blocks
