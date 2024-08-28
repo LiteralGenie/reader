@@ -99,5 +99,9 @@ max_cover_image_size_bytes = 99_999_999
 max_import_requests_per_second = 999_999
 max_import_bytes_per_second = 999_999_999
 
+# This cap only counts images that would otherwise be included
+# Images that are filtered out by the min dimension constraints are not counted
+max_import_images_per_chapter = 99_999
+
 max_mangadex_requests_per_second = 4
 max_bakaupdate_requests_per_second = 1

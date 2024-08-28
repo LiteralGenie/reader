@@ -2,7 +2,7 @@ import io
 import time
 import traceback
 from pathlib import Path
-from typing import TypeAlias
+from typing import TypeAlias, cast
 
 import requests
 from bs4 import BeautifulSoup
@@ -99,47 +99,48 @@ def _process_job(
 
     # Init progress
     progress: dict = dict(
-        progress=0,
-        urls=job["urls"],
+        total=len(job["urls"]),
         done=[],
-        failed=[],
+        ignored=[],
+        phase="scanning",
     )
     jobber.update_progress(job_id, progress)
     jobber.db.commit()
 
     history: RequestHistory = []
 
-    rem_bytes = cfg.max_chapter_size_bytes
-    idx_image = 1
+    maybe_images: list[dict | str] = []
 
+    # Extract all image urls from the original urls
+    # (or the image itself if the url points directly to an image)
     for url in job["urls"]:
-        # Get html
         try:
+            # Fetch url
+            _wait_rate_limit(history, cfg)
             resp = requests.get(url)
             history.append((time.time(), len(resp.content)))
         except:
-            traceback.print_exc()
-            progress["failed"].append(url)
+            # traceback.print_exc()
             continue
 
         content_type = resp.headers.get("Content-Type") or ""
         if content_type.lower().startswith("image"):
+            # URL pointed to an image
             try:
                 im = Image.open(io.BytesIO(resp.content))
                 im.copy().verify()
             except:
                 continue
 
-            matches_width = im.size[0] >= job["min_width"]
-            matches_height = im.size[0] >= job["min_height"]
-            if matches_width and matches_height:
-                fp_out = job["chap_dir"] / f"{idx_image:03}.png"
-                im.save(fp_out)
-
-                rem_bytes -= len(resp.content)
-                idx_image += 1
+            maybe_images.append(
+                dict(
+                    im=im,
+                    size_bytes=len(resp.content),
+                    src=url,
+                )
+            )
         else:
-            # Get <img> srcs
+            # URL pointed to a doc with <img>s
             soup = BeautifulSoup(resp.text)
             imgs = soup.find_all("img")
 
@@ -148,24 +149,63 @@ def _process_job(
                 if not src:
                     continue
 
-                _rate_limit(history, cfg)
+                maybe_images.append(src)
 
-                # Download image
-                result = _download_image(src, fp_out, rem_bytes)
-                history.append((time.time(), result["size"]))
-                if not result["success"]:
-                    continue
+    progress["phase"] = "downloading"
+    progress["total"] = len(maybe_images)
+    jobber.update_progress(job_id, progress)
+    jobber.db.commit()
 
-                matches_width = result["im"].size[0] >= job["min_width"]
-                matches_height = result["im"].size[0] >= job["min_height"]
-                if matches_width and matches_height:
-                    fp_out = job["chap_dir"] / f"{idx_image:03}.png"
-                    result["im"].save(fp_out)
+    rem_bytes = cfg.max_chapter_size_bytes
+    idx_name = 1
 
-                rem_bytes -= result["size"]
-                idx_image += 1
+    for image_or_url in maybe_images:
+        # Check if we hit resource caps
+        over_image_cap = len(progress["done"]) >= cfg.max_import_images_per_chapter
+        over_size_cap = rem_bytes <= 0
+        if over_image_cap or over_size_cap:
+            url = image_or_url if isinstance(image_or_url, str) else image_or_url["src"]
+            progress["ignored"].append(url)
+            jobber.update_progress(job_id, progress)
+            jobber.db.commit()
+            continue
 
-        # Update progress
+        # Download Image if we haven't already
+        if isinstance(image_or_url, str):
+            _wait_rate_limit(history, cfg)
+            result = _download_image(image_or_url, rem_bytes)
+            history.append((time.time(), result["size_bytes"]))
+
+            if not result["success"]:
+                progress["ignored"].append(image_or_url)
+                jobber.update_progress(job_id, progress)
+                jobber.db.commit()
+                continue
+
+            im: Image.Image = result["im"]
+            url = image_or_url
+            size_bytes = result["size_bytes"]
+        else:
+            im: Image.Image = image_or_url["im"]
+            url = image_or_url["src"]
+            size_bytes = image_or_url["size_bytes"]
+
+        # Check dimensions
+        matches_width = im.size[0] >= job["min_width"]
+        matches_height = im.size[0] >= job["min_height"]
+        if not matches_width or not matches_height:
+            progress["ignored"].append(url)
+            jobber.update_progress(job_id, progress)
+            jobber.db.commit()
+            continue
+
+        # Save image
+        fp_out = job["chap_dir"] / f"{idx_name:03}.png"
+        im.save(fp_out)
+
+        idx_name += 1
+        rem_bytes -= size_bytes
+
         progress["done"].append(url)
         jobber.update_progress(job_id, progress)
         jobber.db.commit()
@@ -191,7 +231,7 @@ def _sum_history(history: RequestHistory, recency_seconds=1):
     return count, size
 
 
-def _rate_limit(
+def _wait_rate_limit(
     history: RequestHistory,
     cfg: Config,
     delay=0.1,
@@ -217,17 +257,30 @@ def _download_image(url: str, max_size_bytes: int, chunk_size=8192) -> dict:
             resp.raise_for_status()
 
             if int(resp.headers.get("Content-Length", "0")) > max_size_bytes:
-                return dict(success=False, size=len(buffer))
+                return dict(
+                    success=False,
+                    size_bytes=len(buffer),
+                )
 
             for chunk in resp.iter_content(chunk_size=chunk_size):
                 buffer += chunk
 
                 if len(buffer) > max_size_bytes:
-                    return dict(success=False, size=len(buffer))
+                    return dict(
+                        success=False,
+                        size_bytes=len(buffer),
+                    )
 
         im = Image.open(io.BytesIO(buffer))
         im.copy().verify()
 
-        return dict(im=im, success=True, size=len(buffer))
+        return dict(
+            im=im,
+            success=True,
+            size_bytes=len(buffer),
+        )
     except:
-        return dict(success=False, size=len(buffer))
+        return dict(
+            success=False,
+            size_bytes=len(buffer),
+        )
