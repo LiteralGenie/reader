@@ -31,6 +31,21 @@
 
         dispatch('close')
     }
+
+    function onKeyDown(ev: KeyboardEvent) {
+        // This doesn't always work, especially after a form submit
+        // Probably a Chrome bug since it works on Firefox
+        // Adding a setTimeout() to re-open breaks open / close functionality entirely
+        if (ev.key === 'Escape') {
+            ev.preventDefault()
+
+            if (preventClose) {
+                return
+            }
+
+            dispatch('close')
+        }
+    }
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -39,6 +54,7 @@
     bind:this={dialogEl}
     on:click={handleBackdropClick}
     on:close
+    on:keydown={(ev) => onKeyDown(ev)}
     class="bg-transparent"
 >
     <div

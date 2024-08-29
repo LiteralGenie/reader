@@ -39,6 +39,7 @@
                 class="text-xs"
                 {placeholder}
                 disabled={isSubmitting}
+                required
             />
             <Button
                 type="submit"
