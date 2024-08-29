@@ -4,10 +4,14 @@
     export let series: SeriesDto
 </script>
 
-<img
-    src="/api/cover/{series.filename}/{series.cover}"
-    class="object-cover w-full h-full"
-/>
+{#if series.cover}
+    <img
+        src="/api/cover/{series.filename}/{series.cover}"
+        class="object-cover w-full h-full"
+    />
+{:else}
+    <div></div>
+{/if}
 
 <a
     href="/series/{series.filename}"

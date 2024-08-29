@@ -59,11 +59,13 @@
 
     <!-- Info -->
     <div class="flex gap-8 py-4 px-8">
-        <!-- Image -->
-        <img
-            src="/api/cover/{series.filename}/{series.cover}"
-            class="object-cover w-[40vw] max-w-[20em] shadow-lg"
-        />
+        {#if series.cover}
+            <!-- Image -->
+            <img
+                src="/api/cover/{series.filename}/{series.cover}"
+                class="object-cover w-[40vw] max-w-[20em] shadow-lg"
+            />
+        {/if}
 
         <!-- Info -->
         <div class="flex flex-col justify-center">
@@ -83,6 +85,14 @@
             <ChapterRow seriesId={series.filename} {chapter} />
         {/each}
         <hr />
+
+        {#if !series.chapters.length}
+            <p
+                class="m-auto pt-[5vw] h-full w-full flex justify-center text-muted-foreground"
+            >
+                No chapters found
+            </p>
+        {/if}
     </div>
 </div>
 

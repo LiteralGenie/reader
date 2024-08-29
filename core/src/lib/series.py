@@ -121,7 +121,7 @@ def get_all_series(cfg: Config) -> list[dict]:
         info["filename"] = fp.name
         series.append(info)
 
-    series.sort(key=lambda info: info["name"] or info["filename"])
+    series.sort(key=lambda info: info["name"].lower() or info["filename"].lower())
 
     return series
 
@@ -140,7 +140,7 @@ def get_all_chapters(cfg: Config, series: str):
         info = get_chapter(cfg, series, fp.name)
         chaps.append(info)
 
-    chaps.sort(key=lambda info: info["name"] or info["filename"])
+    chaps.sort(key=lambda info: info["name"].lower() or info["filename"].lower())
 
     return chaps
 
@@ -165,7 +165,7 @@ def get_all_pages(cfg: Config, series: str, chapter: str):
         d["size"] = fp.stat().st_size
 
         pages.append(d)
-    pages.sort(key=lambda d: d["filename"])
+    pages.sort(key=lambda d: d["filename"].lower())
 
     return pages
 
