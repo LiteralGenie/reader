@@ -16,7 +16,9 @@
             {chapter.name || chapter.filename}
         </span>
 
-        <div class="flex gap-6 items-center text-muted-foreground">
+        <div
+            class="flex gap-6 items-center text-muted-foreground text-center"
+        >
             <span>{chapter.num_pages} pages</span>
         </div>
     </a>

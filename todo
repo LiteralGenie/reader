@@ -4,7 +4,6 @@ edit chapter - 5
 unload gpu memory when idle - 1
 nav menu - 2
 definitions page - 3
-parse MU / MD ids from url - 1
 
 demo
     resource blocks

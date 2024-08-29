@@ -39,7 +39,10 @@ async function postSeries(req: PostSeriesRequest) {
     return resp
 }
 
-export async function importMangaDexSeries(id: string) {
+export async function importMangaDexSeries(maybeId: string) {
+    const patt = new RegExp('mangadex.org/title/([a-z0-9-]+)', 'i')
+    const id = maybeId.match(patt)?.[1] ?? maybeId
+
     // Get series info
     const infoResp = await fetch(`/api/proxy/mangadex/manga/${id}`)
     throwOnStatus(infoResp)
@@ -101,7 +104,13 @@ async function fetchMdCover(id: string, info: any) {
     return imBytes
 }
 
-export async function importMangaUpdatesSeries(id: string) {
+export async function importMangaUpdatesSeries(maybeId: string) {
+    const patt = new RegExp(
+        'mangaupdates.com/series/([a-z0-9-]+)',
+        'i'
+    )
+    const id = maybeId.match(patt)?.[1] ?? maybeId
+
     // Get series info
     const realId = parseInt(id, 36)
     const infoResp = await fetch(
