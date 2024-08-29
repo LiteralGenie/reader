@@ -83,6 +83,7 @@ https://abc.xyz/ch09/002.png"
                     type="number"
                     name="min-width"
                     placeholder="300"
+                    disabled={isSubmitting}
                 />
             </div>
             <div>
@@ -91,6 +92,7 @@ https://abc.xyz/ch09/002.png"
                     type="number"
                     name="min-height"
                     placeholder="300"
+                    disabled={isSubmitting}
                 />
             </div>
         </div>
@@ -101,6 +103,7 @@ https://abc.xyz/ch09/002.png"
                 type="text"
                 name="url-regex"
                 placeholder="http://.*whatever.*png"
+                disabled={isSubmitting}
             />
             <p class="text-muted-foreground italic text-xs">
                 For URLs that link to multiple images, each image URL

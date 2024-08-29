@@ -27,6 +27,7 @@ class JobManager:
             WHERE
                 type = ?
                 AND processing = 0
+            ORDER BY rowid
             """,
             [self.job_type],
         ).fetchall()
@@ -218,6 +219,7 @@ def start_job_worker(
     initializer: Callable | None = None,
     initargs=(),
     delay: float = 1,
+    batch_size: int | None = None,
 ):
     exec = ProcessPoolExecutor(
         1,
@@ -231,6 +233,8 @@ def start_job_worker(
 
         while True:
             todo = jobber.select_all_pending()
+            if batch_size:
+                todo = todo[:batch_size]
 
             if not todo:
                 await asyncio.sleep(delay)

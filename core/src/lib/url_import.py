@@ -30,7 +30,7 @@ def start_import_job_worker(cfg: Config):
         cfg,
         IMPORT_JOB_TYPE,
         _process_all_jobs,
-        initargs=(cfg,),
+        batch_size=1,
     )
 
 

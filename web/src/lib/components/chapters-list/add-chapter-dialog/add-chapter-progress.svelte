@@ -102,12 +102,12 @@
         <div class="pt-2"></div>
     {/if}
 
-    <div class="p-4 px-6">
+    <div class="p-4 pl-6 pr-16">
         <span class="font-bold pr-2">Chapter URL: </span>
         <a
             {href}
             target="_blank"
-            class="link-color underline text-primary"
+            class="link-color underline text-primary break-all"
         >
             {href}
         </a>
