@@ -4,10 +4,14 @@ import json
 import time
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
-from typing import Callable
+from typing import Any, Callable
 
 from .config import Config
 from .db.reader_db import ReaderDb, load_reader_db
+
+
+class _NULL:
+    pass
 
 
 @dataclass
@@ -41,7 +45,7 @@ class JobManager:
             [(id, self.job_type) for id in ids],
         )
 
-    def select(self, id: str) -> dict:
+    def select(self, id: str, default: Any = _NULL) -> Any:
         r = self.db.execute(
             """
                 SELECT data FROM jobs
@@ -52,12 +56,15 @@ class JobManager:
             [id, self.job_type],
         ).fetchone()
 
+        if not r and default is not _NULL:
+            return default
+
         return json.loads(r["data"])
 
-    def select_progress(self, id: str) -> dict | None:
+    def select_progress(self, id: str) -> tuple[dict, bool] | None:
         r = self.db.execute(
             """
-                SELECT progress FROM jobs
+                SELECT progress, done_at FROM jobs
                 WHERE
                     id = ?
                     AND type = ?
@@ -65,7 +72,13 @@ class JobManager:
             [id, self.job_type],
         ).fetchone()
 
-        return json.loads(r["progress"]) if r else None
+        if not r:
+            return None
+
+        progress = json.loads(r["progress"])
+        done_at = bool(r["done_at"])
+
+        return progress, done_at
 
     def update_progress(self, id: str, progress: dict):
         self.db.execute(
@@ -147,7 +160,7 @@ class JobManager:
             ],
         )
 
-    def get_done(self, id: str) -> tuple[dict | None, dict | None]:
+    def select_done(self, id: str) -> tuple[dict | None, dict | None]:
         r = self.db.execute(
             """
             SELECT result, error, done_at
@@ -165,6 +178,37 @@ class JobManager:
         result = json.loads(r["result"]) if r["result"] else None
         error = json.loads(r["error"]) if r["error"] else None
         return result, error
+
+    def select_queue_position(self, id: str) -> int:
+        rowid_r = self.db.execute(
+            """
+            SELECT rowid
+            FROM jobs
+            WHERE
+                id = ?
+                AND type = ?
+            """,
+            [id, self.job_type],
+        ).fetchone()
+
+        if not rowid_r:
+            return 0
+
+        rowid = rowid_r["rowid"]
+
+        r = self.db.execute(
+            """
+            SELECT COUNT(*) count
+            FROM jobs
+            WHERE
+                type = ?
+                AND done_at IS NULL
+                AND rowid < ?
+            """,
+            [self.job_type, rowid],
+        ).fetchone()
+
+        return r["count"]
 
 
 def start_job_worker(
@@ -236,7 +280,7 @@ def wait_job(
 
     result, error = None, None
     while result is None and error is None:
-        result, error = jobber.get_done(id)
+        result, error = jobber.select_done(id)
 
         if timeout and (time.time() - start) > timeout:
             raise TimeoutError()

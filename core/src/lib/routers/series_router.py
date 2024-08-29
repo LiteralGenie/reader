@@ -6,8 +6,7 @@ import shutil
 import traceback
 from pathlib import Path
 
-from fastapi import (APIRouter, File, Form, HTTPException, Request, Response,
-                     UploadFile)
+from fastapi import APIRouter, File, Form, HTTPException, Request, Response, UploadFile
 from fastapi.responses import FileResponse, StreamingResponse
 from PIL import Image
 from pydantic import BaseModel
@@ -17,12 +16,21 @@ from ..db.chapter_db import load_chapter_db, update_chapter
 from ..db.reader_db import load_reader_db
 from ..db.series_db import load_series_db, update_series
 from ..job_utils import JobManager, wait_job
-from ..misc_utils import sanitize_or_raise_400
+from ..misc_utils import dump_sse_event, sanitize_or_raise_400
 from ..proxy.proxy import PROXY_JOB_TYPE, insert_proxy_job
-from ..series import (count_file_types, create_series, get_all_chapters,
-                      get_all_pages, get_all_series, get_chapter, get_series,
-                      raise_on_size_limit, upsert_cover, validate_image_upload)
-from ..url_import import get_import_job_progress, insert_import_job
+from ..series import (
+    count_file_types,
+    create_series,
+    get_all_chapters,
+    get_all_pages,
+    get_all_series,
+    get_chapter,
+    get_series,
+    raise_on_size_limit,
+    upsert_cover,
+    validate_image_upload,
+)
+from ..url_import import IMPORT_JOB_TYPE, insert_import_job
 
 router = APIRouter()
 
@@ -485,14 +493,14 @@ def import_chapter(req: Request, body: ImportChapterRequest):
     chap_dir = cfg.root_image_folder / series / chapter
     if chap_dir.exists():
         raise HTTPException(400)
-    
+
     patt = None
     if body.patt:
         try:
             patt = re.compile(body.patt)
         except:
             raise HTTPException(400)
-    
+
     db = load_reader_db()
     job_id = insert_import_job(
         db,
@@ -501,7 +509,7 @@ def import_chapter(req: Request, body: ImportChapterRequest):
         body.chapter_name,
         body.min_width,
         body.min_height,
-        patt
+        patt,
     )
 
     return dict(
@@ -514,20 +522,55 @@ def import_chapter(req: Request, body: ImportChapterRequest):
 def import_chapter_progress(req: Request, job_id: str):
     async def poll():
         db = load_reader_db()
+        jobber = JobManager(db, IMPORT_JOB_TYPE)
 
+        # Wait for job to be created
+        while (job := jobber.select(job_id, None)) is None:
+            await asyncio.sleep(1)
+
+        # Notify metadata
+        yield dump_sse_event(
+            dict(
+                type="metadata",
+                value=dict(
+                    urls=job["urls"],
+                    chapter=Path(job["chap_dir"]).name,
+                    series=Path(job["chap_dir"]).parent.name,
+                ),
+            )
+        )
+
+        # Notify queue position
         while True:
-            progress = get_import_job_progress(db, job_id)
-            if progress is None:
+            pos = jobber.select_queue_position(job_id)
+            print("pos", pos)
+            if pos == 0:
                 break
-            elif not len(progress):
-                await asyncio.sleep(0.5)
+
+            yield dump_sse_event(
+                dict(
+                    type="position",
+                    value=pos,
+                )
+            )
+            await asyncio.sleep(3)
+
+        # Notify progress
+        while True:
+            # Job was maybe deleted
+            r = jobber.select_progress(job_id)
+            if r is None:
+                break
+
+            # Job just started
+            progress, done_at = r
+            if not len(progress):
+                await asyncio.sleep(1)
                 continue
 
-            resp = "data: " + json.dumps(progress) + "\n\n"
-            yield resp
+            yield dump_sse_event(dict(type="progress", value=progress))
 
-            rem = progress["total"] - len(progress["done"]) - len(progress["ignored"])
-            if rem <= 0:
+            if done_at:
                 break
             else:
                 await asyncio.sleep(0.5)

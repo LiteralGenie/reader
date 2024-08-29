@@ -17,7 +17,7 @@ from .db.reader_db import ReaderDb, load_reader_db
 from .job_utils import JobManager, start_job_worker
 from .paths import DATA_DIR
 
-_JOB_TYPE = "import"
+IMPORT_JOB_TYPE = "import"
 
 _WORKER_SESSION: CachedSession = None  # type: ignore
 
@@ -28,7 +28,7 @@ RequestHistory: TypeAlias = list[tuple[float, int]]
 def start_import_job_worker(cfg: Config):
     start_job_worker(
         cfg,
-        _JOB_TYPE,
+        IMPORT_JOB_TYPE,
         _process_all_jobs,
         initargs=(cfg,),
     )
@@ -47,7 +47,7 @@ def insert_import_job(
 
     id = uuid4().hex
 
-    jobber = JobManager(db, _JOB_TYPE)
+    jobber = JobManager(db, IMPORT_JOB_TYPE)
     jobber.insert(
         id,
         dict(
@@ -64,15 +64,9 @@ def insert_import_job(
     return id
 
 
-def get_import_job_progress(db: ReaderDb, job_id: str):
-    jobber = JobManager(db, _JOB_TYPE)
-    progress = jobber.select_progress(job_id)
-    return progress
-
-
 def _process_all_jobs(cfg: Config, job_ids: list[str]):
     reader_db = load_reader_db()
-    jobber = JobManager(reader_db, _JOB_TYPE)
+    jobber = JobManager(reader_db, IMPORT_JOB_TYPE)
 
     global _WORKER_SESSION
     if _WORKER_SESSION is None:

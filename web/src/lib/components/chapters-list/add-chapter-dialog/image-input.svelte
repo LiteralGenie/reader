@@ -6,7 +6,7 @@
 
     export let isSubmitting: boolean
 
-    let mode: 'file-mode' | 'url-mode' = 'url-mode'
+    let mode: 'file-mode' | 'url-mode' = 'file-mode'
 </script>
 
 <div class={$$restProps.class ?? ''}>

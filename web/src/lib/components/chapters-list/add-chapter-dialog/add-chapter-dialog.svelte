@@ -1,12 +1,3 @@
-<script context="module" lang="ts">
-    export interface AddChapterJob {
-        jobId: string
-        seriesId: string
-        chapterId: string
-        urls: string[]
-    }
-</script>
-
 <script lang="ts">
     import { goto } from '$app/navigation'
     import type { SeriesWithChaptersDto } from '$lib/api/dtos'
@@ -25,7 +16,7 @@
     const dispatch = createEventDispatcher()
 
     let isSubmitting: boolean = false
-    let job: AddChapterJob | null = null
+    let jobId: string | null = null
     $: disabled = isSubmitting
 
     async function onSubmit(ev: SubmitEvent) {
@@ -104,8 +95,7 @@
                 throwOnStatus(resp)
 
                 const { job_id } = await resp.json()
-
-                job = { jobId: job_id, seriesId, chapterId, urls }
+                jobId = job_id
             }
         } catch (e) {
             alert(String(e))
@@ -115,7 +105,7 @@
     }
 
     function onReset() {
-        job = null
+        jobId = null
     }
 </script>
 
@@ -125,8 +115,8 @@
     preventClose={disabled}
     class="w-[90vw] max-w-[50em] h-max m-auto"
 >
-    {#if job}
-        <AddChapterProgress {job} on:reset={onReset} on:done />
+    {#if jobId}
+        <AddChapterProgress {jobId} on:reset={onReset} on:done />
     {:else}
         <div class="px-6 pb-8">
             <div class="pt-5 pb-8 flex items-center">

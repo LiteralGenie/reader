@@ -1,3 +1,4 @@
+import json
 from dataclasses import fields, is_dataclass
 from pathlib import Path
 
@@ -82,3 +83,7 @@ def log_422s(app: FastAPI):
         return JSONResponse(
             content=content, status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
         )
+
+
+def dump_sse_event(data: dict) -> str:
+    return "data: " + json.dumps(data) + "\n\n"

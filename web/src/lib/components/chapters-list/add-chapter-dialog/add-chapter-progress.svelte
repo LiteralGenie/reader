@@ -1,10 +1,29 @@
 <script context="module" lang="ts">
-    interface Progress {
-        total: number
-        done: string[]
-        ignored: string[]
-        phase: 'scanning' | 'downloading'
+    interface MetadataEvent {
+        type: 'metadata'
+        value: {
+            urls: string[]
+            chapter: string
+            series: string
+        }
     }
+
+    interface PositionEvent {
+        type: 'position'
+        value: number
+    }
+
+    interface ProgressEvent {
+        type: 'progress'
+        value: {
+            total: number
+            done: string[]
+            ignored: string[]
+            phase: 'scanning' | 'downloading'
+        }
+    }
+
+    type SseEvent = MetadataEvent | PositionEvent | ProgressEvent
 </script>
 
 <script lang="ts">
@@ -16,21 +35,22 @@
     import Button from '$lib/components/ui/button/button.svelte'
     import { createEventDispatcher, onMount } from 'svelte'
     import { writable } from 'svelte/store'
-    import type { AddChapterJob } from './add-chapter-dialog.svelte'
 
-    export let job: AddChapterJob
+    export let jobId: string
     export let done = false
 
     const dispatch = createEventDispatcher()
 
-    $: progress = writable<Progress | null>(null)
+    $: job = writable<MetadataEvent['value'] | null>(null)
+    $: position = writable<number | null>(null)
+    $: progress = writable<ProgressEvent['value'] | null>(null)
     $: href =
         new URL($page.url).origin +
-        `/series/${job.seriesId}/${job.chapterId}`
+        `/series/${$job?.series}/${$job?.chapter}`
 
     onMount(() => {
         const url = new URL(window.location.href)
-        url.pathname = `/api/import_chapter/${euc(job.jobId)}`
+        url.pathname = `/api/import_chapter/${euc(jobId)}`
 
         const evtSource = new EventSource(url)
         evtSource.onmessage = (ev) => {
@@ -41,8 +61,14 @@
                 return
             }
 
-            const update: Progress = JSON.parse(ev.data)
-            progress.set(update)
+            const event = JSON.parse(ev.data) as SseEvent
+            if (event.type === 'metadata') {
+                job.set(event.value)
+            } else if (event.type === 'position') {
+                position.set(event.value)
+            } else {
+                progress.set(event.value)
+            }
         }
     })
 </script>
@@ -52,20 +78,23 @@
         <div
             class="flex items-center bg-primary text-primary-foreground rounded-t-md p-6"
         >
-            {#if !$progress || $progress?.phase === 'scanning'}
-                <Loader
-                    class="size-4 mr-1 stroke-primary-foreground fill-primary-foreground"
-                />
-
-                <p class="font-semibold">Scanning URLs...</p>
-            {:else if $progress?.phase === 'downloading'}
-                <Loader
-                    class="size-4 mr-1 stroke-primary-foreground fill-primary-foreground"
-                />
-
+            <Loader
+                class="size-4 mr-2 stroke-primary-foreground fill-primary-foreground"
+            />
+            {#if $progress?.phase === 'downloading'}
                 <p class="font-semibold">
                     Downloading images ({$progress.done.length +
                         $progress.ignored.length} / {$progress.total})...
+                </p>
+            {:else if $progress?.phase === 'scanning'}
+                <p class="font-semibold">Scanning URLs...</p>
+            {:else if $position !== null}
+                <p class="font-semibold">
+                    Waiting on {$position} other uploads...
+                </p>
+            {:else}
+                <p class="font-semibold">
+                    Checking queue position...
                 </p>
             {/if}
         </div>
@@ -89,11 +118,11 @@
     <div class="flex-grow h-full flex flex-col gap-4 px-8 pt-4 pb-8">
         <div class="flex flex-col gap-1">
             <h2 class="font-semibold">
-                Input URLs ({job.urls.length})
+                Input URLs ({$job?.urls.length ?? 0})
             </h2>
             <Textarea
                 readonly
-                value={job.urls}
+                value={$job?.urls ?? ''}
                 class="flex-grow bg-muted text-muted-foreground whitespace-pre"
             />
         </div>

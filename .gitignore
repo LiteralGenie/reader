@@ -4,6 +4,8 @@ data/dictionary.sqlite
 data/http_cache.sqlite
 data/llm_cache.sqlite
 data/reader.sqlite
+data/series/*
+!data/series/gongyoo
 
 *.log
 *.sqlite-wal
