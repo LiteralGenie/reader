@@ -220,6 +220,8 @@ def start_job_worker(
     initargs=(),
     delay: float = 1,
     batch_size: int | None = None,
+    idle_fn: Callable[[], None] | None = None,
+    idle_time: float = 300,
 ):
     exec = ProcessPoolExecutor(
         1,
@@ -230,13 +232,20 @@ def start_job_worker(
     async def fn():
         db = load_reader_db()
         jobber = JobManager(db, job_type)
+        loop = asyncio.get_running_loop()
 
+        last_request = time.time()
+        is_idle = True
         while True:
             todo = jobber.select_all_pending()
             if batch_size:
                 todo = todo[:batch_size]
 
             if not todo:
+                if idle_fn and not is_idle and time.time() - last_request >= idle_time:
+                    is_idle = True
+                    await loop.run_in_executor(exec, idle_fn)
+
                 await asyncio.sleep(delay)
                 continue
 
@@ -244,8 +253,10 @@ def start_job_worker(
             jobber.lock_all(todo)
             db.commit()
 
-            loop = asyncio.get_running_loop()
             await loop.run_in_executor(exec, consume_fn, cfg, todo)
+
+            last_request = time.time()
+            is_idle = False
 
     return asyncio.create_task(fn())
 

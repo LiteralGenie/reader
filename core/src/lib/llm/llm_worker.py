@@ -1,6 +1,8 @@
+import gc
 import traceback
 from typing import Literal
 
+import torch
 from llama_cpp import Llama
 
 from ..config import Config
@@ -13,7 +15,7 @@ from .mtl import mtl
 _JOB_TYPE = "llm"
 
 
-_WORKER_LLM: Llama = None  # type: ignore
+_WORKER_LLM: Llama | None = None
 
 
 def start_llm_job_worker(cfg: Config):
@@ -21,8 +23,8 @@ def start_llm_job_worker(cfg: Config):
         cfg,
         _JOB_TYPE,
         _process_all_jobs,
-        initializer=_init_worker,
-        initargs=(cfg,),
+        idle_fn=_unload_worker,
+        idle_time=30,
     )
 
 
@@ -48,19 +50,13 @@ def insert_llm_job(
     db.commit()
 
 
-def _init_worker(cfg: Config):
-    global _WORKER_LLM
-    _WORKER_LLM = Llama.from_pretrained(
-        cfg.llm_model_id,
-        cfg.llm_model_file,
-        n_ctx=2048,
-        n_gpu_layers=cfg.llm_num_gpu_layers,
-    )
-
-
 def _process_all_jobs(cfg: Config, job_ids: list[str]):
     reader_db = load_reader_db()
     jobber = JobManager(reader_db, _JOB_TYPE)
+
+    global _WORKER_LLM
+    if _WORKER_LLM is None:
+        _WORKER_LLM = _init_worker(cfg)
 
     for id in job_ids:
         try:
@@ -100,3 +96,27 @@ def _process_job(
         insert_best_defs(cache, job["text"], best_defs)
 
     cache.commit()
+
+
+def _init_worker(cfg: Config):
+    return Llama.from_pretrained(
+        cfg.llm_model_id,
+        cfg.llm_model_file,
+        n_ctx=2048,
+        n_gpu_layers=cfg.llm_num_gpu_layers,
+    )
+
+
+def _unload_worker():
+    global _WORKER_LLM
+    if not _WORKER_LLM:
+        return
+
+    print("unloading llm")
+
+    _WORKER_LLM = None
+
+    gc.collect()
+
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()

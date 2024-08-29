@@ -1,9 +1,8 @@
-import json
+import gc
 import traceback
 from itertools import chain
 from pathlib import Path
 from typing import Generator
-from uuid import uuid4
 
 import doctr
 import torch
@@ -20,6 +19,8 @@ from .db.reader_db import ReaderDb, load_reader_db
 from .job_utils import JobManager, start_job_worker
 
 _JOB_TYPE = "ocr"
+
+_WORKER_PREDICTOR: OCRPredictor | None = None
 
 
 def get_all_ocr_data(chap_dir: Path) -> dict[Path, dict | None]:
@@ -40,8 +41,8 @@ def start_ocr_job_worker(cfg: Config):
         cfg,
         _JOB_TYPE,
         _process_all_jobs,
-        initializer=_init_worker,
-        initargs=(cfg,),
+        idle_fn=_unload_worker,
+        idle_time=30,
     )
 
 
@@ -63,6 +64,10 @@ def _process_all_jobs(cfg: Config, job_ids: list[str]):
     reader_db = load_reader_db()
     jobber = JobManager(reader_db, _JOB_TYPE)
 
+    global _WORKER_PREDICTOR
+    if _WORKER_PREDICTOR is None:
+        _WORKER_PREDICTOR = _load_predictor(cfg)
+
     for id in job_ids:
         try:
             _process_job(
@@ -77,14 +82,6 @@ def _process_all_jobs(cfg: Config, job_ids: list[str]):
 
             jobber.delete(id)
             reader_db.commit()
-
-
-_WORKER_PREDICTOR: OCRPredictor = None  # type: ignore
-
-
-def _init_worker(cfg: Config):
-    global _WORKER_PREDICTOR
-    _WORKER_PREDICTOR = _load_predictor(cfg)
 
 
 def _process_job(
@@ -235,3 +232,18 @@ def _rescale(match: OcrMatch, k: float) -> OcrMatch:
         match.confidence,
         match.value,
     )
+
+
+def _unload_worker():
+    global _WORKER_PREDICTOR
+    if not _WORKER_PREDICTOR:
+        return
+
+    print("unloading ocr model")
+
+    _WORKER_PREDICTOR = None
+
+    gc.collect()
+
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
