@@ -36,9 +36,9 @@
                 disabled={isSubmitting}
             >
                 <RadioGroup.Item value="url-mode" name="url-mode" />
-                <Label for="url-mode" class="cursor-[unset]"
-                    >URL</Label
-                >
+                <Label for="url-mode" class="cursor-[unset]">
+                    URL
+                </Label>
             </button>
         </RadioGroup.Root>
     </div>
@@ -66,6 +66,7 @@
 https://abc.xyz/ch09/001.png
 https://abc.xyz/ch09/002.png"
                 disabled={isSubmitting}
+                class="whitespace-pre"
             />
 
             <p class="text-muted-foreground italic text-xs">

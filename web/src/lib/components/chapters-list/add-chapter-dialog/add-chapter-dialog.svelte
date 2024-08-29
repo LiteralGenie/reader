@@ -1,7 +1,9 @@
 <script context="module" lang="ts">
-    interface Job {
+    export interface AddChapterJob {
         jobId: string
+        seriesId: string
         chapterId: string
+        urls: string[]
     }
 </script>
 
@@ -23,8 +25,8 @@
     const dispatch = createEventDispatcher()
 
     let isSubmitting: boolean = false
-    let job: Job | null = null
-    $: disabled = isSubmitting || !!job
+    let job: AddChapterJob | null = null
+    $: disabled = isSubmitting
 
     async function onSubmit(ev: SubmitEvent) {
         isSubmitting = true
@@ -63,7 +65,7 @@
                 })
                 throwOnStatus(resp)
 
-                onDone(chapterId)
+                goto(`/series/${seriesId}/${chapterId}`)
             } else {
                 const rawUrls = data.get('urls') as string | null
                 if (!rawUrls?.trim()) {
@@ -98,7 +100,7 @@
 
                 const { job_id } = await resp.json()
 
-                job = { jobId: job_id, chapterId }
+                job = { jobId: job_id, seriesId, chapterId, urls }
             }
         } catch (e) {
             alert(String(e))
@@ -107,8 +109,8 @@
         }
     }
 
-    function onDone(chapterId: string) {
-        goto(`/series/${seriesId}/${chapterId}`)
+    function onReset() {
+        job = null
     }
 </script>
 
@@ -119,23 +121,17 @@
     class="w-[90vw] max-w-[50em] h-max m-auto"
 >
     {#if job}
-        <div class="bg-primary p-4 rounded-t-md flex justify-center">
-            <AddChapterProgress
-                jobId={job.jobId}
-                on:done={() => onDone(job?.chapterId ?? '')}
+        <AddChapterProgress {job} on:reset={onReset} on:done />
+    {:else}
+        <div class="px-6 pb-8">
+            <div class="pt-5 pb-8 flex items-center">
+                <h1 class="text-xl font-bold">Add Chapter</h1>
+            </div>
+            <AddChapterForm
+                on:submit={onSubmit}
+                on:close={() => (disabled ? '' : dispatch('close'))}
+                {disabled}
             />
         </div>
     {/if}
-
-    <div class="px-6 pb-8">
-        <div class="pt-5 pb-8 flex items-center">
-            <h1 class="text-xl font-bold">Add Chapter</h1>
-        </div>
-
-        <AddChapterForm
-            on:submit={onSubmit}
-            on:close={() => (disabled ? '' : dispatch('close'))}
-            {disabled}
-        />
-    </div>
 </BasicDialog>

@@ -27,6 +27,7 @@
                 Import from <a
                     {href}
                     class="underline text-foreground inline-flex items-center gap-[0.25em] hover:text-primary"
+                    target="_blank"
                 >
                     {name}
                 </a>

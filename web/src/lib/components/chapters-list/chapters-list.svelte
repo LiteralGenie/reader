@@ -11,6 +11,12 @@
     export let series: SeriesWithChaptersDto
 
     let showAddChapter = false
+
+    async function onNewChapter() {
+        series = await (
+            await fetch(`/api/series/${series.filename}`)
+        ).json()
+    }
 </script>
 
 <div class="flex flex-col h-full">
@@ -83,7 +89,12 @@
 <!-- Fading background image -->
 <img src="/api/cover/{series.filename}/{series.cover}" class="bg" />
 
-<AddChapterDialog open={showAddChapter} seriesId={series.filename} />
+<AddChapterDialog
+    open={showAddChapter}
+    seriesId={series.filename}
+    on:close={() => (showAddChapter = false)}
+    on:done={onNewChapter}
+/>
 
 <style lang="postcss">
     .bg {
