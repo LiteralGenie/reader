@@ -55,6 +55,7 @@ def update_series(
     name: str | None = None,
     id_mangaupdates: str | None = None,
     id_mangadex: str | None = None,
+    autogen_cover: bool | None = None,
 ):
     targets = []
     if name is not None:
@@ -63,6 +64,8 @@ def update_series(
         targets.append(("id_mangaupdates", id_mangaupdates))
     if id_mangadex is not None:
         targets.append(("id_mangadex", id_mangadex))
+    if autogen_cover is not None:
+        targets.append(("autogen_cover", autogen_cover))
 
     if not targets:
         return

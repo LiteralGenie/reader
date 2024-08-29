@@ -12,21 +12,21 @@ import chapter queue position
 import chapter request cache
 
 demo
-    resource blocks
-        as panic button enabled by env
-        ocr
-        mtl
-    resource limits
-        length llm input
-        length nlp input
-        disable prefetch
-        uploads per ip
-    hide custom uploads
-    lock default uploads
-        no ocr edits
-        no chapter edits
-        no chapter uploads
-        no series edits
+resource blocks
+as panic button enabled by env
+ocr
+mtl
+resource limits
+length llm input
+length nlp input
+disable prefetch
+uploads per ip
+hide custom uploads
+lock default uploads
+no ocr edits
+no chapter edits
+no chapter uploads
+no series edits
 
 use template for llm definitions
 logging

@@ -103,6 +103,7 @@ def create_series_(
             name,
             id_mangadex=id_mangadex,
             id_mangaupdates=id_mangaupdates,
+            autogen_cover=not cover_im,
         )
     except FileExistsError:
         raise HTTPException(400)

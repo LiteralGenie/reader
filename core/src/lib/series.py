@@ -46,6 +46,7 @@ def create_series(
     name: str,
     id_mangadex: str | None = None,
     id_mangaupdates: str | None = None,
+    autogen_cover: bool | None = None,
 ) -> SeriesDb:
     series_dir = cfg.root_image_folder / filename
     series_dir.mkdir()
@@ -56,6 +57,7 @@ def create_series(
         name=name,
         id_mangadex=id_mangadex,
         id_mangaupdates=id_mangaupdates,
+        autogen_cover=autogen_cover,
     )
 
     return db

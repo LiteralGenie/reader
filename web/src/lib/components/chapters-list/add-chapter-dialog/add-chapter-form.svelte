@@ -22,6 +22,11 @@
             placeholder="069 - Human Age"
             {disabled}
         />
+        <p class="text-xs text-muted-foreground italic">
+            For proper ordering, names should be prefixed with the
+            chapter number and zero-padded to a consistent number of
+            digits.
+        </p>
     </div>
 
     <ImageInput isSubmitting={disabled} class="py-6" />

@@ -28,7 +28,6 @@
         <Input
             name="name"
             required
-            accept="image/*"
             class="text-xs"
             placeholder="Knight Run"
             disabled={isSubmitting}
@@ -42,6 +41,7 @@
             type="file"
             class="text-sm"
             disabled={isSubmitting}
+            accept="image/*"
         />
     </div>
 
