@@ -13,5 +13,6 @@ pathvalidate
 pillow
 python-multipart
 requests
+requests-cache
 toml
 uvicorn

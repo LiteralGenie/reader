@@ -9,13 +9,17 @@ from uuid import uuid4
 import requests
 from bs4 import BeautifulSoup
 from PIL import Image
+from requests_cache import CachedSession, SQLiteCache
 
 from .config import Config
 from .db.chapter_db import load_chapter_db, update_chapter
 from .db.reader_db import ReaderDb, load_reader_db
 from .job_utils import JobManager, start_job_worker
+from .paths import DATA_DIR
 
 _JOB_TYPE = "import"
+
+_WORKER_SESSION: CachedSession = None  # type: ignore
 
 # time requested, bytes
 RequestHistory: TypeAlias = list[tuple[float, int]]
@@ -70,10 +74,18 @@ def _process_all_jobs(cfg: Config, job_ids: list[str]):
     reader_db = load_reader_db()
     jobber = JobManager(reader_db, _JOB_TYPE)
 
+    global _WORKER_SESSION
+    if _WORKER_SESSION is None:
+        _WORKER_SESSION = CachedSession(
+            backend=SQLiteCache(DATA_DIR / "http_cache.sqlite"),
+            expire_after=10 * 86400,
+        )
+
     for id in job_ids:
         try:
             result = _process_job(
                 cfg,
+                _WORKER_SESSION,
                 jobber,
                 id,
             )
@@ -92,6 +104,7 @@ def _process_all_jobs(cfg: Config, job_ids: list[str]):
 
 def _process_job(
     cfg: Config,
+    session: CachedSession,
     jobber: JobManager,
     job_id: str,
 ):
@@ -128,10 +141,13 @@ def _process_job(
     # (or the image itself if the url points directly to an image)
     for url in job["urls"]:
         try:
-            # Fetch url
             _wait_rate_limit(history, cfg)
-            resp = requests.get(url, headers=headers)
-            history.append((time.time(), len(resp.content)))
+
+            is_cached = session.cache.contains(url=url)
+            resp = session.get(url, headers=headers)
+
+            if not is_cached:
+                history.append((time.time(), len(resp.content)))
         except:
             # traceback.print_exc()
             continue
@@ -197,8 +213,10 @@ def _process_job(
         # Download Image if we haven't already
         if isinstance(image_or_url, str):
             _wait_rate_limit(history, cfg)
-            result = _download_image(image_or_url, rem_bytes, headers)
-            history.append((time.time(), result["size_bytes"]))
+            result = _download_image(session, image_or_url, rem_bytes, headers)
+
+            if not result["is_cached"]:
+                history.append((time.time(), result["size_bytes"]))
 
             if not result["success"]:
                 progress["ignored"].append(image_or_url)
@@ -277,17 +295,20 @@ def _wait_rate_limit(
 
 
 def _download_image(
+    session: CachedSession,
     url: str,
     max_size_bytes: int,
     headers: dict[str, str],
     chunk_size=8192,
 ) -> dict:
+    is_cached = session.cache.contains(url=url)
+
     print("downloading", url)
 
     try:
         buffer = bytearray()
 
-        with requests.get(url, headers=headers, stream=True) as resp:
+        with session.get(url, headers=headers, stream=True) as resp:
             resp.raise_for_status()
 
             if int(resp.headers.get("Content-Length", "0")) > max_size_bytes:
@@ -312,9 +333,11 @@ def _download_image(
             im=im,
             success=True,
             size_bytes=len(buffer),
+            is_cached=is_cached,
         )
     except:
         return dict(
             success=False,
             size_bytes=len(buffer),
+            is_cached=is_cached,
         )

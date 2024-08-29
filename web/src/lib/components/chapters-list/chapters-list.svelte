@@ -62,7 +62,7 @@
         <!-- Image -->
         <img
             src="/api/cover/{series.filename}/{series.cover}"
-            class="object-cover w-[40vw] max-w-md shadow-lg"
+            class="object-cover w-[40vw] max-w-[20em] shadow-lg"
         />
 
         <!-- Info -->
