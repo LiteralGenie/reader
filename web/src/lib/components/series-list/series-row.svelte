@@ -20,8 +20,8 @@
     <div
         class="w-24 flex flex-col text-sm text-muted-foreground leading-tight text-end pr-4"
     >
-        <span>1 chapters</span>
-        <span>100 pages</span>
+        <span>{series.num_chapters} chapters</span>
+        <!-- <span>100 pages</span> -->
     </div>
 </a>
 

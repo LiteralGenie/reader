@@ -10,14 +10,14 @@
 <div class="flex items-center">
     <a
         href="/series/{seriesId}/{chapter.filename}"
-        class="ripple pl-2 pr-4 py-4 h-full w-full rounded-sm flex justify-between items-center"
+        class="ripple pl-2 pr-4 py-4 h-full w-full rounded-sm flex justify-between items-center gap-4"
     >
-        <span>
+        <span class="break-all">
             {chapter.name || chapter.filename}
         </span>
 
         <div class="flex gap-6 items-center text-muted-foreground">
-            <span>100 pages</span>
+            <span>{chapter.num_pages} pages</span>
         </div>
     </a>
 

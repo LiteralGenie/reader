@@ -1,14 +1,13 @@
-edit series
-page counts
-docker
-edit chapter
-unload gpu memory when idle
-null image
-zero chapters
-nav menu
-definitions page
-ocr progress doesnt update
-parse MU / MD ids from url
+edit series - 3
+page counts - 1
+docker - 3
+edit chapter - 5
+unload gpu memory when idle - 1
+null image - 1
+zero chapters - 1
+nav menu - 2
+definitions page - 3
+parse MU / MD ids from url - 1
 
 demo
     resource blocks
@@ -39,3 +38,4 @@ fix spacing before nlp
 hide low confidence matches
 less verbose svelte proxying
 diff sse progress updates
+ocr progress doesnt update

@@ -37,6 +37,9 @@ def get_series(cfg: Config, filename: str):
     cover = get_cover(cfg, filename)
     info["cover"] = cover.name if cover else None
 
+    chapters = get_all_chapters(cfg, filename)
+    info["num_chapters"] = len(chapters)
+
     return info
 
 
@@ -100,6 +103,9 @@ def get_chapter(cfg: Config, series: str, chapter: str):
 
     info = select_chapter(db)
     info["filename"] = chapter
+
+    pages = get_all_pages(cfg, series, chapter)
+    info["num_pages"] = len(pages)
 
     return info
 

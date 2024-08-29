@@ -4,11 +4,13 @@ export interface SeriesDto {
     id_mangaupdates: string
     id_mangadex: string
     cover: string | null
+    num_chapters: number
 }
 
 export interface ChapterDto {
     filename: string
     name: string
+    num_pages: number
 }
 
 export interface PageDto {
