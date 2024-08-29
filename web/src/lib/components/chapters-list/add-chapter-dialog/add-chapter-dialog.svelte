@@ -76,11 +76,15 @@
                     .split(/\s/)
                     .map((url) => url.trim())
 
-                const minWidth =
-                    data.get('minWidth') ?? (300 as number)
+                const minWidth = parseInt(
+                    (data.get('min-width') || '300') as string
+                )
 
-                const minHeight =
-                    data.get('minHeight') ?? (300 as number)
+                const minHeight = parseInt(
+                    (data.get('min-height') || '300') as string
+                )
+
+                const patt = data.get('url-regex') ?? null
 
                 const resp = await fetch('/api/import_chapter', {
                     method: 'POST',
@@ -90,7 +94,8 @@
                         chapter_name: name,
                         urls: urls,
                         min_width: minWidth,
-                        min_height: minHeight
+                        min_height: minHeight,
+                        patt
                     }),
                     headers: {
                         'Content-Type': 'application/json'

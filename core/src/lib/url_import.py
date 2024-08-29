@@ -1,4 +1,5 @@
 import io
+import re
 import time
 import traceback
 from pathlib import Path
@@ -36,6 +37,7 @@ def insert_import_job(
     chap_name: str,
     min_width: int,
     min_height: int,
+    patt: re.Pattern | None,
 ):
     print("Inserting import job for", urls)
 
@@ -50,6 +52,7 @@ def insert_import_job(
             chap_name=chap_name,
             min_width=min_width,
             min_height=min_height,
+            patt=patt.pattern if patt else None,
         ),
     )
     db.commit()
@@ -96,11 +99,14 @@ def _process_job(
     print("Processing import job", job_id, job)
 
     chap_dir = Path(job["chap_dir"])
-
     if chap_dir.exists():
         raise Exception()
     else:
         chap_dir.mkdir()
+
+    url_patt = None
+    if job["patt"]:
+        url_patt = re.compile(job["patt"], flags=re.IGNORECASE)
 
     # Init progress
     progress: dict = dict(
@@ -156,10 +162,21 @@ def _process_job(
                 if not src:
                     continue
 
+                if url_patt and not url_patt.search(src):
+                    continue
+
                 maybe_images.append(src)
 
+    # Truncate candidate list if way too many
+    to_ignore = [
+        x if isinstance(x, str) else x["src"]
+        for x in maybe_images[cfg.max_import_candidates_per_chapter :]
+    ]
+    maybe_images = maybe_images[: cfg.max_import_candidates_per_chapter]
+
     progress["phase"] = "downloading"
-    progress["total"] = len(maybe_images)
+    progress["total"] = len(maybe_images) + len(to_ignore)
+    progress["ignored"] = to_ignore
     jobber.update_progress(job_id, progress)
     jobber.db.commit()
 

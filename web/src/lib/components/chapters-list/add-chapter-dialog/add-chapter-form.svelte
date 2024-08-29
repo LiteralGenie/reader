@@ -12,7 +12,7 @@
 </script>
 
 <form on:submit|preventDefault class="flex flex-col">
-    <div class="flex flex-col gap-2">
+    <div class="flex flex-col gap-1.5">
         <Label for="name">Chapter Name *</Label>
         <Input
             name="name"
@@ -29,16 +29,20 @@
         </p>
     </div>
 
-    <ImageInput isSubmitting={disabled} class="py-6" />
+    <hr class="my-6 border-muted-foreground opacity-20" />
+
+    <ImageInput isSubmitting={disabled} />
 
     <div class="pt-2 flex flex-col gap-4">
         <Button
             {disabled}
             on:click={() => dispatch('close')}
-            variant="secondary">Cancel</Button
+            variant="secondary"
         >
+            <span class="font-semibold">Cancel</span>
+        </Button>
         <Button {disabled} type="submit" class="flex gap-1">
-            <span>Submit</span>
+            <span class="font-semibold">Submit</span>
             {#if disabled}
                 <Loader
                     class="size-3 stroke-primary-foreground text-primary-foreground"

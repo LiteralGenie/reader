@@ -1,11 +1,13 @@
 import asyncio
 import base64
 import json
+import re
 import shutil
 import traceback
 from pathlib import Path
 
-from fastapi import APIRouter, File, Form, HTTPException, Request, Response, UploadFile
+from fastapi import (APIRouter, File, Form, HTTPException, Request, Response,
+                     UploadFile)
 from fastapi.responses import FileResponse, StreamingResponse
 from PIL import Image
 from pydantic import BaseModel
@@ -17,18 +19,9 @@ from ..db.series_db import load_series_db, update_series
 from ..job_utils import JobManager, wait_job
 from ..misc_utils import sanitize_or_raise_400
 from ..proxy.proxy import PROXY_JOB_TYPE, insert_proxy_job
-from ..series import (
-    count_file_types,
-    create_series,
-    get_all_chapters,
-    get_all_pages,
-    get_all_series,
-    get_chapter,
-    get_series,
-    raise_on_size_limit,
-    upsert_cover,
-    validate_image_upload,
-)
+from ..series import (count_file_types, create_series, get_all_chapters,
+                      get_all_pages, get_all_series, get_chapter, get_series,
+                      raise_on_size_limit, upsert_cover, validate_image_upload)
 from ..url_import import get_import_job_progress, insert_import_job
 
 router = APIRouter()
@@ -479,6 +472,7 @@ class ImportChapterRequest(BaseModel):
     urls: list[str]
     min_width: int
     min_height: int
+    patt: str | None
 
 
 @router.post("/import_chapter")
@@ -491,7 +485,14 @@ def import_chapter(req: Request, body: ImportChapterRequest):
     chap_dir = cfg.root_image_folder / series / chapter
     if chap_dir.exists():
         raise HTTPException(400)
-
+    
+    patt = None
+    if body.patt:
+        try:
+            patt = re.compile(body.patt)
+        except:
+            raise HTTPException(400)
+    
     db = load_reader_db()
     job_id = insert_import_job(
         db,
@@ -500,6 +501,7 @@ def import_chapter(req: Request, body: ImportChapterRequest):
         body.chapter_name,
         body.min_width,
         body.min_height,
+        patt
     )
 
     return dict(

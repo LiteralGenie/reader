@@ -89,7 +89,7 @@
     <div class="flex-grow h-full flex flex-col gap-4 px-8 pt-4 pb-8">
         <div class="flex flex-col gap-1">
             <h2 class="font-semibold">
-                Input URLs ({$progress?.done.length ?? 0})
+                Input URLs ({job.urls.length})
             </h2>
             <Textarea
                 readonly

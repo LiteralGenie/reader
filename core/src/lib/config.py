@@ -44,6 +44,7 @@ class Config:
     max_import_bytes_per_second: int
 
     max_import_images_per_chapter: int
+    max_import_candidates_per_chapter: int
 
     user_agent_for_import: str
 

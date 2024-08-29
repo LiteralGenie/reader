@@ -1,4 +1,8 @@
-create chapter
+import chapter queue position
+import chapter request cache
+import regex
+min size for import
+diff progress updates
 edit series
 page counts
 docker
@@ -8,11 +12,7 @@ null image
 zero chapters
 nav menu
 definitions page
-import chapter queue position
-import chapter request cache
-min size for import
-import regex
-diff progress updates
+ocr progress doesnt update
 
 demo
 resource blocks

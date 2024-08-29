@@ -103,6 +103,10 @@ max_import_bytes_per_second = 999_999_999
 # Images that are filtered out by the min dimension constraints are not counted
 max_import_images_per_chapter = 99_999
 
+# Limits the number of images to download / check
+# Unlike max_import_images_per_chapter, even images that are filtered out are counted towards this cap
+max_import_candidates_per_chapter = 999_999
+
 user_agent_for_import = ""
 
 max_mangadex_requests_per_second = 4
