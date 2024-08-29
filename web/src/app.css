@@ -13,7 +13,7 @@ body {
 }
 
 hr {
-    border-color: hsl(var(--border));
+    border-color: hsl(var(--muted-foreground) / 20%);
 }
 
 @layer base {

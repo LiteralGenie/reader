@@ -29,7 +29,7 @@
         </p>
     </div>
 
-    <hr class="my-6 border-muted-foreground opacity-20" />
+    <hr class="my-6" />
 
     <ImageInput isSubmitting={disabled} />
 

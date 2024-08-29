@@ -45,7 +45,7 @@
     </div>
 
     {#if mode === 'file-mode'}
-        <div class="text-sm flex flex-col gap-2 pt-1">
+        <div class="text-sm flex flex-col gap-1.5 pt-0.5 pb-4">
             <input
                 type="file"
                 accept="image/*"

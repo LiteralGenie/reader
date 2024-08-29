@@ -56,7 +56,7 @@
             type="submit"
             class="flex gap-1"
         >
-            <span>Submit</span>
+            <span class="font-semibold">Submit</span>
             {#if showSpinner}
                 <Loader
                     class="size-1 stroke-primary-foreground text-primary-foreground"

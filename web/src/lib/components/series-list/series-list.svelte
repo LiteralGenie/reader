@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { SeriesDto } from '$lib/api/dtos'
     import Plus from '$lib/icons/plus.svelte'
-    import AppHeader from '../app-header.svelte'
+    import AppHeader from '../app-header/app-header.svelte'
     import Button from '../ui/button/button.svelte'
     import AddSeriesDialog from './add-series-dialog/add-series-dialog.svelte'
     import SeriesRow from './series-row.svelte'

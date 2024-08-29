@@ -3,7 +3,7 @@
     import ChevronLeft from '$lib/icons/chevron-left.svelte'
     import Cog_6 from '$lib/icons/cog-6.svelte'
     import Plus from '$lib/icons/plus.svelte'
-    import AppHeader from '../app-header.svelte'
+    import AppHeader from '../app-header/app-header.svelte'
     import Button from '../ui/button/button.svelte'
     import AddChapterDialog from './add-chapter-dialog/add-chapter-dialog.svelte'
     import ChapterRow from './chapter-row.svelte'

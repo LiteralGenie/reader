@@ -1,5 +1,6 @@
 <script lang="ts">
     import type { DefinitionDto, ExampleDto } from '$lib/api/dtos'
+    import AppHeader from '../app-header/app-header.svelte'
     import Definitions from './definitions.svelte'
     import Examples from './examples.svelte'
 
@@ -9,6 +10,8 @@
     export let examples: ExampleDto[]
     export let exampleCount: Promise<number>
 </script>
+
+<AppHeader />
 
 <div class="flex flex-col gap-16 p-4">
     <Definitions {query} {definitions} count={definitionCount} />

@@ -113,7 +113,7 @@
         </a>
     </div>
 
-    <hr class="border-muted mx-4" />
+    <hr class="mx-4" />
 
     <div class="flex-grow h-full flex flex-col gap-4 px-8 pt-4 pb-8">
         <div class="flex flex-col gap-1">
@@ -153,9 +153,9 @@
     </div>
 
     {#if done}
-        <hr class="border-muted mx-4" />
+        <hr class="mx-4" />
 
-        <div class="flex justify-end px-6 py-4">
+        <div class="flex justify-end px-6 py-6">
             <Button on:click={() => dispatch('reset')}>
                 Add New Chapter
             </Button>
