@@ -1,4 +1,5 @@
 import { max, min } from 'radash'
+import sanitize from 'sanitize-filename'
 import type { JSONResponse } from './api/dtos'
 
 export function abs(x: number) {
@@ -41,4 +42,20 @@ export function throwOnStatus(resp: Response, expected = [200]) {
     }
 
     return resp
+}
+
+export function addSuffixUntilUnique(
+    existing: string[],
+    base: string
+) {
+    const baseFilename = sanitize(base)
+    let nameIdx = 2
+
+    let filename = baseFilename
+    while (existing.some((fn) => fn === filename)) {
+        filename = `${baseFilename}_${nameIdx}`
+        nameIdx += 1
+    }
+
+    return filename
 }

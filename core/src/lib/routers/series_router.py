@@ -1,11 +1,12 @@
+import asyncio
 import base64
+import json
 import shutil
-import time
 import traceback
 from pathlib import Path
 
 from fastapi import APIRouter, File, Form, HTTPException, Request, Response, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from PIL import Image
 from pydantic import BaseModel
 
@@ -210,12 +211,13 @@ def delete_series_(req: Request, body: DeleteSeriesRequest):
     return "ok"
 
 
-@router.post("/chapter/{series}/{chapter}")
+@router.post("/chapter")
 def create_chapter(
     req: Request,
-    series: str,
-    chapter: str,
-    pages: list[UploadFile],
+    series: str = Form(),
+    chapter: str = Form(),
+    chapterName: str = Form(),
+    pages: list[UploadFile] = File(),
 ):
     series = sanitize_or_raise_400(series)
     chapter_filename = sanitize_or_raise_400(chapter)
@@ -260,7 +262,7 @@ def create_chapter(
         pg["im"].save(fp)
 
     db = load_chapter_db(chap_dir)
-    update_chapter(db, chapter)
+    update_chapter(db, chapterName)
 
     return get_chapter(cfg, series, chapter_filename)
 
@@ -474,6 +476,8 @@ class ImportChapterRequest(BaseModel):
     chapter: str
     chapter_name: str
     urls: list[str]
+    min_width: int
+    min_height: int
 
 
 @router.post("/import_chapter")
@@ -493,17 +497,41 @@ def import_chapter(req: Request, body: ImportChapterRequest):
         body.urls,
         chap_dir,
         body.chapter_name,
+        body.min_width,
+        body.min_height,
     )
 
-    return job_id, chapter
+    return dict(
+        job_id=job_id,
+        chapter=chapter,
+    )
 
 
 @router.get("/import_chapter/{job_id}")
 def import_chapter_progress(req: Request, job_id: str):
-    db = load_reader_db()
+    async def poll():
+        db = load_reader_db()
 
-    progress = get_import_job_progress(db, job_id)
-    return progress
+        while True:
+            progress = get_import_job_progress(db, job_id)
+            if progress is None:
+                break
+            elif not len(progress):
+                await asyncio.sleep(0.5)
+                continue
+
+            resp = "data: " + json.dumps(progress) + "\n\n"
+            yield resp
+
+            rem = progress["total"] - len(progress["done"]) - len(progress["ignored"])
+            if rem <= 0:
+                break
+            else:
+                await asyncio.sleep(0.5)
+
+        yield "data: close\n\n"
+
+    return StreamingResponse(poll(), media_type="text/event-stream")
 
 
 @router.get("/proxy/mangadex/{rest:path}")

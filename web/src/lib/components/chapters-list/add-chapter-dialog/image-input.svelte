@@ -12,14 +12,19 @@
     <div class="flex gap-4 items-center pb-2">
         <Label>Import from:</Label>
 
-        <RadioGroup.Root class="flex gap-4" bind:value={mode}>
+        <RadioGroup.Root
+            disabled={isSubmitting}
+            class="flex gap-4"
+            bind:value={mode}
+        >
             <button
                 type="button"
                 class="flex items-center gap-1"
                 on:click|preventDefault={() => (mode = 'file-mode')}
+                disabled={isSubmitting}
             >
                 <RadioGroup.Item value="file-mode" name="file-mode" />
-                <Label for="file-mode" class="cursor-pointer">
+                <Label for="file-mode" class="cursor-[unset]">
                     File
                 </Label>
             </button>
@@ -28,11 +33,12 @@
                 type="button"
                 class="flex items-center gap-1"
                 on:click|preventDefault={() => (mode = 'url-mode')}
+                disabled={isSubmitting}
             >
                 <RadioGroup.Item value="url-mode" name="url-mode" />
-                <Label for="url-mode" class="cursor-pointer">
-                    URL
-                </Label>
+                <Label for="url-mode" class="cursor-[unset]"
+                    >URL</Label
+                >
             </button>
         </RadioGroup.Root>
     </div>
@@ -45,6 +51,7 @@
                 multiple
                 name="files"
                 disabled={isSubmitting}
+                required
             />
 
             <p class="text-muted-foreground italic text-xs">

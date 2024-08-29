@@ -27,7 +27,7 @@ def load_reader_db() -> ReaderDb:
             created_at  TEXT     NOT NULL,
             data        TEXT     NOT NULL,
             processing  BOOLEAN  NOT NULL,
-            progress    TEXT,
+            progress    TEXT     NOT NULL,
 
             done_at     TEXT,
             result      TEXT,

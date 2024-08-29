@@ -42,7 +42,10 @@ class Config:
 
     max_import_requests_per_second: int
     max_import_bytes_per_second: int
+
     max_import_images_per_chapter: int
+
+    user_agent_for_import: str
 
     max_mangadex_requests_per_second: int
     max_bakaupdate_requests_per_second: int

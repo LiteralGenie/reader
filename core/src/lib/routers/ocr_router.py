@@ -33,7 +33,6 @@ def ocr_for_chapter(req: Request, series: str, chapter: str):
 
     missing = [fp_image for fp_image in data if data[fp_image] is None]
     missing.sort()
-    print("missing", missing)
     for fp_image in missing:
         insert_ocr_job(load_reader_db(), fp_image)
 

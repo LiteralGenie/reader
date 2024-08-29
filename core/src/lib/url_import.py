@@ -2,7 +2,8 @@ import io
 import time
 import traceback
 from pathlib import Path
-from typing import TypeAlias, cast
+from typing import TypeAlias
+from uuid import uuid4
 
 import requests
 from bs4 import BeautifulSoup
@@ -38,14 +39,14 @@ def insert_import_job(
 ):
     print("Inserting import job for", urls)
 
-    id = f"{urls}"
+    id = uuid4().hex
 
     jobber = JobManager(db, _JOB_TYPE)
     jobber.insert(
         id,
         dict(
             urls=urls,
-            chap_dir=chap_dir,
+            chap_dir=str(chap_dir.absolute()),
             chap_name=chap_name,
             min_width=min_width,
             min_height=min_height,
@@ -94,8 +95,12 @@ def _process_job(
     job = jobber.select(job_id)
     print("Processing import job", job_id, job)
 
-    if job["chap_dir"].exists():
+    chap_dir = Path(job["chap_dir"])
+
+    if chap_dir.exists():
         raise Exception()
+    else:
+        chap_dir.mkdir()
 
     # Init progress
     progress: dict = dict(
@@ -109,6 +114,8 @@ def _process_job(
 
     history: RequestHistory = []
 
+    headers = {"User-Agent": cfg.user_agent_for_import}
+
     maybe_images: list[dict | str] = []
 
     # Extract all image urls from the original urls
@@ -117,7 +124,7 @@ def _process_job(
         try:
             # Fetch url
             _wait_rate_limit(history, cfg)
-            resp = requests.get(url)
+            resp = requests.get(url, headers=headers)
             history.append((time.time(), len(resp.content)))
         except:
             # traceback.print_exc()
@@ -141,7 +148,7 @@ def _process_job(
             )
         else:
             # URL pointed to a doc with <img>s
-            soup = BeautifulSoup(resp.text)
+            soup = BeautifulSoup(resp.text, "lxml")
             imgs = soup.find_all("img")
 
             for el in imgs:
@@ -173,7 +180,7 @@ def _process_job(
         # Download Image if we haven't already
         if isinstance(image_or_url, str):
             _wait_rate_limit(history, cfg)
-            result = _download_image(image_or_url, rem_bytes)
+            result = _download_image(image_or_url, rem_bytes, headers)
             history.append((time.time(), result["size_bytes"]))
 
             if not result["success"]:
@@ -200,7 +207,7 @@ def _process_job(
             continue
 
         # Save image
-        fp_out = job["chap_dir"] / f"{idx_name:03}.png"
+        fp_out = chap_dir / f"{idx_name:03}.png"
         im.save(fp_out)
 
         idx_name += 1
@@ -210,7 +217,7 @@ def _process_job(
         jobber.update_progress(job_id, progress)
         jobber.db.commit()
 
-    db = load_chapter_db(job["chap_dir"])
+    db = load_chapter_db(chap_dir)
     update_chapter(db, name=job["chap_name"])
 
     return progress
@@ -238,22 +245,32 @@ def _wait_rate_limit(
 ):
     count, size = _sum_history(history)
 
-    while (
-        count >= cfg.max_import_requests_per_second
-        or cfg.max_import_bytes_per_second >= size
-    ):
+    while True:
+        count, size = _sum_history(history)
+
+        if (
+            count < cfg.max_import_requests_per_second
+            and size < cfg.max_import_bytes_per_second
+        ):
+            break
+
         time.sleep(delay)
 
     return
 
 
-def _download_image(url: str, max_size_bytes: int, chunk_size=8192) -> dict:
+def _download_image(
+    url: str,
+    max_size_bytes: int,
+    headers: dict[str, str],
+    chunk_size=8192,
+) -> dict:
     print("downloading", url)
 
     try:
         buffer = bytearray()
 
-        with requests.get(url, stream=True) as resp:
+        with requests.get(url, headers=headers, stream=True) as resp:
             resp.raise_for_status()
 
             if int(resp.headers.get("Content-Length", "0")) > max_size_bytes:

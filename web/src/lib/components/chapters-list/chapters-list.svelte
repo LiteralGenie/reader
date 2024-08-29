@@ -9,6 +9,8 @@
     import ChapterRow from './chapter-row.svelte'
 
     export let series: SeriesWithChaptersDto
+
+    let showAddChapter = false
 </script>
 
 <div class="flex flex-col h-full">
@@ -37,7 +39,10 @@
             </Button>
 
             <!-- Add Chapter button -->
-            <Button class="flex gap-1 px-4 ripple">
+            <Button
+                on:click={() => (showAddChapter = true)}
+                class="flex gap-1 px-4 ripple"
+            >
                 <Plus
                     class="size-4 stroke-[3px] stroke-primary-foreground"
                 />
@@ -78,7 +83,7 @@
 <!-- Fading background image -->
 <img src="/api/cover/{series.filename}/{series.cover}" class="bg" />
 
-<AddChapterDialog open={true} />
+<AddChapterDialog open={showAddChapter} seriesId={series.filename} />
 
 <style lang="postcss">
     .bg {

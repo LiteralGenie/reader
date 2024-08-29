@@ -8,6 +8,8 @@ null image
 zero chapters
 nav menu
 definitions page
+import chapter queue position
+import chapter request cache
 
 demo
     resource blocks
@@ -15,12 +17,10 @@ demo
         ocr
         mtl
     resource limits
-        total image area
         length llm input
         length nlp input
         disable prefetch
         uploads per ip
-        cover size
     hide custom uploads
     lock default uploads
         no ocr edits
@@ -32,8 +32,10 @@ use template for llm definitions
 logging
 create ocr blocks
 create chapter from archive
+edit series with md / mu import
 
 move worker init to outside web server (so that uvicorn can spawn multiple workers)
 image load priority
 fix spacing before nlp
 hide low confidence matches
+less verbose svelte proxying

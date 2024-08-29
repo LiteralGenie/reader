@@ -15,6 +15,7 @@ from lib.nlp import start_nlp_pool
 from lib.ocr import start_ocr_job_worker
 from lib.proxy.proxy import start_proxy_job_worker
 from lib.routers import dictionary_router, llm_router, ocr_router, series_router
+from lib.url_import import start_import_job_worker
 
 # web gui doesn't support custom config so just hard code the config here too
 CONFIG_FILE = Path(__file__).parent.parent.parent / "config.toml"
@@ -43,6 +44,7 @@ async def _lifespan(app: FastAPI):
 
     start_ocr_job_worker(cfg)
     start_llm_job_worker(cfg)
+    start_import_job_worker(cfg)
     start_proxy_job_worker(cfg)
 
     yield

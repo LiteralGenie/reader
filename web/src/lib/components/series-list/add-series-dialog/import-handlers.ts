@@ -1,6 +1,5 @@
 import type { SeriesDto } from '$lib/api/dtos'
-import { throwOnStatus } from '$lib/miscUtils'
-import sanitize from 'sanitize-filename'
+import { addSuffixUntilUnique, throwOnStatus } from '$lib/miscUtils'
 
 interface PostSeriesRequest {
     filename: string
@@ -57,7 +56,10 @@ export async function importMangaDexSeries(id: string) {
     const series: SeriesDto[] = await (
         await fetch('/api/series')
     ).json()
-    const filename = addSuffixUntilUnique(series, title)
+    const filename = addSuffixUntilUnique(
+        series.map((s) => s.filename),
+        title
+    )
 
     // Get cover image
     const coverBytes = await fetchMdCover(id, info)
@@ -117,7 +119,10 @@ export async function importMangaUpdatesSeries(id: string) {
     const series: SeriesDto[] = await (
         await fetch('/api/series')
     ).json()
-    const filename = addSuffixUntilUnique(series, title)
+    const filename = addSuffixUntilUnique(
+        series.map((s) => s.filename),
+        title
+    )
 
     // Get cover image
     const coverUrl = info?.image?.url?.original
@@ -136,22 +141,6 @@ export async function importMangaUpdatesSeries(id: string) {
         coverBytes: coverBytes,
         mangaUpdatesId: id
     })
-
-    return filename
-}
-
-export function addSuffixUntilUnique(
-    allSeries: SeriesDto[],
-    base: string
-) {
-    const baseFilename = sanitize(base)
-    let nameIdx = 2
-
-    let filename = baseFilename
-    while (allSeries.some((s) => s.filename === filename)) {
-        filename = `${baseFilename}_${nameIdx}`
-        nameIdx += 1
-    }
 
     return filename
 }
@@ -176,7 +165,10 @@ export async function importManualSeries(data: FormData) {
         await fetch('/api/series')
     ).json()
 
-    const filename = addSuffixUntilUnique(series, name)
+    const filename = addSuffixUntilUnique(
+        series.map((s) => s.filename),
+        name
+    )
 
     // Send request
     const resp = await postSeries({

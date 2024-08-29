@@ -94,9 +94,9 @@ class JobManager:
         self.db.execute(
             """
             INSERT OR IGNORE INTO jobs (
-                id, created_at, type, data, processing
+                id, created_at, type, data, processing, progress
             ) VALUES (
-                ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?
             )
             """,
             [
@@ -105,6 +105,7 @@ class JobManager:
                 self.job_type,
                 json.dumps(data),
                 False,
+                "{}",
             ],
         )
 
