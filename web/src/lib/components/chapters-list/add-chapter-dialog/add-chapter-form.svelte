@@ -17,7 +17,6 @@
         <Input
             name="name"
             required
-            accept="image/*"
             class="text-xs"
             placeholder="069 - Human Age"
             {disabled}

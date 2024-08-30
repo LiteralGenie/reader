@@ -7,6 +7,7 @@
     import Button from '../ui/button/button.svelte'
     import AddChapterDialog from './add-chapter-dialog/add-chapter-dialog.svelte'
     import ChapterRow from './chapter-row.svelte'
+    import EditSeriesDialog from './edit-series-dialog/edit-series-dialog.svelte'
 
     export let series: SeriesWithChaptersDto
 
@@ -41,7 +42,7 @@
                 class="flex gap-2 ripple bg-muted text-foreground"
             >
                 <Cog_6 class="size-4" />
-                <span class="uppercase font-bold"> Edit </span>
+                <span class="uppercase font-bold"> Edit Series </span>
             </Button>
 
             <!-- Add Chapter button -->
@@ -105,6 +106,8 @@
     on:close={() => (showAddChapter = false)}
     on:done={onNewChapter}
 />
+
+<EditSeriesDialog open={true} />
 
 <style lang="postcss">
     .bg {

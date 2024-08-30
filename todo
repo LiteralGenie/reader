@@ -3,6 +3,10 @@ docker - 3
 edit chapter - 5
 definitions page - 3
 footer - 1
+reverse chapter list dropdown - 1
+chapter name overflow - 1
+chapter nav arrows - 1
+mu / md icons - 1
 
 demo
     resource blocks
@@ -34,3 +38,4 @@ hide low confidence matches
 less verbose svelte proxying
 diff sse progress updates
 ocr progress doesnt update
+less hacky dialog titles

@@ -55,16 +55,16 @@
     on:click={handleBackdropClick}
     on:close
     on:keydown={(ev) => onKeyDown(ev)}
-    class="bg-transparent"
+    class="bg-transparent rounded-lg"
 >
     <div
-        class="relative rounded-md bg-popover text-popover-foreground {$$props.class ??
+        class="relative bg-popover text-popover-foreground {$$props.class ??
             ''}"
     >
         {#if !preventClose}
             <Button
                 variant="ghost"
-                class="absolute top-3 right-3 rounded-full p-0 h-max w-max"
+                class="absolute top-3 right-3 rounded-full p-0 h-max w-max hover:bg-background"
                 on:click={handleCloseButtonClick}
             >
                 <XIcon class={closeIconSize} />

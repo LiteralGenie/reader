@@ -16,6 +16,10 @@ hr {
     border-color: hsl(var(--muted-foreground) / 20%);
 }
 
+input::placeholder {
+    color: hsl(var(--muted-foreground) / 66%) !important;
+}
+
 @layer base {
     :root {
         --background: 0 0% 100%;

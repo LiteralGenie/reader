@@ -22,8 +22,6 @@
     .active {
         @apply font-bold text-primary cursor-default;
 
-        &:hover {
-            background-color: hsl(var(--muted) / 30%);
-        }
+        background-color: hsl(var(--muted) / 40%);
     }
 </style>
