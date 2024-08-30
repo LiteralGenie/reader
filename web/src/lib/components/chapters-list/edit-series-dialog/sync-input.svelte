@@ -25,8 +25,6 @@
     <div class="flex gap-1">
         <Input {name} required class="text-xs" {placeholder} />
 
-        <Button class="flex gap-1">
-            <span>Sync</span>
-        </Button>
+        <Button class="flex gap-1 font-bold">Sync</Button>
     </div>
 </div>

@@ -1,13 +1,27 @@
+<script context="module" lang="ts">
+    export interface EditSeriesForm {
+        md_id: string
+        mu_id: string
+        name: string
+        cover: File
+    }
+</script>
+
 <script lang="ts">
+    import type { SeriesDto } from '$lib/api/dtos'
     import BasicDialogHeader from '$lib/components/basic-dialog/basic-dialog-header.svelte'
     import BasicDialog from '$lib/components/basic-dialog/basic-dialog.svelte'
     import Button from '$lib/components/ui/button/button.svelte'
     import Input from '$lib/components/ui/input/input.svelte'
     import Label from '$lib/components/ui/label/label.svelte'
+    import { createEditSeriesContext } from './editSeriesContext'
     import SyncInput from './sync-input.svelte'
     import UploadCoverInput from './upload-cover-input.svelte'
 
     export let open: boolean
+    export let series: SeriesDto
+
+    const { form, controls } = createEditSeriesContext(series)
 </script>
 
 <BasicDialog
@@ -47,7 +61,9 @@
     </div>
 
     <div class="flex justify-end gap-2 p-4 bg-muted">
-        <Button variant="outline" class="w-24">Cancel</Button>
-        <Button class="w-24">Save</Button>
+        <Button variant="outline" class="w-24 font-bold"
+            >Cancel</Button
+        >
+        <Button class="w-24 font-bold">Save</Button>
     </div>
 </BasicDialog>
