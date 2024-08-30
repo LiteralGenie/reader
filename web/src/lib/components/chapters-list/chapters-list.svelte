@@ -107,7 +107,7 @@
     on:done={onNewChapter}
 />
 
-<EditSeriesDialog open={false} />
+<EditSeriesDialog open={true} />
 
 <style lang="postcss">
     .bg {

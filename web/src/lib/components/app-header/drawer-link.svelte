@@ -6,7 +6,6 @@
 
     $: realHref = new URL($page.url.origin + href)
     $: active = $page.url.pathname === realHref.pathname
-    $: console.log($page.url.pathname, realHref.pathname)
 </script>
 
 <a

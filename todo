@@ -6,7 +6,6 @@ footer - 1
 reverse chapter list dropdown - 1
 chapter name overflow - 1
 chapter nav arrows - 1
-mu / md icons - 1
 dictionary lru cache - 1
 dictionary jamo - 1
 edit series with md / mu import - 1
@@ -41,3 +40,4 @@ less verbose svelte proxying
 diff sse progress updates
 ocr progress doesnt update
 less hacky dialog titles
+mu / md icons
