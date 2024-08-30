@@ -1,6 +1,7 @@
 <script lang="ts">
+    import XIcon from '$lib/icons/x-icon.svelte'
     import { createEventDispatcher } from 'svelte'
-    import BasicDialog from './basic-dialog.svelte'
+    import BasicDialog from './basic-dialog/basic-dialog.svelte'
     import Button from './ui/button/button.svelte'
 
     export let open = false
@@ -14,6 +15,14 @@
     class="min-h-36 min-w-72 h-max px-6 py-8 m-auto flex flex-col justify-between"
     closeIconSize="hidden"
 >
+    <Button
+        variant="ghost"
+        class="absolute top-4 right-3 rounded-full p-0 h-max w-max hover:bg-background"
+        on:click={() => dispatch('close')}
+    >
+        <XIcon class="size-12 p-2" />
+    </Button>
+
     <slot />
 
     <div class="flex flex-col justify-end gap-2 items-center">

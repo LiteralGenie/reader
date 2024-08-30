@@ -1,7 +1,8 @@
 <script lang="ts">
     import { goto } from '$app/navigation'
     import type { SeriesWithChaptersDto } from '$lib/api/dtos'
-    import BasicDialog from '$lib/components/basic-dialog.svelte'
+    import BasicDialogHeader from '$lib/components/basic-dialog/basic-dialog-header.svelte'
+    import BasicDialog from '$lib/components/basic-dialog/basic-dialog.svelte'
     import {
         addSuffixUntilUnique,
         throwOnStatus
@@ -16,7 +17,7 @@
     const dispatch = createEventDispatcher()
 
     let isSubmitting: boolean = false
-    let jobId: string | null = null
+    let jobId: string | null = 'null'
     $: disabled = isSubmitting
 
     async function onSubmit(ev: SubmitEvent) {
@@ -118,15 +119,17 @@
     {#if jobId}
         <AddChapterProgress {jobId} on:reset={onReset} on:done />
     {:else}
-        <div class="px-6 pb-8">
-            <div class="pt-5 pb-8 flex items-center">
-                <h1 class="text-xl font-bold">Add Chapter</h1>
+        <div class="pb-8">
+            <BasicDialogHeader label="Add Chapter" />
+
+            <div class="px-6">
+                <AddChapterForm
+                    on:submit={onSubmit}
+                    on:close={() =>
+                        disabled ? '' : dispatch('close')}
+                    {disabled}
+                />
             </div>
-            <AddChapterForm
-                on:submit={onSubmit}
-                on:close={() => (disabled ? '' : dispatch('close'))}
-                {disabled}
-            />
         </div>
     {/if}
 </BasicDialog>

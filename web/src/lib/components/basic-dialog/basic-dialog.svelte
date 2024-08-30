@@ -1,10 +1,7 @@
 <script lang="ts">
-    import XIcon from '$lib/icons/x-icon.svelte'
     import { createEventDispatcher } from 'svelte'
-    import Button from './ui/button/button.svelte'
 
     export let open = false
-    export let closeIconSize = 'size-12 p-2'
     export let preventClose = false
 
     let dispatch = createEventDispatcher()
@@ -61,16 +58,6 @@
         class="relative bg-popover text-popover-foreground {$$props.class ??
             ''}"
     >
-        {#if !preventClose}
-            <Button
-                variant="ghost"
-                class="absolute top-3 right-3 rounded-full p-0 h-max w-max hover:bg-background"
-                on:click={handleCloseButtonClick}
-            >
-                <XIcon class={closeIconSize} />
-            </Button>
-        {/if}
-
         <slot />
     </div>
 </dialog>

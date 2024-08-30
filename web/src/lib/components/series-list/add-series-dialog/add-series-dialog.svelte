@@ -1,6 +1,7 @@
 <script lang="ts">
     import { goto } from '$app/navigation'
-    import BasicDialog from '$lib/components/basic-dialog.svelte'
+    import BasicDialogHeader from '$lib/components/basic-dialog/basic-dialog-header.svelte'
+    import BasicDialog from '$lib/components/basic-dialog/basic-dialog.svelte'
     import LabeledDivider from '$lib/components/labeled-divider.svelte'
     import { createEventDispatcher } from 'svelte'
     import ExternalImportForm from './external-import-form.svelte'
@@ -71,15 +72,13 @@
     {open}
     on:close
     preventClose={isSubmitting}
-    class="w-[90vw] max-w-[40em] h-max px-6 pb-8 m-auto"
+    class="w-[90vw] max-w-[40em] h-max pb-8 m-auto"
 >
     <!-- Title -->
-    <div class="pt-5 pb-8 flex items-center">
-        <h1 class="text-xl font-bold">Add Series</h1>
-    </div>
+    <BasicDialogHeader label="Add Series" />
 
     <!-- Import from external source -->
-    <div class="flex flex-col gap-4">
+    <div class="px-6 flex flex-col gap-4">
         <ExternalImportForm
             on:submit={(ev) => onMangaDexImport(ev.detail)}
             name="MangaDex"
@@ -99,13 +98,15 @@
         />
     </div>
 
-    <LabeledDivider label="OR" class="pb-4 pt-6" />
+    <LabeledDivider label="OR" class="px-6 pb-6 pt-6" />
 
     <!-- Manual -->
-    <ManualImportForm
-        on:submit={(ev) => onManualImport(ev.detail)}
-        on:close
-        {isSubmitting}
-        showSpinner={isSubmitting && activeForm === 'manual'}
-    />
+    <div class="px-6">
+        <ManualImportForm
+            on:submit={(ev) => onManualImport(ev.detail)}
+            on:close
+            {isSubmitting}
+            showSpinner={isSubmitting && activeForm === 'manual'}
+        />
+    </div>
 </BasicDialog>

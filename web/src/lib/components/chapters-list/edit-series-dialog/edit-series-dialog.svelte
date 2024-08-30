@@ -1,12 +1,16 @@
 <script lang="ts">
-    import BasicDialog from '$lib/components/basic-dialog.svelte'
+    import BasicDialogHeader from '$lib/components/basic-dialog/basic-dialog-header.svelte'
+    import BasicDialog from '$lib/components/basic-dialog/basic-dialog.svelte'
     import Button from '$lib/components/ui/button/button.svelte'
     import Input from '$lib/components/ui/input/input.svelte'
     import Label from '$lib/components/ui/label/label.svelte'
+    import { createEventDispatcher } from 'svelte'
     import ImageOverlay from './image-overlay.svelte'
     import SyncInput from './sync-input.svelte'
 
     export let open: boolean
+
+    const dispatch = createEventDispatcher()
 </script>
 
 <BasicDialog
@@ -15,9 +19,7 @@
     class="w-[90vw] max-w-[40em] h-[80vh] m-auto flex flex-col"
 >
     <div class="flex-1 overflow-auto">
-        <div class="flex p-6 bg-muted">
-            <h1 class="text-xl font-bold">Editing Knight Run</h1>
-        </div>
+        <BasicDialogHeader label="Editing Knight Run" />
 
         <div class="flex flex-col p-8 gap-4">
             <SyncInput

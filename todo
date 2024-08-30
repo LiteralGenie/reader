@@ -7,6 +7,9 @@ reverse chapter list dropdown - 1
 chapter name overflow - 1
 chapter nav arrows - 1
 mu / md icons - 1
+dictionary lru cache - 1
+dictionary jamo - 1
+edit series with md / mu import - 1
 
 demo
     resource blocks
@@ -29,7 +32,6 @@ use template for llm definitions
 logging
 create ocr blocks
 create chapter from archive
-edit series with md / mu import
 
 move worker init to outside web server (so that uvicorn can spawn multiple workers)
 image load priority

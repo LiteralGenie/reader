@@ -21,8 +21,6 @@
 </script>
 
 <form on:submit|preventDefault={onSubmit} class="flex flex-col gap-4">
-    <h2 class="font-bold text-lg">Manual Import</h2>
-
     <div class="flex flex-col gap-2">
         <Label for="name">Series Name *</Label>
         <Input
