@@ -8,6 +8,7 @@
 
     export let series: SeriesDto
     export let control: FormControl<File | null>
+    export let disabled
 
     let inputEl: HTMLInputElement
 
@@ -69,6 +70,7 @@
                 type="file"
                 accept="image/*"
                 hidden
+                {disabled}
             />
 
             <div
@@ -86,6 +88,7 @@
                 on:click={() => control.setValue(null)}
                 class="px-6 w-full flex gap-2 items-center"
                 variant="secondary"
+                {disabled}
             >
                 Clear
             </Button>

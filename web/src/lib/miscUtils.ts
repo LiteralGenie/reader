@@ -61,3 +61,20 @@ export function addSuffixUntilUnique(
 
     return filename
 }
+
+export function isFileEqual(
+    a: File | undefined | null,
+    b: File | undefined | null
+) {
+    const props = ['size', 'name', 'lastModified'] as const
+
+    for (let p of props) {
+        if (a?.[p] !== b?.[p]) {
+            return false
+        }
+    }
+
+    // @todo compare file contents
+
+    return true
+}

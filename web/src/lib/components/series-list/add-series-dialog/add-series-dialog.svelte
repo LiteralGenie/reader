@@ -4,12 +4,13 @@
     import BasicDialog from '$lib/components/basic-dialog/basic-dialog.svelte'
     import LabeledDivider from '$lib/components/labeled-divider.svelte'
     import { createEventDispatcher } from 'svelte'
-    import ExternalImportForm from './external-import-form.svelte'
     import {
         importMangaDexSeries,
         importMangaUpdatesSeries,
-        importManualSeries
-    } from './import-handlers'
+        importManualSeries,
+        postSeries
+    } from '../../../import-handlers'
+    import ExternalImportForm from './external-import-form.svelte'
     import ManualImportForm from './manual-import-form.svelte'
 
     export let open: boolean
@@ -24,8 +25,10 @@
         activeForm = 'mangadex'
 
         try {
-            const filename = await importMangaDexSeries(id)
-            goto(`/series/${filename}`)
+            const data = await importMangaDexSeries(id)
+            await postSeries(data)
+
+            goto(`/series/${data.filename}`)
             dispatch('close')
         } catch (e) {
             alert(String(e))
@@ -40,8 +43,10 @@
         activeForm = 'mangaupdates'
 
         try {
-            const filename = await importMangaUpdatesSeries(id)
-            goto(`/series/${filename}`)
+            const data = await importMangaUpdatesSeries(id)
+            await postSeries(data)
+
+            goto(`/series/${data.filename}`)
             dispatch('close')
         } catch (e) {
             alert(String(e))

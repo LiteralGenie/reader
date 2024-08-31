@@ -1,7 +1,7 @@
 import type { SeriesDto } from '$lib/api/dtos'
 import { addSuffixUntilUnique, throwOnStatus } from '$lib/miscUtils'
 
-interface PostSeriesRequest {
+export interface ImportedSeries {
     filename: string
     name: string
     coverBytes?: ArrayBuffer | null
@@ -10,24 +10,24 @@ interface PostSeriesRequest {
     mangaUpdatesId?: string | null
 }
 
-async function postSeries(req: PostSeriesRequest) {
+export async function postSeries(data: ImportedSeries) {
     const formData = new FormData()
-    formData.set('filename', req.filename)
-    formData.set('name', req.name)
+    formData.set('filename', data.filename)
+    formData.set('name', data.name)
 
-    if (req.coverBytes) {
-        const blob = new Blob([req.coverBytes])
+    if (data.coverBytes) {
+        const blob = new Blob([data.coverBytes])
         formData.set('cover', blob)
-    } else if (req.coverFile && req.coverFile.size > 0) {
-        formData.set('cover', req.coverFile)
+    } else if (data.coverFile && data.coverFile.size > 0) {
+        formData.set('cover', data.coverFile)
     }
 
-    if (req.mangaDexId) {
-        formData.set('id_mangadex', req.mangaDexId)
+    if (data.mangaDexId) {
+        formData.set('id_mangadex', data.mangaDexId)
     }
 
-    if (req.mangaUpdatesId) {
-        formData.set('id_mangadex', req.mangaUpdatesId)
+    if (data.mangaUpdatesId) {
+        formData.set('id_mangadex', data.mangaUpdatesId)
     }
 
     const resp = await fetch('/api/series', {
@@ -68,14 +68,12 @@ export async function importMangaDexSeries(maybeId: string) {
     const coverBytes = await fetchMdCover(id, info)
 
     // Submit
-    const resp = await postSeries({
+    return {
         filename,
         name: title,
         coverBytes: coverBytes,
         mangaDexId: id
-    })
-
-    return filename
+    }
 }
 
 async function fetchMdCover(id: string, info: any) {
@@ -144,14 +142,12 @@ export async function importMangaUpdatesSeries(maybeId: string) {
     }
 
     // Submit
-    const resp = await postSeries({
+    return {
         filename,
         name: title,
         coverBytes: coverBytes,
         mangaUpdatesId: id
-    })
-
-    return filename
+    }
 }
 
 async function fetchImageBytes(url: string) {

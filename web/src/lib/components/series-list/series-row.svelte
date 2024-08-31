@@ -18,7 +18,7 @@
     class="ripple pl-4 h-full w-full rounded-r-md flex justify-between items-center"
 >
     <span class="flex items-center h-full">
-        {series.filename}
+        {series.name || series.filename}
     </span>
 
     <div

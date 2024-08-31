@@ -7,6 +7,7 @@
     import { writable } from 'svelte/store'
 
     export let control: FormControl<string>
+    export let disabled = false
 
     let inputEl: Input
     const subSink = writable<Unsubscribe[]>([])
@@ -15,5 +16,11 @@
 
 <div class="flex flex-col gap-1.5">
     <Label for="name">Series Name</Label>
-    <Input bind:this={inputEl} name="name" required class="text-xs" />
+    <Input
+        bind:this={inputEl}
+        {disabled}
+        name="name"
+        required
+        class="text-xs"
+    />
 </div>

@@ -12,6 +12,10 @@
     import BasicDialogHeader from '$lib/components/basic-dialog/basic-dialog-header.svelte'
     import BasicDialog from '$lib/components/basic-dialog/basic-dialog.svelte'
     import Button from '$lib/components/ui/button/button.svelte'
+    import {
+        importMangaDexSeries,
+        importMangaUpdatesSeries
+    } from '$lib/import-handlers'
     import { throwOnStatus } from '$lib/miscUtils'
     import { createEventDispatcher } from 'svelte'
     import { createEditSeriesContext } from './editSeriesContext'
@@ -22,7 +26,13 @@
     export let open: boolean
     export let series: SeriesDto
 
-    const { controls, submit } = createEditSeriesContext(series)
+    let isSubmitting = false
+    let isSyncingDex = false
+    let isSyncingMu = false
+    $: disabled = isSubmitting || isSyncingDex || isSyncingMu
+
+    const { controls, hasChanges, submit } =
+        createEditSeriesContext(series)
 
     const dispatch = createEventDispatcher()
 
@@ -43,10 +53,14 @@
     {open}
     on:close
     class="w-[90vw] max-w-[40em] h-[80vh] m-auto flex flex-col"
+    preventClose={disabled}
 >
     <form on:submit|preventDefault={onSubmit} class="contents">
         <div class="flex-1 overflow-auto">
-            <BasicDialogHeader label="Editing Knight Run" />
+            <BasicDialogHeader
+                label="Editing Knight Run"
+                hideClose={disabled}
+            />
 
             <div class="flex flex-col pt-0 p-8 gap-4">
                 <SyncInput
@@ -54,7 +68,10 @@
                     href="https://mangadex.org/"
                     placeholder="be06d561-1670-4f1e-a491-0608ba35ce00"
                     name="md_id"
-                    control={controls.children.md_id}
+                    control={controls.children.id_dex}
+                    importFn={importMangaDexSeries}
+                    {disabled}
+                    bind:isSyncing={isSyncingDex}
                 />
 
                 <SyncInput
@@ -62,31 +79,55 @@
                     href="https://www.mangaupdates.com/"
                     placeholder="w1sb5f6"
                     name="mu_id"
-                    control={controls.children.mu_id}
+                    control={controls.children.id_mu}
+                    importFn={importMangaUpdatesSeries}
+                    {disabled}
+                    bind:isSyncing={isSyncingMu}
                 />
             </div>
 
             <hr class="mx-4" />
 
             <div class="p-8 flex flex-col gap-4">
-                <NameInput control={controls.children.name} />
+                <NameInput
+                    control={controls.children.name}
+                    {disabled}
+                />
 
                 <UploadCoverInput
                     control={controls.children.cover}
                     {series}
+                    {disabled}
                 />
             </div>
         </div>
 
-        <div class="flex justify-end gap-2 p-4 bg-muted">
+        <div class="footer flex justify-end gap-2 p-4 bg-muted">
             <Button
                 type="button"
                 variant="outline"
-                class="w-24 font-bold"
+                class="cancel-btn w-24 font-bold"
+                {disabled}
             >
                 Cancel
             </Button>
-            <Button type="submit" class="w-24 font-bold">Save</Button>
+            <Button
+                type="submit"
+                class="w-24 font-bold"
+                disabled={disabled || !$hasChanges}
+            >
+                Save
+            </Button>
         </div>
     </form>
 </BasicDialog>
+
+<style lang="postcss">
+    .footer :global(.cancel-btn:hover) {
+        background-color: color-mix(
+            in srgb,
+            hsl(var(--muted)),
+            hsl(var(--background)) 55%
+        );
+    }
+</style>
