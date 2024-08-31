@@ -8,7 +8,7 @@
 
     export let series: SeriesDto
     export let control: FormControl<File | null | string>
-    export let disabled
+    export let disabled: boolean
 
     let inputEl: HTMLInputElement
     let showImageOverlay = false
@@ -22,8 +22,27 @@
         }
     }
 
+    let downloadEl: HTMLAnchorElement
+
     function onUpload() {
         control.setValue(inputEl.files?.[0] ?? null)
+    }
+
+    function onDownload() {
+        if (!$value) {
+            return
+        }
+
+        if ($value instanceof File) {
+            downloadEl.href = URL.createObjectURL($value)
+            downloadEl.download = $value.name
+        } else {
+            downloadEl.href = $value
+            downloadEl.download =
+                $value.split('/').slice(-1)[0] ?? 'cover.png'
+        }
+
+        downloadEl.click()
     }
 </script>
 
@@ -36,6 +55,7 @@
                 on:click={() => inputEl.click()}
                 on:mouseenter={() => (showImageOverlay = true)}
                 on:mouseleave={() => (showImageOverlay = false)}
+                class:pointer-events-none={disabled}
                 class="w-full flex justify-center"
                 type="button"
             >
@@ -88,15 +108,18 @@
                 Clear
             </Button>
             <Button
-                on:click={() => alert('@todo')}
+                on:click={onDownload}
                 class="px-6 w-full"
                 variant="secondary"
+                disabled={$value === null}
             >
                 Download
             </Button>
         </div>
     </div>
 </div>
+
+<a bind:this={downloadEl} class="hidden"></a>
 
 <style lang="postcss">
     .overlay {

@@ -39,9 +39,8 @@
 
             controls.children.name.setValue(data.name)
 
-            if (data.coverBytes) {
-                const file = new File([data.coverBytes], 'cover')
-                controls.children.cover.setValue(file)
+            if (data.cover) {
+                controls.children.cover.setValue(data.cover)
             }
         } catch (e) {
             alert(String(e))

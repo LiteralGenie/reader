@@ -4,8 +4,7 @@ import { addSuffixUntilUnique, throwOnStatus } from '$lib/miscUtils'
 export interface ImportedSeries {
     filename: string
     name: string
-    coverBytes?: ArrayBuffer | null
-    coverFile?: File | null
+    cover?: File | null
     mangaDexId?: string | null
     mangaUpdatesId?: string | null
 }
@@ -15,11 +14,8 @@ export async function postSeries(data: ImportedSeries) {
     formData.set('filename', data.filename)
     formData.set('name', data.name)
 
-    if (data.coverBytes) {
-        const blob = new Blob([data.coverBytes])
-        formData.set('cover', blob)
-    } else if (data.coverFile && data.coverFile.size > 0) {
-        formData.set('cover', data.coverFile)
+    if (data.cover && data.cover.size > 0) {
+        formData.set('cover', data.cover)
     }
 
     if (data.mangaDexId) {
@@ -65,13 +61,13 @@ export async function importMangaDexSeries(maybeId: string) {
     )
 
     // Get cover image
-    const coverBytes = await fetchMdCover(id, info)
+    const cover = await fetchMdCover(id, info)
 
     // Submit
     return {
         filename,
         name: title,
-        coverBytes: coverBytes,
+        cover,
         mangaDexId: id
     }
 }
@@ -96,10 +92,11 @@ async function fetchMdCover(id: string, info: any) {
         return null
     }
 
-    const imBytes = await fetchImageBytes(
-        `/api/proxy/mangadex_cover/${id}/${fileName}`
+    const file = await fetchImageFile(
+        `/api/proxy/mangadex_cover/${id}/${fileName}`,
+        fileName
     )
-    return imBytes
+    return file
 }
 
 export async function importMangaUpdatesSeries(maybeId: string) {
@@ -132,31 +129,48 @@ export async function importMangaUpdatesSeries(maybeId: string) {
     )
 
     // Get cover image
+    let cover: File | null = null
     const coverUrl = info?.image?.url?.original
-    let coverBytes: ArrayBuffer | null = null
     if (coverUrl) {
         const coverUrlObj = new URL(coverUrl)
         const proxyUrl =
             '/api/proxy/mangaupdates_cover' + coverUrlObj.pathname
-        coverBytes = await fetchImageBytes(proxyUrl)
+        cover = await fetchImageFile(proxyUrl)
     }
 
     // Submit
     return {
         filename,
         name: title,
-        coverBytes: coverBytes,
+        cover,
         mangaUpdatesId: id
     }
 }
 
-async function fetchImageBytes(url: string) {
+async function fetchImageFile(
+    url: string,
+    filename?: string
+): Promise<File> {
     const resp = await fetch(url)
     throwOnStatus(resp)
     console.log('Fetched image', resp)
 
-    const imBytes = await resp.arrayBuffer()
-    return imBytes
+    const bytes = await resp.arrayBuffer()
+
+    const contentType = resp.headers.get('Content-Type')
+
+    if (!filename) {
+        const disposition = resp.headers.get('Content-Disposition')
+        if (disposition) {
+            filename =
+                disposition.match(/filename=".*"/)?.[1] || undefined
+        }
+    }
+
+    const file = new File([bytes], filename || 'cover.png', {
+        type: contentType ?? undefined
+    })
+    return file
 }
 
 export async function importManualSeries(data: FormData) {
@@ -179,7 +193,7 @@ export async function importManualSeries(data: FormData) {
     const resp = await postSeries({
         filename,
         name,
-        coverFile: data.get('cover') as File
+        cover: data.get('cover') as File
     })
 
     return filename

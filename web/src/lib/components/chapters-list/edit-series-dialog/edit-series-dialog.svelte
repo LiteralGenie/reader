@@ -11,6 +11,7 @@
     import type { SeriesDto } from '$lib/api/dtos'
     import BasicDialogHeader from '$lib/components/basic-dialog/basic-dialog-header.svelte'
     import BasicDialog from '$lib/components/basic-dialog/basic-dialog.svelte'
+    import Loader from '$lib/components/loader.svelte'
     import Button from '$lib/components/ui/button/button.svelte'
     import {
         importMangaDexSeries,
@@ -37,6 +38,8 @@
     const dispatch = createEventDispatcher()
 
     async function onSubmit() {
+        isSubmitting = true
+
         try {
             const resp = await submit()
             throwOnStatus(resp)
@@ -45,6 +48,8 @@
             dispatch('close')
         } catch (e) {
             alert(String(e))
+        } finally {
+            isSubmitting = false
         }
     }
 </script>
@@ -58,7 +63,7 @@
     <form on:submit|preventDefault={onSubmit} class="contents">
         <div class="flex-1 overflow-auto">
             <BasicDialogHeader
-                label="Editing Knight Run"
+                label="Editing {series.name || series.filename}"
                 hideClose={disabled}
             />
 
@@ -116,7 +121,14 @@
                 class="w-24 font-bold"
                 disabled={disabled || !$hasChanges}
             >
-                Save
+                {#if isSubmitting}
+                    <Loader
+                        class="h-full w-auto stroke-primary-foreground text-primary-foreground"
+                        showTrack={false}
+                    />
+                {:else}
+                    Save
+                {/if}
             </Button>
         </div>
     </form>
