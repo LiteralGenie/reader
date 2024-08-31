@@ -30,7 +30,7 @@ export async function postSeries(data: ImportedSeries) {
         method: 'POST',
         body: formData
     })
-    throwOnStatus(resp)
+    await throwOnStatus(resp)
 
     return resp
 }
@@ -41,7 +41,7 @@ export async function importMangaDexSeries(maybeId: string) {
 
     // Get series info
     const infoResp = await fetch(`/api/proxy/mangadex/manga/${id}`)
-    throwOnStatus(infoResp)
+    await throwOnStatus(infoResp)
     const info = await infoResp.json()
     console.log('Fetched series info', info)
 
@@ -83,7 +83,7 @@ async function fetchMdCover(id: string, info: any) {
     const coverInfoResp = await fetch(
         `/api/proxy/mangadex/cover/${coverId}`
     )
-    throwOnStatus(coverInfoResp)
+    await throwOnStatus(coverInfoResp)
     const coverInfo = await coverInfoResp.json()
     console.log('Fetched cover info', coverInfo)
 
@@ -111,7 +111,7 @@ export async function importMangaUpdatesSeries(maybeId: string) {
     const infoResp = await fetch(
         `/api/proxy/mangaupdates/series/${realId}`
     )
-    throwOnStatus(infoResp)
+    await throwOnStatus(infoResp)
     const info = await infoResp.json()
     console.log('Fetched series info', info)
 
@@ -152,7 +152,7 @@ async function fetchImageFile(
     filename?: string
 ): Promise<File> {
     const resp = await fetch(url)
-    throwOnStatus(resp)
+    await throwOnStatus(resp)
     console.log('Fetched image', resp)
 
     const bytes = await resp.arrayBuffer()

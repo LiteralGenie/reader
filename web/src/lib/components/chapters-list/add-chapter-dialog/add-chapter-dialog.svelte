@@ -55,7 +55,7 @@
                     method: 'POST',
                     body: postData
                 })
-                throwOnStatus(resp)
+                await throwOnStatus(resp)
 
                 goto(`/series/${seriesId}/${chapterId}`)
             } else {
@@ -93,7 +93,7 @@
                         'Content-Type': 'application/json'
                     }
                 })
-                throwOnStatus(resp)
+                await throwOnStatus(resp)
 
                 const { job_id } = await resp.json()
                 jobId = job_id
@@ -120,7 +120,7 @@
         <AddChapterProgress {jobId} on:reset={onReset} on:done />
     {:else}
         <div class="pb-8">
-            <BasicDialogHeader label="Add Chapter" />
+            <BasicDialogHeader on:close label="Add Chapter" />
 
             <div class="px-6">
                 <AddChapterForm

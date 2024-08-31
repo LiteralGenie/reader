@@ -80,7 +80,7 @@
     class="w-[90vw] max-w-[40em] h-max pb-8 m-auto"
 >
     <!-- Title -->
-    <BasicDialogHeader label="Add Series" />
+    <BasicDialogHeader on:close label="Add Series" />
 
     <!-- Import from external source -->
     <div class="px-6 flex flex-col gap-4">

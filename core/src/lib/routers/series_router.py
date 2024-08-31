@@ -260,7 +260,10 @@ def create_chapter(
 
             to_create.append(dict(im=im, filename=filename))
         except:
-            raise HTTPException(400)
+            raise HTTPException(
+                400,
+                detail=f"{pg.filename} is not a valid image.",
+            )
 
     chap_dir.mkdir()
     for pg in to_create:

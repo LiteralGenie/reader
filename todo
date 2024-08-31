@@ -29,6 +29,7 @@ use template for llm definitions
 logging
 create ocr blocks
 create chapter from archive
+stitch before ocr
 
 move worker init to outside web server (so that uvicorn can spawn multiple workers)
 image load priority

@@ -228,7 +228,7 @@ def _process_job(
 
         # Check dimensions
         matches_width = im.size[0] >= job["min_width"]
-        matches_height = im.size[0] >= job["min_height"]
+        matches_height = im.size[1] >= job["min_height"]
         if not matches_width or not matches_height:
             progress["ignored"].append(url)
             jobber.update_progress(job_id, progress)

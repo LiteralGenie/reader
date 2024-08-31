@@ -36,11 +36,24 @@ export function deepCopy<T>(x: T): T {
     return JSON.parse(JSON.stringify(x))
 }
 
-export function throwOnStatus(resp: Response, expected = [200]) {
+export async function throwOnStatus(
+    resp: Response,
+    expected = [200]
+) {
     const isError = !expected.includes(resp.status)
     if (isError) {
+        let msg = resp.statusText
         console.error(resp)
-        throw new Error(resp.statusText)
+
+        try {
+            const data = await resp.json()
+            if (data?.detail) {
+                msg += ' ' + data.detail
+            }
+            console.error(data)
+        } catch (e) {}
+
+        throw new Error(msg)
     }
 
     return resp
