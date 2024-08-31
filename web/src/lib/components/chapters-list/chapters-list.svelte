@@ -1,5 +1,8 @@
 <script lang="ts">
-    import type { SeriesWithChaptersDto } from '$lib/api/dtos'
+    import type {
+        ChapterDto,
+        SeriesWithChaptersDto
+    } from '$lib/api/dtos'
     import ChevronLeft from '$lib/icons/chevron-left.svelte'
     import Cog_6 from '$lib/icons/cog-6.svelte'
     import MangaDex from '$lib/icons/manga-dex.svelte'
@@ -9,12 +12,14 @@
     import Button from '../ui/button/button.svelte'
     import AddChapterDialog from './add-chapter-dialog/add-chapter-dialog.svelte'
     import ChapterRow from './chapter-row.svelte'
+    import EditChapterDialog from './edit-chapter-dialog/edit-chapter-dialog.svelte'
     import EditSeriesDialog from './edit-series-dialog/edit-series-dialog.svelte'
 
     export let series: SeriesWithChaptersDto
 
     let showEditSeries = false
     let showAddChapter = false
+    let showEditChapter: ChapterDto | null = null
 
     async function refresh() {
         series = await (
@@ -117,7 +122,11 @@
         </h2>
         {#each series.chapters.toReversed() as chapter}
             <hr />
-            <ChapterRow seriesId={series.filename} {chapter} />
+            <ChapterRow
+                on:edit={() => (showEditChapter = chapter)}
+                seriesId={series.filename}
+                {chapter}
+            />
         {/each}
         <hr />
 
@@ -146,6 +155,15 @@
         open={true}
         {series}
         on:close={() => (showEditSeries = false)}
+        on:done={refresh}
+    />
+{/if}
+
+{#if showEditChapter}
+    <EditChapterDialog
+        open={true}
+        chapter={showEditChapter}
+        on:close={() => (showEditChapter = null)}
         on:done={refresh}
     />
 {/if}

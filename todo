@@ -1,5 +1,5 @@
 docker - 3
-edit chapter - 5
+edit chapter - 3
 definitions page - 3
 footer - 1
 reverse chapter list dropdown - 1
@@ -7,6 +7,8 @@ chapter name overflow - 1
 chapter nav arrows - 1
 dictionary lru cache - 1
 dictionary jamo - 1
+move worker init to outside web server (so that uvicorn can spawn multiple workers) - 2
+add blocks and merge pages - 3
 
 demo
     resource blocks
@@ -27,17 +29,14 @@ demo
 
 use template for llm definitions
 logging
-create ocr blocks
 create chapter from archive
-stitch before ocr
+random 404s
 
-move worker init to outside web server (so that uvicorn can spawn multiple workers)
 image load priority
 fix spacing before nlp
 hide low confidence matches
 less verbose svelte proxying
 diff sse progress updates
 ocr progress doesnt update
-less hacky dialog titles
 mu / md icons
 add chapter progress link-able
