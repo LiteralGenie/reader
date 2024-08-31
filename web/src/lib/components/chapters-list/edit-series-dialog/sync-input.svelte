@@ -36,7 +36,6 @@
             bind:this={inputEl}
             {name}
             {placeholder}
-            required
             class="text-xs"
         />
 

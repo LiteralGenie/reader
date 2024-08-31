@@ -17,7 +17,7 @@
     const dispatch = createEventDispatcher()
 
     let isSubmitting: boolean = false
-    let jobId: string | null = 'null'
+    let jobId: string | null = null
     $: disabled = isSubmitting
 
     async function onSubmit(ev: SubmitEvent) {

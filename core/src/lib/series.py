@@ -34,8 +34,10 @@ def get_series(cfg: Config, filename: str):
     info = select_series(db)
     info["filename"] = filename
 
-    cover = get_cover(cfg, filename)
-    info["cover"] = cover.name if cover else None
+    info["cover"] = None
+    if cover := get_cover(cfg, filename):
+        cache_buster = cover.stat().st_mtime
+        info["cover"] = f"{cover.name}?t={cache_buster}"
 
     chapters = get_all_chapters(cfg, filename)
     info["num_chapters"] = len(chapters)

@@ -11,9 +11,10 @@
 
     export let series: SeriesWithChaptersDto
 
+    let showEditSeries = false
     let showAddChapter = false
 
-    async function onNewChapter() {
+    async function refresh() {
         series = await (
             await fetch(`/api/series/${series.filename}`)
         ).json()
@@ -38,6 +39,7 @@
         <div class="flex justify-end gap-4">
             <!-- Edit Series button -->
             <Button
+                on:click={() => (showEditSeries = true)}
                 variant="secondary"
                 class="flex gap-2 ripple bg-muted text-foreground"
             >
@@ -104,10 +106,17 @@
     open={showAddChapter}
     seriesId={series.filename}
     on:close={() => (showAddChapter = false)}
-    on:done={onNewChapter}
+    on:done={refresh}
 />
 
-<EditSeriesDialog open={true} {series} />
+{#if showEditSeries}
+    <EditSeriesDialog
+        open={true}
+        {series}
+        on:close={() => (showEditSeries = false)}
+        on:done={refresh}
+    />
+{/if}
 
 <style lang="postcss">
     .bg {

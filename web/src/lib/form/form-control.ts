@@ -87,16 +87,18 @@ export function createFormControlRecord<
     T extends Record<string, any>
 >(
     source: Writable<T>,
-    template: Omit<TemplateRecord<T>, '_type'>
+    template: TemplateRecord<T>
 ): FormControlRecord<T> {
+    const entries = Object.entries(template).filter(
+        ([k, _]) => k !== '_type'
+    ) as Array<[string, TemplateType]>
+
     return {
         value: source,
         setValue: (update) => source.set(update),
         // @ts-ignore
         children: objectify(
-            Object.entries(template).filter(
-                ([k, v]) => k !== '_type'
-            ),
+            entries,
             ([k, _]) => k,
             ([k, tmpl]) => {
                 const slice = new WritableSlice(source, k)

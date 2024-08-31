@@ -12,7 +12,7 @@
     let inputEl: HTMLInputElement
 
     $: currSrc = series.cover
-        ? `/series/${series.filename}/${series.cover}`
+        ? `/api/cover/${series.filename}/${series.cover}`
         : null
 
     let showImageOverlay = false
@@ -38,33 +38,24 @@
         <div class="relative">
             <button
                 on:click={() => inputEl.click()}
+                on:mouseenter={() => (showImageOverlay = true)}
+                on:mouseleave={() => (showImageOverlay = false)}
                 class="w-full flex justify-center"
+                type="button"
             >
                 {#if $value}
                     <img
                         class="cover object-scale-down min-w-0 max-h-[40em] bg-[#050505] w-full"
                         bind:this={previewEl}
-                        on:mouseenter={() =>
-                            (showImageOverlay = true)}
-                        on:mouseleave={() =>
-                            (showImageOverlay = false)}
                     />
                 {:else if currSrc}
                     <img
-                        src="/api/cover/Knight%20Run/_reader_cover.png"
+                        src={currSrc}
                         class="cover object-scale-down min-w-0 max-h-[40em] bg-[#050505] w-full"
-                        on:mouseenter={() =>
-                            (showImageOverlay = true)}
-                        on:mouseleave={() =>
-                            (showImageOverlay = false)}
                     />
                 {:else}
                     <div
                         class="placeholder h-[20em] w-full bg-[#303030] flex flex-col gap-2 items-center justify-center text-sm"
-                        on:mouseenter={() =>
-                            (showImageOverlay = true)}
-                        on:mouseleave={() =>
-                            (showImageOverlay = false)}
                     >
                         <ArrowUpTray class="size-12 stroke-2" />
                         <span class="font-bold">Tap to Upload</span>
