@@ -12,9 +12,8 @@
     import BasicDialogHeader from '$lib/components/basic-dialog/basic-dialog-header.svelte'
     import BasicDialog from '$lib/components/basic-dialog/basic-dialog.svelte'
     import Button from '$lib/components/ui/button/button.svelte'
-    import Input from '$lib/components/ui/input/input.svelte'
-    import Label from '$lib/components/ui/label/label.svelte'
     import { createEditSeriesContext } from './editSeriesContext'
+    import NameInput from './name-input.svelte'
     import SyncInput from './sync-input.svelte'
     import UploadCoverInput from './upload-cover-input.svelte'
 
@@ -22,6 +21,7 @@
     export let series: SeriesDto
 
     const { form, controls } = createEditSeriesContext(series)
+    $: console.log('form', $form)
 </script>
 
 <BasicDialog
@@ -38,6 +38,7 @@
                 href="https://mangadex.org/"
                 placeholder="be06d561-1670-4f1e-a491-0608ba35ce00"
                 name="md_id"
+                control={controls.children.md_id}
             />
 
             <SyncInput
@@ -45,25 +46,26 @@
                 href="https://www.mangaupdates.com/"
                 placeholder="w1sb5f6"
                 name="mu_id"
+                control={controls.children.mu_id}
             />
         </div>
 
         <hr class="mx-4" />
 
         <div class="p-8 flex flex-col gap-4">
-            <div class="flex flex-col gap-1.5">
-                <Label for="name">Series Name</Label>
-                <Input name="name" required class="text-xs" />
-            </div>
+            <NameInput control={controls.children.name} />
 
-            <UploadCoverInput />
+            <UploadCoverInput
+                control={controls.children.cover}
+                {series}
+            />
         </div>
     </div>
 
     <div class="flex justify-end gap-2 p-4 bg-muted">
-        <Button variant="outline" class="w-24 font-bold"
-            >Cancel</Button
-        >
+        <Button variant="outline" class="w-24 font-bold">
+            Cancel
+        </Button>
         <Button class="w-24 font-bold">Save</Button>
     </div>
 </BasicDialog>

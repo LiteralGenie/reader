@@ -2,6 +2,8 @@ import { max, min } from 'radash'
 import sanitize from 'sanitize-filename'
 import type { JSONResponse } from './api/dtos'
 
+export type Unsubscribe = () => void
+
 export function abs(x: number) {
     return x > 0 ? x : -x
 }

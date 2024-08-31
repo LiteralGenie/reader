@@ -12,14 +12,14 @@ import type {
 } from './types'
 
 export interface TemplateScalar<T> {
-    type: 'scalar'
+    _type: 'scalar'
 }
 
 export interface TemplateArray<T> {
-    type: 'array'
+    _type: 'array'
 }
 
-export type TemplateRecord<T> = { type: 'record' } & {
+export type TemplateRecord<T> = { _type: 'record' } & {
     [K in keyof T]: TemplateWrapper<T[K]>
 }
 
@@ -87,18 +87,20 @@ export function createFormControlRecord<
     T extends Record<string, any>
 >(
     source: Writable<T>,
-    template: TemplateRecord<T>
+    template: Omit<TemplateRecord<T>, '_type'>
 ): FormControlRecord<T> {
     return {
         value: source,
         setValue: (update) => source.set(update),
         // @ts-ignore
         children: objectify(
-            Object.entries(template.children),
+            Object.entries(template).filter(
+                ([k, v]) => k !== '_type'
+            ),
             ([k, _]) => k,
-            ([k, template]) => {
+            ([k, tmpl]) => {
                 const slice = new WritableSlice(source, k)
-                return createFormControl(slice, template)
+                return createFormControl(slice, tmpl)
             }
         )
     }
@@ -108,11 +110,11 @@ export function createFormControl<T>(
     source: Writable<T>,
     template: TemplateType
 ) {
-    if (template.type === 'scalar') {
+    if (template._type === 'scalar') {
         return createFormControlPrimitive(source, template)
-    } else if (template.type === 'array') {
+    } else if (template._type === 'array') {
         return createFormControlArray(source, template)
-    } else if (template.type === 'record') {
+    } else if (template._type === 'record') {
         return createFormControlRecord(source, template)
     } else {
         throw Error()

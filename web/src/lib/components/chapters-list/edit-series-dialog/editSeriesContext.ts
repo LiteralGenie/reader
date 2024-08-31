@@ -31,18 +31,18 @@ export function createEditSeriesContext(series: SeriesDto) {
     const form = writable<EditSeriesForm>(deepCopy(initial))
     const formInitial = writable<EditSeriesForm>(deepCopy(initial))
     const controls = createFormControlRecord(form, {
-        type: 'record',
+        _type: 'record',
         name: {
-            type: 'scalar'
+            _type: 'scalar'
         },
         md_id: {
-            type: 'scalar'
+            _type: 'scalar'
         },
         mu_id: {
-            type: 'scalar'
+            _type: 'scalar'
         },
         cover: {
-            type: 'scalar'
+            _type: 'scalar'
         }
     })
 

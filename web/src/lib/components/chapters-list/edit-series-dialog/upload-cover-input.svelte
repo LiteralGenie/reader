@@ -1,14 +1,34 @@
 <script lang="ts">
+    import type { SeriesDto } from '$lib/api/dtos'
     import Button from '$lib/components/ui/button/button.svelte'
     import Label from '$lib/components/ui/label/label.svelte'
+    import type { FormControl } from '$lib/form/types'
     import ArrowUpTray from '$lib/icons/arrow-up-tray.svelte'
     import PencilSquare from '$lib/icons/pencil-square.svelte'
-    import { createEventDispatcher } from 'svelte'
+
+    export let series: SeriesDto
+    export let control: FormControl<File | null>
+
+    let inputEl: HTMLInputElement
+
+    $: currSrc = series.cover
+        ? `/series/${series.filename}/${series.cover}`
+        : null
 
     let showImageOverlay = false
-    let hasImage = true
 
-    const dispatch = createEventDispatcher()
+    let previewEl: HTMLImageElement
+    $: ({ value } = control)
+    $: {
+        if ($value && previewEl) {
+            previewEl.src = URL.createObjectURL($value)
+            showImageOverlay = false
+        }
+    }
+
+    function onUpload() {
+        control.setValue(inputEl.files?.[0] ?? null)
+    }
 </script>
 
 <div class="flex flex-col gap-1.5">
@@ -16,8 +36,20 @@
 
     <div class="flex flex-col gap-2">
         <div class="relative">
-            <button class="w-full flex justify-center">
-                {#if hasImage}
+            <button
+                on:click={() => inputEl.click()}
+                class="w-full flex justify-center"
+            >
+                {#if $value}
+                    <img
+                        class="cover object-scale-down min-w-0 max-h-[40em] bg-[#050505] w-full"
+                        bind:this={previewEl}
+                        on:mouseenter={() =>
+                            (showImageOverlay = true)}
+                        on:mouseleave={() =>
+                            (showImageOverlay = false)}
+                    />
+                {:else if currSrc}
                     <img
                         src="/api/cover/Knight%20Run/_reader_cover.png"
                         class="cover object-scale-down min-w-0 max-h-[40em] bg-[#050505] w-full"
@@ -28,7 +60,7 @@
                     />
                 {:else}
                     <div
-                        class="placeholder h-[20em] bg-[#303030] flex flex-col gap-2 items-center justify-center text-sm"
+                        class="placeholder h-[20em] w-full bg-[#303030] flex flex-col gap-2 items-center justify-center text-sm"
                         on:mouseenter={() =>
                             (showImageOverlay = true)}
                         on:mouseleave={() =>
@@ -40,28 +72,34 @@
                 {/if}
             </button>
 
+            <input
+                on:change={onUpload}
+                bind:this={inputEl}
+                type="file"
+                accept="image/*"
+                hidden
+            />
+
             <div
                 class="overlay absolute top-0 bottom-0 left-0 right-0 p-0 flex items-center justify-center pointer-events-none"
                 class:invisible={!showImageOverlay}
             >
-                {#if hasImage}
-                    <PencilSquare
-                        class="size-16 stroke-white hidden"
-                    />
+                {#if currSrc}
+                    <PencilSquare class="size-16 stroke-white" />
                 {/if}
             </div>
         </div>
 
         <div class="flex gap-2 justify-center">
             <Button
-                on:click={() => dispatch('clear')}
+                on:click={() => control.setValue(null)}
                 class="px-6 w-full flex gap-2 items-center"
                 variant="secondary"
             >
                 Clear
             </Button>
             <Button
-                on:click={() => dispatch('download')}
+                on:click={() => alert('@todo')}
                 class="px-6 w-full"
                 variant="secondary"
             >

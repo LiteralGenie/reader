@@ -49,7 +49,7 @@
         `/series/${$job?.series}/${$job?.chapter}`
 
     onMount(() => {
-        const url = new URL(window.location.href)
+        const url = new URL($page.url.href)
         url.pathname = `/api/import_chapter/${euc(jobId)}`
 
         const evtSource = new EventSource(url)
