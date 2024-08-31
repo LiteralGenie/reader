@@ -22,6 +22,7 @@ def load_series_db(series_dir: Path, raise_on_missing=False) -> SeriesDb:
             
             name                TEXT        NOT NULL        DEFAULT '',
             autogen_cover       BOOLEAN     NOT NULL        DEFAULT 1,
+            hide_cover          BOOLEAN     NOT NULL        DEFAULT 0,
 
             id_mangaupdates     TEXT        NOT NULL        DEFAULT '',
             id_mangadex         TEXT        NOT NULL        DEFAULT ''
@@ -56,6 +57,7 @@ def update_series(
     id_mangaupdates: str | None = None,
     id_mangadex: str | None = None,
     autogen_cover: bool | None = None,
+    hide_cover: bool | None = None,
 ):
     targets = []
     if name is not None:
@@ -66,6 +68,8 @@ def update_series(
         targets.append(("id_mangadex", id_mangadex))
     if autogen_cover is not None:
         targets.append(("autogen_cover", autogen_cover))
+    if hide_cover is not None:
+        targets.append(("hide_cover", hide_cover))
 
     if not targets:
         return
@@ -88,12 +92,14 @@ def select_series(db: SeriesDb) -> dict:
     r = db.execute(
         """
         SELECT 
-            name, id_mangaupdates, id_mangadex
+            name, id_mangaupdates, id_mangadex, hide_cover
         FROM metadata
         """
     ).fetchone()
 
-    return dict(r)
+    info = dict(r)
+    info["hide_cover"] = bool(info["hide_cover"])
+    return info
 
 
 def select_autogen_cover(db: SeriesDb):

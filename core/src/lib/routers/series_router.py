@@ -4,6 +4,7 @@ import re
 import shutil
 import traceback
 from pathlib import Path
+from typing import Literal
 
 from fastapi import APIRouter, File, Form, HTTPException, Request, Response, UploadFile
 from fastapi.responses import FileResponse, StreamingResponse
@@ -164,7 +165,7 @@ def update_series_(
     name: str | None = Form(None),
     id_mangaupdates: str | None = Form(None),
     id_mangadex: str | None = Form(None),
-    cover: UploadFile | None = Form(None),
+    cover: UploadFile | str | None = Form(None),
 ):
     filename = sanitize_or_raise_400(filename)
 
@@ -176,15 +177,19 @@ def update_series_(
     except FileNotFoundError:
         raise HTTPException(404)
 
-    if cover:
+    hide_cover = False
+    if isinstance(cover, str):
+        hide_cover = True
+    elif cover:
         cover_im = validate_image_upload(cover, cfg.max_cover_image_size_bytes)
         upsert_cover(cfg, filename, cover_im)
 
     update_series(
         db,
-        name,
-        id_mangaupdates,
-        id_mangadex,
+        name=name,
+        id_mangaupdates=id_mangaupdates,
+        id_mangadex=id_mangadex,
+        hide_cover=hide_cover,
     )
 
     info = get_series(req.app.state.cfg, filename)

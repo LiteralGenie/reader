@@ -7,21 +7,16 @@
     import PencilSquare from '$lib/icons/pencil-square.svelte'
 
     export let series: SeriesDto
-    export let control: FormControl<File | null>
+    export let control: FormControl<File | null | string>
     export let disabled
 
     let inputEl: HTMLInputElement
-
-    $: currSrc = series.cover
-        ? `/api/cover/${series.filename}/${series.cover}`
-        : null
-
     let showImageOverlay = false
 
     let previewEl: HTMLImageElement
     $: ({ value } = control)
     $: {
-        if ($value && previewEl) {
+        if ($value instanceof File && previewEl) {
             previewEl.src = URL.createObjectURL($value)
             showImageOverlay = false
         }
@@ -44,14 +39,14 @@
                 class="w-full flex justify-center"
                 type="button"
             >
-                {#if $value}
+                {#if $value instanceof File}
                     <img
                         class="cover object-scale-down min-w-0 max-h-[40em] bg-[#050505] w-full"
                         bind:this={previewEl}
                     />
-                {:else if currSrc}
+                {:else if typeof $value === 'string'}
                     <img
-                        src={currSrc}
+                        src="/api/cover/{series.filename}/{$value}"
                         class="cover object-scale-down min-w-0 max-h-[40em] bg-[#050505] w-full"
                     />
                 {:else}
@@ -77,7 +72,7 @@
                 class="overlay absolute top-0 bottom-0 left-0 right-0 p-0 flex items-center justify-center pointer-events-none"
                 class:invisible={!showImageOverlay}
             >
-                {#if currSrc}
+                {#if $value}
                     <PencilSquare class="size-16 stroke-white" />
                 {/if}
             </div>

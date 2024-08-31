@@ -35,7 +35,7 @@ def get_series(cfg: Config, filename: str):
     info["filename"] = filename
 
     info["cover"] = None
-    if cover := get_cover(cfg, filename):
+    if not info["hide_cover"] and (cover := get_cover(cfg, filename)):
         cache_buster = cover.stat().st_mtime
         info["cover"] = f"{cover.name}?t={cache_buster}"
 

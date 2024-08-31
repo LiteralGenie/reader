@@ -11,7 +11,7 @@ export interface EditSeriesForm {
     name: string
     id_dex: string
     id_mu: string
-    cover: File | null
+    cover: File | null | string
 }
 
 export interface EditSeriesContext {
@@ -27,7 +27,7 @@ export function createEditSeriesContext(series: SeriesDto) {
         name: series.name,
         id_dex: series.id_mangadex,
         id_mu: series.id_mangaupdates,
-        cover: null
+        cover: series.cover
     }
 
     const form = writable<EditSeriesForm>(deepCopy(initial))
@@ -49,7 +49,7 @@ export function createEditSeriesContext(series: SeriesDto) {
     })
     const hasChanges = derived(
         [formInitial, form],
-        ([before, after]) => isFormEqual(before, after)
+        ([before, after]) => !isFormEqual(before, after)
     )
 
     const ctx: EditSeriesContext = {
@@ -77,8 +77,8 @@ async function submit(seriesId: string, form: EditSeriesForm) {
     formData.set('id_mangadex', form.id_dex)
     formData.set('id_mangaupdates', form.id_mu)
 
-    if (form.cover) {
-        formData.set('cover', form.cover)
+    if (typeof form.cover !== 'string') {
+        formData.set('cover', form.cover ?? 'hide')
     }
 
     return fetch('/api/series', {
@@ -88,16 +88,22 @@ async function submit(seriesId: string, form: EditSeriesForm) {
 }
 
 function isFormEqual(a: EditSeriesForm, b: EditSeriesForm): boolean {
-    if (!isFileEqual(a.cover, b.cover)) {
-        return true
+    if (
+        a instanceof File &&
+        b instanceof File &&
+        !isFileEqual(a, b)
+    ) {
+        return false
+    } else if (a !== b) {
+        return false
     }
 
     const props = ['name', 'id_dex', 'id_mu'] as const
     for (let p of props) {
         if (a[p] !== b[p]) {
-            return true
+            return false
         }
     }
 
-    return false
+    return true
 }

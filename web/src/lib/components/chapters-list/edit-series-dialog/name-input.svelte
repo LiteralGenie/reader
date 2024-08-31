@@ -20,7 +20,6 @@
         bind:this={inputEl}
         {disabled}
         name="name"
-        required
         class="text-xs"
     />
 </div>
