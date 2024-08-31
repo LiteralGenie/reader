@@ -10,3 +10,4 @@ data/series/*
 *.log
 *.sqlite-wal
 *.sqlite-shm
+*.sqlite-journal

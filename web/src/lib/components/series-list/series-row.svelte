@@ -15,7 +15,7 @@
 
 <a
     href="/series/{series.filename}"
-    class="ripple pl-4 h-full w-full rounded-r-md flex justify-between items-center"
+    class="ripple pl-4 h-full w-full rounded-r-md flex justify-between items-center gap-4"
 >
     <span class="flex items-center h-full">
         {series.name || series.filename}

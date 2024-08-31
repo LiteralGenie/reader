@@ -46,7 +46,9 @@
                 class="flex gap-2 ripple bg-muted text-foreground"
             >
                 <Cog_6 class="size-4" />
-                <span class="uppercase font-bold"> Edit Series </span>
+                <span class="uppercase font-bold hidden xs:inline">
+                    Edit Series
+                </span>
             </Button>
 
             <!-- Add Chapter button -->
@@ -57,7 +59,9 @@
                 <Plus
                     class="size-4 stroke-[3px] stroke-primary-foreground"
                 />
-                <span class="uppercase font-bold"> Add Chapter </span>
+                <span class="uppercase font-bold hidden xs:inline">
+                    Add Chapter
+                </span>
             </Button>
         </div>
     </div>
@@ -75,7 +79,7 @@
         <!-- Info -->
         <div class="flex flex-col justify-center">
             <!-- Title -->
-            <h1 class="text-2xl font-semibold pb-4">
+            <h1 class="text-2xl lg:text-4xl font-semibold pb-4">
                 {series.name || series.filename}
             </h1>
 
@@ -87,7 +91,7 @@
                         class="pill dex-pill"
                     >
                         <MangaDex class="size-4" />
-                        <span>MangaDex</span>
+                        <span class="hidden xs:inline">MangaDex</span>
                     </a>
                 {/if}
 
@@ -97,7 +101,9 @@
                         class="pill mu-pill"
                     >
                         <MangaUpdates class="size-4" />
-                        <span>BakaUpdates</span>
+                        <span class="hidden xs:inline"
+                            >BakaUpdates</span
+                        >
                     </a>
                 {/if}
             </div>
@@ -172,11 +178,10 @@
             hsl(var(--background)) 50%
         );
         color: var(--site-color);
-        /* background-color: color-mix(
-            in srgb,
-            var(--site-color),
-            hsl(var(--background)) 20%
-        ); */
+    }
+
+    :global(.pill svg) {
+        @apply drop-shadow-sm;
     }
 
     .dex-pill {
@@ -184,6 +189,6 @@
     }
 
     .mu-pill {
-        --site-color: #d0d8e2;
+        --site-color: #8a8f96;
     }
 </style>
