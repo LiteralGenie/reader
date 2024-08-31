@@ -65,6 +65,7 @@
     <div class="flex gap-1">
         <Input
             bind:this={inputEl}
+            {disabled}
             {name}
             {placeholder}
             class="text-xs"

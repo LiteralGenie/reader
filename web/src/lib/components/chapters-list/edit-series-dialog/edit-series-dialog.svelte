@@ -116,6 +116,7 @@
 
         <div class="footer flex justify-end gap-2 p-4 bg-muted">
             <Button
+                on:click={() => dispatch('close')}
                 type="button"
                 variant="outline"
                 class="cancel-btn w-24 font-bold"

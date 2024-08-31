@@ -75,7 +75,7 @@
         <!-- Info -->
         <div class="flex flex-col justify-center">
             <!-- Title -->
-            <h1 class="text-3xl font-semibold pb-4">
+            <h1 class="text-2xl font-semibold pb-4">
                 {series.name || series.filename}
             </h1>
 
@@ -105,7 +105,7 @@
     </div>
 
     <!-- Chapter list -->
-    <div class="pt-8 px-4 h-full">
+    <div class="flex flex-col pt-8 px-4">
         <h2 class="pb-2 font-semibold text-muted-foreground">
             Chapters
         </h2>
@@ -117,7 +117,7 @@
 
         {#if !series.chapters.length}
             <p
-                class="m-auto pt-[5vw] h-full w-full flex justify-center text-muted-foreground"
+                class="m-auto pt-[5vw] w-full flex justify-center text-muted-foreground"
             >
                 No chapters found
             </p>

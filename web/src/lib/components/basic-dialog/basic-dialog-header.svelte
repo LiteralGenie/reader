@@ -10,9 +10,9 @@
 </script>
 
 <div
-    class="flex items-center justify-between pl-6 pr-4 py-2 bg-muted mb-6 h-16"
+    class="flex items-center justify-between pl-6 pr-4 py-2 bg-muted mb-6"
 >
-    <h1 class="text-xl font-bold">{label}</h1>
+    <h1 class="text-xl font-bold py-2">{label}</h1>
 
     {#if !hideClose}
         <Button
