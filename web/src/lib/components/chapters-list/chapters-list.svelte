@@ -2,6 +2,8 @@
     import type { SeriesWithChaptersDto } from '$lib/api/dtos'
     import ChevronLeft from '$lib/icons/chevron-left.svelte'
     import Cog_6 from '$lib/icons/cog-6.svelte'
+    import MangaDex from '$lib/icons/manga-dex.svelte'
+    import MangaUpdates from '$lib/icons/manga-updates.svelte'
     import Plus from '$lib/icons/plus.svelte'
     import AppHeader from '../app-header/app-header.svelte'
     import Button from '../ui/button/button.svelte'
@@ -72,9 +74,33 @@
 
         <!-- Info -->
         <div class="flex flex-col justify-center">
-            <h1 class="text-xl font-semibold">
+            <!-- Title -->
+            <h1 class="text-3xl font-semibold pb-4">
                 {series.name || series.filename}
             </h1>
+
+            <!-- External links -->
+            <div class="flex gap-2 flex-wrap">
+                {#if series.id_mangadex}
+                    <a
+                        href="https://mangadex.org/title/{series.id_mangadex}"
+                        class="pill dex-pill"
+                    >
+                        <MangaDex class="size-4" />
+                        <span>MangaDex</span>
+                    </a>
+                {/if}
+
+                {#if series.id_mangaupdates}
+                    <a
+                        href="https://www.mangaupdates.com/series/{series.id_mangaupdates}"
+                        class="pill mu-pill"
+                    >
+                        <MangaUpdates class="size-4" />
+                        <span>BakaUpdates</span>
+                    </a>
+                {/if}
+            </div>
         </div>
     </div>
 
@@ -135,5 +161,29 @@
             hsla(var(--background) / 7.5%) 33%,
             hsla(var(--background) / 0%) 100%
         );
+    }
+
+    .pill {
+        @apply border-2 border-muted-foreground rounded-md py-1 px-4 text-xs flex gap-1 font-bold;
+
+        border-color: color-mix(
+            in srgb,
+            var(--site-color),
+            hsl(var(--background)) 50%
+        );
+        color: var(--site-color);
+        /* background-color: color-mix(
+            in srgb,
+            var(--site-color),
+            hsl(var(--background)) 20%
+        ); */
+    }
+
+    .dex-pill {
+        --site-color: #ff6740;
+    }
+
+    .mu-pill {
+        --site-color: #d0d8e2;
     }
 </style>

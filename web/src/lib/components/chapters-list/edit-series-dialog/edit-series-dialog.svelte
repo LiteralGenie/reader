@@ -32,8 +32,15 @@
     let isSyncingMu = false
     $: disabled = isSubmitting || isSyncingDex || isSyncingMu
 
-    const { controls, hasChanges, submit } =
+    const { form, controls, hasChanges, submit } =
         createEditSeriesContext(series)
+
+    $: dexHref =
+        'https://mangadex.org' +
+        ($form.id_dex ? `/title/${$form.id_dex}` : '')
+    $: muHref =
+        'mangaupdates.com' +
+        ($form.id_mu ? `/series/${$form.id_mu}` : '')
 
     const dispatch = createEventDispatcher()
 
@@ -70,7 +77,7 @@
             <div class="flex flex-col pt-0 p-8 gap-4">
                 <SyncInput
                     source="MangaDex"
-                    href="https://mangadex.org/"
+                    href={dexHref}
                     placeholder="be06d561-1670-4f1e-a491-0608ba35ce00"
                     name="md_id"
                     control={controls.children.id_dex}
@@ -81,7 +88,7 @@
 
                 <SyncInput
                     source="MangaUpdates"
-                    href="https://www.mangaupdates.com/"
+                    href={muHref}
                     placeholder="w1sb5f6"
                     name="mu_id"
                     control={controls.children.id_mu}
