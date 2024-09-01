@@ -7,11 +7,11 @@ import {
 } from 'svelte/store'
 import type {
     FormControl,
-    FormControlArray,
-    FormControlRecord,
     TemplateArray,
     TemplateRecord,
     TemplateScalar,
+    TemplateToControlType,
+    TemplateToSourceType,
     TemplateType
 } from './types'
 
@@ -75,7 +75,7 @@ interface Data {
     d: string[]
 }
 
-The goal is to define "controls" (callbacks)
+The goal is to define "controls" (a pair of getter / setter functions)
 that can be used to read / update (possibly nested) properties of the data.
 
 The key being that each control already knows the path to the property they are updating.
@@ -213,28 +213,31 @@ export function createFormControlPrimitive<T>(
     }
 }
 
-export function createFormControlArray<T extends any[]>(
-    source: Writable<T>,
-    template: TemplateArray<T>
-): FormControlArray<T> {
+export function createFormControlArray<T extends TemplateArray<any>>(
+    source: Writable<TemplateToSourceType<T>>,
+    template: T
+): TemplateToControlType<T> {
     return {
         value: source,
         setValue: (update: T) => source.set(update),
-        children: derived(source, (xs) =>
-            xs.map((x) => createFormControl(source, template))
-        )
+        children: derived(source, (xs) => {
+            return xs.map((x, idx) => {
+                const slice = new WritableSlice(source, idx)
+                return createFormControl(slice, template.children)
+            })
+        })
     }
 }
 
 export function createFormControlRecord<
-    T extends Record<string, any>
+    T extends TemplateRecord<any>
 >(
-    source: Writable<T>,
-    template: TemplateRecord<T>
-): FormControlRecord<T> {
+    source: Writable<TemplateToSourceType<T>>,
+    template: T
+): TemplateToControlType<T> {
     const entries = Object.entries(template).filter(
         ([k, _]) => k !== '_type'
-    ) as Array<[string, TemplateType]>
+    ) as Array<[string, TemplateType<any>]>
 
     return {
         value: source,
@@ -253,7 +256,7 @@ export function createFormControlRecord<
 
 export function createFormControl<T>(
     source: Writable<T>,
-    template: TemplateType
+    template: TemplateType<any>
 ) {
     if (template._type === 'scalar') {
         return createFormControlPrimitive(source, template)

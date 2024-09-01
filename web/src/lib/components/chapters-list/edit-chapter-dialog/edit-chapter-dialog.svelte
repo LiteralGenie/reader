@@ -7,7 +7,7 @@
     import Button from '$lib/components/ui/button/button.svelte'
     import Trash from '$lib/icons/trash.svelte'
     import { createEventDispatcher } from 'svelte'
-    import EditPageList from '../edit-series-dialog/edit-page-list/edit-page-list.svelte'
+    import EditPageList from './edit-page-list/edit-page-list.svelte'
     import { createEditChapterContext } from './editChapterContext'
 
     export let series: string
@@ -17,7 +17,10 @@
 
     let isSubmitting = false
 
-    const { controls, hasChanges } = createEditChapterContext(chapter)
+    const { controls, hasChanges } = createEditChapterContext(
+        series,
+        chapter
+    )
 
     const dispatch = createEventDispatcher()
 
@@ -52,7 +55,7 @@
             <EditPageList
                 {series}
                 chapter={chapter.filename}
-                class="px-4 sm:px-8 pt-4"
+                class="p-4 sm:px-8"
             />
         </div>
 

@@ -10,7 +10,7 @@
     import { createDictionaryContext } from '$lib/contexts/dictionaryContext'
     import { createReaderSettingsContext } from '$lib/contexts/readerSettingsContext'
     import { clone } from 'radash'
-    import { onMount } from 'svelte'
+    import { onDestroy, onMount } from 'svelte'
     import { writable } from 'svelte/store'
     import Resizable from '../resizable.svelte'
     import ChapterHeader from './chapter-header.svelte'
@@ -29,7 +29,8 @@
         setDict,
         nlpPrefetchQueue,
         bestDefsPrefetchQueue,
-        mtlPrefetchQueue
+        mtlPrefetchQueue,
+        destroy
     } = createDictionaryContext(null)
 
     createReaderSettingsContext()
@@ -151,6 +152,8 @@
 
         setDict(detail, true)
     }
+
+    onDestroy(() => destroy())
 </script>
 
 <div

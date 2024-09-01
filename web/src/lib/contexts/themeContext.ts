@@ -5,7 +5,7 @@ import {
     type Writable,
     writable
 } from 'svelte/store'
-import { getWindow } from '../miscUtils'
+import { getWindow, type Unsubscribe } from '../miscUtils'
 
 const CTX_KEY = 'theme'
 const STORAGE_KEY = 'theme'
@@ -20,6 +20,7 @@ export interface ThemeContext {
     rawTheme: Writable<RawTheme>
     theme: Readable<Theme>
     setTheme: (theme: RawTheme) => void
+    destroy: Unsubscribe
 }
 
 export function createThemeContext() {
@@ -50,7 +51,7 @@ export function createThemeContext() {
         return realTheme
     })
 
-    themeStore.subscribe((theme) => {
+    const unsubTheme = themeStore.subscribe((theme) => {
         if (theme === 'light') {
             getWindow()?.document.body.classList.remove('dark')
         } else {
@@ -61,7 +62,8 @@ export function createThemeContext() {
     const ctx = {
         rawTheme: rawThemeStore,
         theme: themeStore,
-        setTheme
+        setTheme,
+        destroy: unsubTheme
     }
 
     setContext<ThemeContext>(CTX_KEY, ctx)

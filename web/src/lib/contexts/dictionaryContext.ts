@@ -1,4 +1,4 @@
-import { euc } from '$lib/miscUtils'
+import { euc, type Unsubscribe } from '$lib/miscUtils'
 import { getContext, setContext } from 'svelte'
 import { get, type Writable, writable } from 'svelte/store'
 import type {
@@ -29,6 +29,7 @@ export interface DictionaryContext {
         opts: SetValueArgs | null,
         forceUpdate?: boolean
     ) => void
+    destroy: Unsubscribe
 }
 
 interface SetValueArgs {
@@ -39,50 +40,57 @@ interface SetValueArgs {
 export function createDictionaryContext(
     dict: DictionaryContextValue | null
 ) {
+    const nlpPrefetchQueue = writable<string[]>([])
+    const bestDefsPrefetchQueue = writable<string[]>([])
+    const mtlPrefetchQueue = writable<string[]>([])
+
+    const subSink = [
+        // Fetch and cache items in prefetch queue one-by-one
+        nlpPrefetchQueue.subscribe(async ([fst, ...rest]) => {
+            if (fst) {
+                await fetchNlpData(fst)
+                // console.log('Prefetching nlp for', fst)
+
+                const [currFst, ...rest] = get(nlpPrefetchQueue)
+                if (currFst === fst) {
+                    nlpPrefetchQueue.set(rest)
+                }
+            }
+        }),
+        bestDefsPrefetchQueue.subscribe(async ([fst, ...rest]) => {
+            if (fst) {
+                await fetchBestDefs(fst)
+                // console.log('Prefetching best defs for', fst)
+
+                const [currFst, ...rest] = get(bestDefsPrefetchQueue)
+                if (currFst === fst) {
+                    bestDefsPrefetchQueue.set(rest)
+                }
+            }
+        }),
+        mtlPrefetchQueue.subscribe(async ([fst, ...rest]) => {
+            if (fst) {
+                await fetchMtl(fst)
+                // console.log('Prefetching mtl for', fst)
+
+                const [currFst, ...rest] = get(mtlPrefetchQueue)
+                if (currFst === fst) {
+                    mtlPrefetchQueue.set(rest)
+                }
+            }
+        })
+    ]
+
     const ctx = {
         dict: writable(dict),
-        nlpPrefetchQueue: writable<string[]>([]),
-        bestDefsPrefetchQueue: writable<string[]>([]),
-        mtlPrefetchQueue: writable<string[]>([]),
-        setDict
+        nlpPrefetchQueue,
+        bestDefsPrefetchQueue,
+        mtlPrefetchQueue,
+        setDict,
+        destroy: () => subSink.forEach((unsub) => unsub())
     }
 
     setContext<DictionaryContext>(KEY, ctx)
-
-    // Fetch and cache items in prefetch queue one-by-one
-    ctx.nlpPrefetchQueue.subscribe(async ([fst, ...rest]) => {
-        if (fst) {
-            await fetchNlpData(fst)
-            // console.log('Prefetching nlp for', fst)
-
-            const [currFst, ...rest] = get(ctx.nlpPrefetchQueue)
-            if (currFst === fst) {
-                ctx.nlpPrefetchQueue.set(rest)
-            }
-        }
-    })
-    ctx.bestDefsPrefetchQueue.subscribe(async ([fst, ...rest]) => {
-        if (fst) {
-            await fetchBestDefs(fst)
-            // console.log('Prefetching best defs for', fst)
-
-            const [currFst, ...rest] = get(ctx.bestDefsPrefetchQueue)
-            if (currFst === fst) {
-                ctx.bestDefsPrefetchQueue.set(rest)
-            }
-        }
-    })
-    ctx.mtlPrefetchQueue.subscribe(async ([fst, ...rest]) => {
-        if (fst) {
-            await fetchMtl(fst)
-            // console.log('Prefetching mtl for', fst)
-
-            const [currFst, ...rest] = get(ctx.mtlPrefetchQueue)
-            if (currFst === fst) {
-                ctx.mtlPrefetchQueue.set(rest)
-            }
-        }
-    })
 
     return ctx
 

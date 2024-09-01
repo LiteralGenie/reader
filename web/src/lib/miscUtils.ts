@@ -1,6 +1,9 @@
 import { max, min } from 'radash'
 import sanitize from 'sanitize-filename'
+import type { Readable } from 'svelte/store'
 import type { JSONResponse } from './api/dtos'
+
+export type Primitive = string | number | boolean | null | undefined
 
 export type Unsubscribe = () => void
 
@@ -91,3 +94,15 @@ export function isFileEqual(
 
     return true
 }
+
+export type ReadableParam<T> = T extends Readable<infer V> ? V : never
+
+// https://stackoverflow.com/questions/57683303/how-can-i-see-the-full-expanded-contract-of-a-typescript-type
+export type Expand<T> = T extends infer O
+    ? { [K in keyof O]: O[K] }
+    : never
+export type ExpandRecursively<T> = T extends object
+    ? T extends infer O
+        ? { [K in keyof O]: ExpandRecursively<O[K]> }
+        : never
+    : T
