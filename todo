@@ -1,14 +1,15 @@
-docker - 3
 edit chapter - 3
 definitions page - 3
-footer - 1
-reverse chapter list dropdown - 1
-chapter name overflow - 1
-chapter nav arrows - 1
-dictionary lru cache - 1
-dictionary jamo - 1
-move worker init to outside web server (so that uvicorn can spawn multiple workers) - 2
+    dictionary jamo - 1
+    dictionary lru cache - 1
 add blocks and merge pages - 3
+    chapter name overflow - 1
+    reverse chapter list dropdown - 1
+    chapter nav arrows - 1
+docker - 3
+workers dying - 2
+move worker init to outside web server (so that uvicorn can spawn multiple workers) - 2
+footer - 1
 
 demo
     resource blocks

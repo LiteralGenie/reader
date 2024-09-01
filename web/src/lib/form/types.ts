@@ -15,3 +15,26 @@ export interface FormControlRecord<T extends Object>
         [K in keyof T]: FormControl<T[K]>
     }
 }
+
+export interface TemplateScalar<T> {
+    _type: 'scalar'
+}
+
+export interface TemplateArray<T> {
+    _type: 'array'
+    children: TemplateWrapper<T>
+}
+
+export type TemplateRecord<T> = { _type: 'record' } & {
+    [K in keyof T]: TemplateWrapper<T[K]>
+}
+
+export type TemplateWrapper<T> =
+    T extends Array<infer V>
+        ? TemplateArray<V>
+        : TemplateRecord<T> | TemplateScalar<T>
+
+export type TemplateType =
+    | TemplateScalar<any>
+    | TemplateArray<any>
+    | TemplateRecord<any>

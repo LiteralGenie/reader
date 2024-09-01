@@ -51,7 +51,7 @@
                 class="flex gap-2 ripple bg-muted text-foreground"
             >
                 <Cog_6 class="size-4" />
-                <span class="uppercase font-bold hidden xs:inline">
+                <span class="uppercase font-bold hidden sm:inline">
                     Edit Series
                 </span>
             </Button>
@@ -64,7 +64,7 @@
                 <Plus
                     class="size-4 stroke-[3px] stroke-primary-foreground"
                 />
-                <span class="uppercase font-bold hidden xs:inline">
+                <span class="uppercase font-bold hidden sm:inline">
                     Add Chapter
                 </span>
             </Button>
@@ -96,7 +96,7 @@
                         class="pill dex-pill"
                     >
                         <MangaDex class="size-4" />
-                        <span class="hidden xs:inline">MangaDex</span>
+                        <span class="hidden sm:inline">MangaDex</span>
                     </a>
                 {/if}
 
@@ -106,7 +106,7 @@
                         class="pill mu-pill"
                     >
                         <MangaUpdates class="size-4" />
-                        <span class="hidden xs:inline"
+                        <span class="hidden sm:inline"
                             >BakaUpdates</span
                         >
                     </a>
@@ -162,6 +162,7 @@
 {#if showEditChapter}
     <EditChapterDialog
         open={true}
+        series={series.filename}
         chapter={showEditChapter}
         on:close={() => (showEditChapter = null)}
         on:done={refresh}

@@ -6,6 +6,8 @@
     import type { Unsubscribe } from '$lib/miscUtils'
     import { writable } from 'svelte/store'
 
+    export let label: string
+    export let name: string
     export let control: FormControl<string>
     export let disabled = false
 
@@ -14,12 +16,7 @@
     $: syncStringInput(inputEl, control, subSink)
 </script>
 
-<div class="flex flex-col gap-1.5">
-    <Label for="name">Series Name</Label>
-    <Input
-        bind:this={inputEl}
-        {disabled}
-        name="name"
-        class="text-xs"
-    />
+<div class="flex flex-col gap-1.5 {$$restProps['class'] ?? ''}">
+    <Label for={name}>{label}</Label>
+    <Input bind:this={inputEl} {disabled} {name} class="text-xs" />
 </div>

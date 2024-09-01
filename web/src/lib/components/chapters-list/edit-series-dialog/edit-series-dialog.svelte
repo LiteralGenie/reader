@@ -20,6 +20,7 @@
     import BasicDialog from '$lib/components/basic-dialog/basic-dialog.svelte'
     import ConfirmDialog from '$lib/components/confirm-dialog.svelte'
     import Loader from '$lib/components/loader.svelte'
+    import StringInput from '$lib/components/string-input.svelte'
     import Button from '$lib/components/ui/button/button.svelte'
     import Trash from '$lib/icons/trash.svelte'
     import {
@@ -29,7 +30,6 @@
     import { throwOnStatus } from '$lib/miscUtils'
     import { createEventDispatcher } from 'svelte'
     import { createEditSeriesContext } from './editSeriesContext'
-    import NameInput from './name-input.svelte'
     import SyncInput from './sync-input.svelte'
     import UploadCoverInput from './upload-cover-input.svelte'
 
@@ -156,7 +156,9 @@
             <hr class="mx-4" />
 
             <div class="p-8 flex flex-col gap-4">
-                <NameInput
+                <StringInput
+                    label="Series Name"
+                    name="name"
                     control={controls.children.name}
                     {disabled}
                 />
