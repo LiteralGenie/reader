@@ -2,6 +2,7 @@ import sqlite3
 import time
 from typing import TypeAlias
 
+from ..misc_utils import to_jamo, to_joined_jamo
 from ..paths import DICTIONARY_FILE
 
 DictionaryDb: TypeAlias = sqlite3.Connection
@@ -22,16 +23,16 @@ def select_words(
     check_dash_prefix=False,
     check_suffix=False,
 ) -> list[dict]:
-    where_clause = "word = ?"
-    to_check = [word]
+    where_clause = "jamo = ?"
+    to_check = [to_joined_jamo(word)]
 
     if check_dash_prefix:
-        where_clause += " OR word = ?"
-        to_check.append(f"-{word}")
+        where_clause += " OR jamo = ?"
+        to_check.append(f"-{to_joined_jamo(word)}")
 
     if check_suffix:
-        where_clause += " OR word LIKE ?"
-        to_check.append(f"{word}%")
+        where_clause += " OR jamo LIKE ?"
+        to_check.append(f"{to_joined_jamo(word)}%")
 
     return [
         dict(r)
@@ -62,11 +63,11 @@ def select_examples(
         f"""
         SELECT korean, english, source
         FROM examples
-        WHERE korean LIKE ?
+        WHERE jamo LIKE ?
         LIMIT ?
         OFFSET ?
         """,
-        [f"%{text}%", limit, offset],
+        [f"%{to_joined_jamo(text)}%", limit, offset],
     ).fetchall()
 
     return [dict(r) for r in examples]
@@ -77,9 +78,9 @@ def count_examples(db: DictionaryDb, text: str) -> int:
         f"""
         SELECT COUNT(*) count
         FROM examples
-        WHERE korean LIKE ?
+        WHERE jamo LIKE ?
         """,
-        [f"%{text}%"],
+        [f"%{to_joined_jamo(text)}%"],
     ).fetchone()
     time.sleep(3)
 
@@ -97,13 +98,13 @@ def select_definitions(
         SELECT id, word, pos, definition, source
         FROM definitions
         WHERE 
-            word LIKE ?
+            jamo LIKE ?
             AND definition NOT LIKE 'See the entry%'
             AND pos != 'syllable'
         LIMIT ?
         OFFSET ?
         """,
-        [f"%{text}%", limit, offset],
+        [f"%{to_joined_jamo(text)}%", limit, offset],
     ).fetchall()
 
     return [dict(r) for r in rs]
@@ -115,11 +116,11 @@ def count_definitions(db: DictionaryDb, text: str) -> int:
         SELECT COUNT(*) count
         FROM definitions
         WHERE 
-            word LIKE ?
+            jamo LIKE ?
             AND definition NOT LIKE 'See the entry%'
             AND pos != 'syllable'
         """,
-        [f"%{text}%"],
+        [f"%{to_joined_jamo(text)}%"],
     ).fetchone()
 
     return r["count"]

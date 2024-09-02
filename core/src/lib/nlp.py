@@ -1,8 +1,8 @@
 import multiprocessing
 from multiprocessing.pool import Pool
 
-from jamo import h2j, j2hcj
 from konlpy.tag import Kkma
+from lib.misc_utils import to_jamo
 from nltk import edit_distance
 
 from .db.dictionary_db import load_dictionary_db, select_words
@@ -23,14 +23,14 @@ def get_pos_by_word(tagger: Kkma | Pool, text: str) -> list[list[dict]] | None:
         for w in words:
             parts: list[dict] = []
 
-            rem_jamo = _to_jamo(w)
+            rem_jamo = to_jamo(w)
             while rem_jamo:
                 chars, tag = rem_pos.pop(0)
-                chars_jamo = _to_jamo(chars)
+                chars_jamo = to_jamo(chars)
 
                 assert (
                     rem_jamo[: len(chars_jamo)] == chars_jamo
-                ), f"{all_pos} {[_to_jamo(w) for w in words]}"
+                ), f"{all_pos} {[to_jamo(w) for w in words]}"
 
                 parts.append(
                     dict(
@@ -72,10 +72,6 @@ def get_pos_by_word_dumb(tagger: Pool | Kkma, text: str) -> list[list[dict]]:
         pos_by_word.append(parts)
 
     return pos_by_word
-
-
-def _to_jamo(text: str) -> list[str]:
-    return [char for char in j2hcj(h2j(text))]
 
 
 def get_defs(word: str, kkma_pos: str) -> list[dict]:

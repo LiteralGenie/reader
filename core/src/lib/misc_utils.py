@@ -5,6 +5,7 @@ from pathlib import Path
 import numpy as np
 import requests
 from fastapi import FastAPI, HTTPException
+from jamo import h2j, j2hcj
 from pathvalidate import sanitize_filename
 
 
@@ -87,3 +88,15 @@ def log_422s(app: FastAPI):
 
 def dump_sse_event(data: dict) -> str:
     return "data: " + json.dumps(data) + "\n\n"
+
+
+def to_jamo(text: str) -> list[str]:
+    try:
+        return [char for char in j2hcj(h2j(text))]
+    except:
+        # @todo: handle to_jamo() fail
+        return [text]
+
+
+def to_joined_jamo(text: str) -> str:
+    return "".join(to_jamo(text))

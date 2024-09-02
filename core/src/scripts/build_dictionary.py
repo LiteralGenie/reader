@@ -1,8 +1,6 @@
 import sys
 from pathlib import Path
 
-from lib.misc_utils import download_stream
-
 sys.path.append(str(Path(__file__).parent.parent))
 
 import json
@@ -11,6 +9,7 @@ from zipfile import ZipFile
 
 from datasets import load_dataset
 from lib.db.dictionary_db import DictionaryDb
+from lib.misc_utils import download_stream, to_jamo, to_joined_jamo
 from lib.paths import DICTIONARY_FILE, RAW_DATA_DIR
 from tqdm import tqdm
 
@@ -47,6 +46,7 @@ def init_db():
             source      TEXT        NOT NULL,
 
             word        TEXT        NOT NULL,
+            jamo        TEXT        NOT NULL,
             pos         TEXT,
             definition  TEXT        NOT NULL,
 
@@ -63,6 +63,7 @@ def init_db():
             source      TEXT        NOT NULL,
 
             korean      TEXT        NOT NULL,
+            jamo        TEXT        NOT NULL,
             english     TEXT        NOT NULL,
 
             UNIQUE (korean, english)
@@ -98,12 +99,12 @@ def export_wiktionary(db: DictionaryDb):
                 db.execute(
                     """
                     INSERT OR IGNORE INTO definitions (
-                        source, word, pos, definition
+                        source, word, jamo, pos, definition
                     ) VALUES (
-                        ?, ?, ?, ?
+                        ?, ?, ?, ?, ?
                     )
                     """,
-                    [source, d["word"], d["pos"], gloss],
+                    [source, d["word"], to_joined_jamo(d["word"]), d["pos"], gloss],
                 )
 
     _set_done(db, source)
@@ -169,12 +170,12 @@ def export_krdict(db: DictionaryDb):
                             db.execute(
                                 """
                                 INSERT OR IGNORE INTO definitions (
-                                    source, word, pos, definition
+                                    source, word, jamo, pos, definition
                                 ) VALUES (
-                                    ?, ?, ?, ?
+                                    ?, ?, ?, ?, ?
                                 )
                                 """,
-                                [source, w, None, defn],
+                                [source, w, to_joined_jamo(w), None, defn],
                             )
 
     _set_done(db, source)
@@ -198,12 +199,12 @@ def export_ted_talks(db: DictionaryDb):
         db.execute(
             """
             INSERT OR IGNORE INTO examples (
-                source, korean, english
+                source, korean, jamo, english
             ) VALUES (
-                ?, ?, ?
+                ?, ?, ?, ?
             )
             """,
-            [source, item["korean"], item["english"]],
+            [source, item["korean"], to_joined_jamo(item["korean"]), item["english"]],
         )
 
     _set_done(db, source)
@@ -229,12 +230,17 @@ def export_subtitles(db: DictionaryDb):
         db.execute(
             """
             INSERT OR IGNORE INTO examples (
-                source, korean, english
+                source, korean, jamo, english
             ) VALUES (
-                ?, ?, ?
+                ?, ?, ?, ?
             )
             """,
-            [source, item["translation"]["ko"], item["translation"]["en"]],
+            [
+                source,
+                item["translation"]["ko"],
+                to_joined_jamo(item["translation"]["ko"]),
+                item["translation"]["en"],
+            ],
         )
 
     _set_done(db, source)
