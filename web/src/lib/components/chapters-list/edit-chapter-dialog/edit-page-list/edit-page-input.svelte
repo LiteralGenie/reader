@@ -46,7 +46,9 @@
 
 <div class="flex {$$restProps['class'] ?? ''} items-center">
     <div class="relative">
-        <img {src} class="w-12 h-16 object-cover" />
+        <a target="_blank" href={src}>
+            <img {src} class="w-12 h-16 object-cover" />
+        </a>
 
         <div
             class="absolute top-0 bottom-0 left-0 right-0 bg-background opacity-70"
@@ -68,9 +70,9 @@
                     ev.key === 'Enter' ? onRenameEnd() : ''}
             />
         {:else if state.type === 'rename'}
-            <div class="flex gap-1 items-center">
+            <div class="flex gap-1 items-center min-w-0">
                 <div
-                    class="text-sm sm:text-base flex flex-col gap-1 !leading-none"
+                    class="text-sm sm:text-base text-wrap break-all flex flex-col gap-1 !leading-none"
                 >
                     <span class="deleted">
                         {filename}
@@ -83,9 +85,9 @@
                 {/if}
             </div>
         {:else}
-            <div class="flex gap-1 items-center">
+            <div class="flex gap-1 items-center min-w-0">
                 <span
-                    class="text-sm sm:text-base"
+                    class="text-sm sm:text-base text-wrap break-all"
                     class:deleted={state.type === 'delete'}
                 >
                     {filename}

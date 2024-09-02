@@ -58,15 +58,6 @@ def load_chapter_db(chap_dir: Path, raise_on_missing=False) -> ChapterDb:
         """
     )
 
-    db.execute(
-        """
-        CREATE TABLE IF NOT EXISTS nlp_data (
-            filename    TEXT     PRIMARY KEY,
-            data        TEXT     NOT NULL
-        )
-        """
-    )
-
     _check_version(db)
 
     return db

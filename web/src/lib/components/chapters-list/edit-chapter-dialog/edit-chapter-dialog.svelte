@@ -6,6 +6,7 @@
     import StringInput from '$lib/components/string-input.svelte'
     import Button from '$lib/components/ui/button/button.svelte'
     import Trash from '$lib/icons/trash.svelte'
+    import { throwOnStatus } from '$lib/miscUtils'
     import { createEventDispatcher } from 'svelte'
     import EditPageList from './edit-page-list/edit-page-list.svelte'
     import { createEditChapterContext } from './editChapterContext'
@@ -13,18 +14,31 @@
     export let series: string
     export let chapter: ChapterDto
     export let open: boolean
-    export let disabled = false
 
     let isSubmitting = false
 
-    const { controls, hasChanges } = createEditChapterContext(
+    const { submit, controls, hasChanges } = createEditChapterContext(
         series,
         chapter
     )
 
     const dispatch = createEventDispatcher()
 
-    function onSave() {}
+    async function onSave() {
+        isSubmitting = true
+
+        try {
+            const resp = await submit()
+            await throwOnStatus(resp)
+
+            dispatch('save')
+            dispatch('close')
+        } catch (e) {
+            alert(String(e))
+        } finally {
+            isSubmitting = false
+        }
+    }
 
     function onConfirmDelete() {}
 </script>
@@ -33,7 +47,7 @@
     {open}
     on:close
     class="w-[90vw] max-w-[40em] h-[80vh] m-auto flex flex-col"
-    preventClose={disabled}
+    preventClose={isSubmitting}
 >
     <form on:submit|preventDefault={onSave} class="contents">
         <div class="flex-1 overflow-auto">
@@ -41,16 +55,17 @@
                 on:close
                 label="Editing Chapter {chapter.name ||
                     chapter.filename}"
-                hideClose={disabled}
+                hideClose={isSubmitting}
             />
 
             <StringInput
                 label="Chapter Name"
                 name="name"
                 control={controls.children.name}
-                {disabled}
+                disabled={isSubmitting}
                 class="px-4 sm:px-8"
                 variant="md"
+                required
             />
 
             <EditPageList
@@ -67,7 +82,7 @@
                     type="button"
                     variant="destructive"
                     class="w-24 font-bold flex items-center gap-1"
-                    {disabled}
+                    disabled={isSubmitting}
                 >
                     <Trash class="size-6" />
 
@@ -81,14 +96,14 @@
                     type="button"
                     variant="outline"
                     class="cancel-btn w-24 font-bold"
-                    {disabled}
+                    disabled={isSubmitting}
                 >
                     Cancel
                 </Button>
                 <Button
                     type="submit"
                     class="w-24 font-bold"
-                    disabled={disabled || !$hasChanges}
+                    disabled={isSubmitting || !$hasChanges}
                 >
                     {#if isSubmitting}
                         <Loader

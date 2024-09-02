@@ -1,3 +1,4 @@
+import shutil
 from itertools import chain
 from pathlib import Path
 
@@ -8,6 +9,7 @@ from .config import Config
 from .constants import SUPPORTED_IMAGE_EXTENSIONS
 from .db.chapter_db import (
     CHAPTER_DB_FILENAME,
+    ChapterDb,
     insert_page,
     load_chapter_db,
     select_chapter,
@@ -250,3 +252,108 @@ def validate_image_upload(
         raise HTTPException(400, "Invalid image file")
 
     return im
+
+
+def apply_chapter_crud(
+    db: ChapterDb,
+    to_delete: set[Path],
+    to_rename: dict[Path, Path],
+    to_add: list[dict],
+    name: str | None = None,
+):
+    after_delete: dict[Path, Path] = dict()
+    after_rename: dict[Path, Path] = dict()
+    after_add: list[Path] = []
+
+    try:
+        for fp in to_delete:
+            fp_temp = _get_temp_file(fp)
+            after_delete[fp] = fp_temp
+            shutil.move(fp, fp_temp)
+
+            db.execute("DELETE FROM pages WHERE filename = ?", [fp.name])
+            db.execute("DELETE FROM ocr_data WHERE filename = ?", [fp.name])
+
+        for fp_before, fp_after in to_rename.items():
+            fp_target_before = after_rename.get(fp_before, _get_temp_file(fp_before))
+            if not fp_target_before.exists():
+                assert fp_before.exists()
+                after_rename[fp_before] = fp_target_before
+                shutil.move(fp_before, fp_target_before)
+
+            db.execute(
+                "UPDATE pages SET filename = ? WHERE filename = ?",
+                [fp_target_before.name, fp_before.name],
+            )
+            db.execute(
+                "UPDATE ocr_data SET filename = ? WHERE filename = ?",
+                [fp_target_before.name, fp_before.name],
+            )
+
+            fp_target_after = fp_after
+            if fp_target_after.exists():
+                fp_temp_after = _get_temp_file(fp_after)
+                after_rename[fp_after] = fp_temp_after
+                shutil.move(fp_after, fp_temp_after)
+
+            db.execute(
+                "UPDATE pages SET filename = ? WHERE filename = ?",
+                [fp_target_after.name, fp_after.name],
+            )
+            db.execute(
+                "UPDATE ocr_data SET filename = ? WHERE filename = ?",
+                [fp_target_after.name, fp_after.name],
+            )
+
+            shutil.copy(fp_target_before, fp_target_after)
+            db.execute(
+                "UPDATE pages SET filename = ? WHERE filename = ?",
+                [fp_target_before.name, fp_target_after.name],
+            )
+            db.execute(
+                "UPDATE ocr_data SET filename = ? WHERE filename = ?",
+                [fp_target_before.name, fp_target_after.name],
+            )
+
+        for d in to_add:
+            after_add.append(d["fp"])
+            d["im"].save(d["fp"])
+
+        if name:
+            db.execute("UPDATE metadata SET name = ?", [name])
+
+        for fp in after_delete.values():
+            fp.unlink()
+        for fp in after_rename.values():
+            fp.unlink()
+            db.execute("DELETE FROM pages WHERE filename = ?", [fp.name])
+            db.execute("DELETE FROM ocr_data WHERE filename = ?", [fp.name])
+
+        db.commit()
+
+    except:
+        for fp_before, fp_after in after_delete.items():
+            if fp_after.exists():
+                shutil.move(fp_after, fp_before)
+
+        for fp_before, fp_after in after_delete.items():
+            if fp_after.exists():
+                shutil.move(fp_after, fp_before)
+
+        for fp in after_add:
+            if fp.exists():
+                fp.unlink()
+
+        db.rollback()
+
+        raise
+
+
+def _get_temp_file(fp: Path):
+    idx = 1
+    fp_temp = None
+    while not fp_temp or fp_temp.exists():
+        fp_temp = fp.parent / (fp.name + f".tmp.{idx}")
+        idx += 1
+
+    return fp_temp

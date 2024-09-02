@@ -1,37 +1,53 @@
 import { env } from '$env/dynamic/private'
 import type { RequestHandler } from './$types'
 
-export const GET: RequestHandler = async ({ request }) => {
-    // @ts-ignore
-    const url = env.config.apiUrl + `/series`
-    return await fetch(url, {
+export const GET: RequestHandler = async ({ request, url }) => {
+    const proxyPath = url.pathname.replace('api/', '')
+    const apiUrl = new URL(
+        // @ts-ignore
+        env.config.apiUrl + proxyPath
+    )
+
+    return await fetch(apiUrl, {
         method: request.method,
         headers: request.headers
     })
 }
 
-export const POST: RequestHandler = async ({ request }) => {
-    // @ts-ignore
-    const url = env.config.apiUrl + `/series`
-    return await fetch(url, {
+export const POST: RequestHandler = async ({ request, url }) => {
+    const proxyPath = url.pathname.replace('api/', '')
+    const apiUrl = new URL(
+        // @ts-ignore
+        env.config.apiUrl + proxyPath
+    )
+
+    return await fetch(apiUrl, {
         method: request.method,
         body: await request.formData()
     })
 }
 
-export const PATCH: RequestHandler = async ({ request }) => {
-    // @ts-ignore
-    const url = env.config.apiUrl + `/series`
-    return await fetch(url, {
+export const PATCH: RequestHandler = async ({ request, url }) => {
+    const proxyPath = url.pathname.replace('api/', '')
+    const apiUrl = new URL(
+        // @ts-ignore
+        env.config.apiUrl + proxyPath
+    )
+
+    return await fetch(apiUrl, {
         method: request.method,
         body: await request.formData()
     })
 }
 
-export const DELETE: RequestHandler = async ({ request }) => {
-    // @ts-ignore
-    const url = env.config.apiUrl + `/series`
-    return await fetch(url, {
+export const DELETE: RequestHandler = async ({ request, url }) => {
+    const proxyPath = url.pathname.replace('api/', '')
+    const apiUrl = new URL(
+        // @ts-ignore
+        env.config.apiUrl + proxyPath
+    )
+
+    return await fetch(apiUrl, {
         method: request.method,
         body: await request.text(),
         headers: {

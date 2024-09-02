@@ -195,10 +195,18 @@
 
         border-color: color-mix(
             in srgb,
-            var(--site-color),
-            hsl(var(--background)) 50%
+            hsl(var(--site-color)),
+            hsl(var(--background)) 70%
         );
-        color: var(--site-color);
+        color: hsl(var(--site-color));
+
+        opacity: 80%;
+    }
+
+    .pill:hover {
+        background-color: hsl(var(--site-color) / 15%);
+
+        opacity: 100%;
     }
 
     :global(.pill svg) {
@@ -206,10 +214,13 @@
     }
 
     .dex-pill {
-        --site-color: #ff6740;
+        --site-color: 12 100% 63%;
     }
 
     .mu-pill {
-        --site-color: #8a8f96;
+        --site-color: 215 5% 40%;
+    }
+    :global(.dark .mu-pill) {
+        --site-color: 215 5% 76%;
     }
 </style>

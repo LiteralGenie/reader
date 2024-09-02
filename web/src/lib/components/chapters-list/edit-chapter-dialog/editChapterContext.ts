@@ -103,7 +103,7 @@ export function createEditChapterContext(
         formInitial,
         controls,
         hasChanges,
-        submit: () => submit(chapter.filename, get(form)),
+        submit: () => submit(series, chapter.filename, get(form)),
         pages,
         destroy: () => unsubPages()
     }
@@ -116,7 +116,7 @@ export function createEditChapterContext(
         const resp = await fetch(
             `/api/series/${series}/${chapter.filename}`
         )
-        throwOnStatus(resp)
+        await throwOnStatus(resp)
 
         return (await resp.json()) as PageDto[]
     }
@@ -126,16 +126,43 @@ export function getEditChapterContext(): EditChapterContext {
     return getContext(CTX_KEY)
 }
 
-async function submit(seriesId: string, form: EditChapterForm) {
+async function submit(
+    series: string,
+    chapter: string,
+    form: EditChapterForm
+) {
     const formData = new FormData()
 
-    alert('@todo')
-    return
+    formData.set('series', series)
+    formData.set('chapter', chapter)
+    formData.set('name', form.name)
 
-    return fetch('/api/series', {
+    const to_modify: Record<string, string> = {}
+    for (let pg of form.existingPages) {
+        if (pg.action?.type === 'delete') {
+            formData.append('pages_deleted', pg.filename)
+        } else if (pg.action?.type === 'rename') {
+            to_modify[pg.filename] = pg.action.filename
+        }
+    }
+    formData.set('pages_modified', JSON.stringify(to_modify))
+
+    for (let pg of form.newPages) {
+        let file = pg.file
+        if (pg.newFilename) {
+            file = new File([file], pg.newFilename, {
+                type: file.type
+            })
+        }
+        formData.append('pages_added', pg.file)
+    }
+
+    const resp = await fetch('/api/chapter', {
         method: 'PATCH',
         body: formData
     })
+
+    return resp
 }
 
 function isFormEqual(

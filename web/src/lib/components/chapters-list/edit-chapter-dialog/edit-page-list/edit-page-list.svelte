@@ -63,15 +63,20 @@
     )
 
     function onPageUpload() {
-        const file = inputEl.files?.[0]
-        if (!file) {
+        const files = inputEl.files
+        if (!files?.length) {
             return
         }
 
-        const update = [
-            ...get(controls.children.newPages.value),
-            { id: getUuidWithFallback(), file, newFilename: null }
-        ]
+        const update = [...get(controls.children.newPages.value)]
+        for (let file of files) {
+            update.push({
+                id: getUuidWithFallback(),
+                file,
+                newFilename: null
+            })
+        }
+
         controls.children.newPages.setValue(update)
     }
 
@@ -105,6 +110,7 @@
                 hidden
                 type="file"
                 accept="image/*"
+                multiple
             />
         </Button>
     </div>

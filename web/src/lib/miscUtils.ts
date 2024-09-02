@@ -51,7 +51,7 @@ export async function throwOnStatus(
         try {
             const data = await resp.json()
             if (data?.detail) {
-                msg += ' ' + data.detail
+                msg += '\n' + data.detail
             }
             console.error(data)
         } catch (e) {}

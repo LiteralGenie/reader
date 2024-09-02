@@ -1,10 +1,10 @@
 import asyncio
 import base64
+import json
 import re
 import shutil
 import traceback
 from pathlib import Path
-from typing import Literal
 
 from fastapi import APIRouter, File, Form, HTTPException, Request, Response, UploadFile
 from fastapi.responses import FileResponse, StreamingResponse
@@ -19,6 +19,7 @@ from ..job_utils import JobManager, wait_job
 from ..misc_utils import dump_sse_event, sanitize_or_raise_400
 from ..proxy.proxy import PROXY_JOB_TYPE, insert_proxy_job
 from ..series import (
+    apply_chapter_crud,
     count_file_types,
     create_series,
     get_all_chapters,
@@ -283,21 +284,112 @@ class RenameChapterRequest(BaseModel):
 
 
 @router.patch("/chapter")
-def rename_chapter(req: Request, body: RenameChapterRequest):
-    series = sanitize_or_raise_400(body.series)
-    chapter = sanitize_or_raise_400(body.chapter)
+def edit_chapter(
+    req: Request,
+    series: str = Form(),
+    chapter: str = Form(),
+    name: str = Form(""),
+    pages_deleted: list[str] = Form([]),
+    pages_modified: str = Form("{}"),
+    pages_added: list[UploadFile] = File(),
+):
+    series = sanitize_or_raise_400(series)
+    chapter = sanitize_or_raise_400(chapter)
+    name = name.strip()
 
     cfg: Config = req.app.state.cfg
 
+    chap_dir = cfg.root_image_folder / series / chapter
+
+    try:
+        pages_modified = json.loads(pages_modified)
+    except:
+        raise HTTPException(400)
+
+    if not isinstance(pages_modified, dict):
+        raise HTTPException(400)
+
+    # Validate deleted pages
+    to_delete = set()
+    for pg in pages_deleted:
+        fp = chap_dir / sanitize_or_raise_400(pg)
+        if not fp.exists() or not fp.is_file():
+            raise HTTPException(400)
+
+        if fp in to_delete:
+            raise HTTPException(400)
+
+        to_delete.add(fp)
+
+    # Resolve before / after paths
+    to_rename = dict()
+    for before, after in pages_modified.items():
+        if not isinstance(before, str):
+            raise HTTPException(400)
+        if not isinstance(after, str):
+            raise HTTPException(400)
+
+        fp_before = chap_dir / sanitize_or_raise_400(before)
+        if not fp_before.exists() or not fp.is_file():
+            raise HTTPException(400)
+
+        after = sanitize_or_raise_400(after)
+        after = Path(after).stem + ".png"
+        fp_after = chap_dir / after
+
+        if fp_before in to_rename:
+            raise HTTPException(400)
+
+        to_rename[fp_before] = fp_after
+
+    # Verify target paths are unique
+    all_fp_after = set()
+    for fp_after in to_rename.values():
+        if fp_after in all_fp_after:
+            raise HTTPException(400)
+        all_fp_after.add(fp_after)
+
+    # Verify target paths don't already exist (or will be freed up)
+    for fp_after in to_rename.values():
+        if (
+            fp_after.exists()
+            and fp_after not in to_rename
+            and fp_after not in to_delete
+        ):
+            raise HTTPException(400)
+
+    # Validate new pages
+    to_add = []
+    for pg in pages_added:
+        fp_out = chap_dir / sanitize_or_raise_400(pg.filename or "")
+        if fp_out.exists() and fp_out not in to_rename and fp_out not in to_delete:
+            raise HTTPException(400)
+
+        try:
+            im = Image.open(pg.file)
+            im.copy().verify()
+        except:
+            raise HTTPException(400, detail=f"Invalid image file: {pg.filename}")
+
+        to_add.append(dict(im=im, fp=fp_out))
+
     try:
         db = load_chapter_db(
-            cfg.root_image_folder / series / chapter,
+            chap_dir,
             raise_on_missing=True,
         )
     except FileNotFoundError:
         raise HTTPException(400)
 
-    update_chapter(db, body.name)
+    # Apply changes, as atomically as possible
+    apply_chapter_crud(
+        db,
+        to_delete,
+        to_rename,
+        to_add,
+        name=name or None,
+    )
+
     return get_chapter(cfg, series, chapter)
 
 

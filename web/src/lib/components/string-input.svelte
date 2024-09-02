@@ -11,6 +11,7 @@
     export let control: FormControl<string>
     export let disabled = false
     export let variant: 'sm' | 'md' = 'sm'
+    export let required = false
 
     $: labelTextSize = {
         sm: 'text-sm',
@@ -33,5 +34,6 @@
         {disabled}
         {name}
         class="text-xs {inputTextSize}"
+        {required}
     />
 </div>
