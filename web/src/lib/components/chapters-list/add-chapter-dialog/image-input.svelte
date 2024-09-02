@@ -56,7 +56,11 @@
             />
 
             <p class="text-muted-foreground italic text-xs">
-                Pages will be ordered by file name.
+                * Pages will be ordered by file name.
+                <br />
+                ** Speech bubbles that span multiple pages may not be detected.
+                If this is an issue, try merging the image files using
+                an external program.
             </p>
         </div>
     {:else}

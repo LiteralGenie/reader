@@ -119,7 +119,9 @@
             />
         </div>
 
-        <div class="footer p-4 bg-muted flex justify-between">
+        <div
+            class="footer p-4 bg-muted flex justify-between flex-wrap gap-2"
+        >
             <div>
                 <Button
                     on:click={onConfirmDelete}
@@ -134,7 +136,7 @@
                 </Button>
             </div>
 
-            <div class="flex justify-end gap-2">
+            <div class="flex justify-end gap-2 flex-wrap">
                 <Button
                     on:click={() => dispatch('close')}
                     type="button"

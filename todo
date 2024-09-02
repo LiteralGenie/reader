@@ -1,11 +1,12 @@
-edit chapter - 3
 definitions page - 3
     dictionary jamo - 1
     dictionary lru cache - 1
-add blocks and merge pages - 3
+    link from reader view - 1
+    null search - 1
+use template for llm definitions - 2
 docker - 3
-workers dying - 2
 move worker init to outside web server (so that uvicorn can spawn multiple workers) - 2
+workers dying - 2
 
 demo
     resource blocks
@@ -24,10 +25,11 @@ demo
         no chapter uploads
         no series edits
 
-use template for llm definitions
 logging
 create chapter from archive
 random 404s
+add blocks and merge pages
+    or ocr all pages as strip
 
 image load priority
 fix spacing before nlp
