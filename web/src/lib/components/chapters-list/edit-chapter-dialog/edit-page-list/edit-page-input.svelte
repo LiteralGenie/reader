@@ -60,6 +60,7 @@
         on:click={onRenameStart}
         disabled={state.type === 'delete'}
         class="flex-1 flex items-center justify-start text-start mx-4"
+        type="button"
     >
         {#if isEditing}
             <Input

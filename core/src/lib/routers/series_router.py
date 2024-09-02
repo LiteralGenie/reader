@@ -291,7 +291,7 @@ def edit_chapter(
     name: str = Form(""),
     pages_deleted: list[str] = Form([]),
     pages_modified: str = Form("{}"),
-    pages_added: list[UploadFile] = File(),
+    pages_added: list[UploadFile] = File([]),
 ):
     series = sanitize_or_raise_400(series)
     chapter = sanitize_or_raise_400(chapter)
@@ -330,7 +330,7 @@ def edit_chapter(
             raise HTTPException(400)
 
         fp_before = chap_dir / sanitize_or_raise_400(before)
-        if not fp_before.exists() or not fp.is_file():
+        if not fp_before.exists() or not fp_before.is_file():
             raise HTTPException(400)
 
         after = sanitize_or_raise_400(after)
@@ -642,7 +642,6 @@ def import_chapter_progress(req: Request, job_id: str):
         # Notify queue position
         while True:
             pos = jobber.select_queue_position(job_id)
-            print("pos", pos)
             if pos == 0:
                 break
 

@@ -118,3 +118,13 @@
         </div>
     </form>
 </BasicDialog>
+
+<style lang="postcss">
+    .footer :global(.cancel-btn:hover) {
+        background-color: color-mix(
+            in srgb,
+            hsl(var(--muted)),
+            hsl(var(--background)) 55%
+        );
+    }
+</style>

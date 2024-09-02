@@ -10,6 +10,7 @@ import requests
 from bs4 import BeautifulSoup
 from PIL import Image
 from requests_cache import CachedSession, SQLiteCache
+from yarl import URL
 
 from .config import Config
 from .db.chapter_db import load_chapter_db, update_chapter
@@ -129,12 +130,14 @@ def _process_job(
 
     headers = {"User-Agent": cfg.user_agent_for_import}
 
-    maybe_images: list[dict | str] = []
+    maybe_images: list[dict] = []
 
     # Extract all image urls from the original urls
     # (or the image itself if the url points directly to an image)
     for url in job["urls"]:
         try:
+            origin = URL(url).origin()
+
             _wait_rate_limit(history, cfg)
 
             is_cached = session.cache.contains(url=url)
@@ -157,6 +160,7 @@ def _process_job(
 
             maybe_images.append(
                 dict(
+                    type="image",
                     im=im,
                     size_bytes=len(resp.content),
                     src=url,
@@ -175,7 +179,16 @@ def _process_job(
                 if url_patt and not url_patt.search(src):
                     continue
 
-                maybe_images.append(src)
+                src_url = URL(src)
+                if not src_url.is_absolute():
+                    src_url = origin / src.strip("/")
+
+                maybe_images.append(
+                    dict(
+                        type="url",
+                        src=str(src_url),
+                    )
+                )
 
     # Truncate candidate list if way too many
     to_ignore = [
@@ -198,28 +211,33 @@ def _process_job(
         over_image_cap = len(progress["done"]) >= cfg.max_import_images_per_chapter
         over_size_cap = rem_bytes <= 0
         if over_image_cap or over_size_cap:
-            url = image_or_url if isinstance(image_or_url, str) else image_or_url["src"]
+            url = image_or_url["src"]
             progress["ignored"].append(url)
             jobber.update_progress(job_id, progress)
             jobber.db.commit()
             continue
 
         # Download Image if we haven't already
-        if isinstance(image_or_url, str):
+        if image_or_url["type"] == "url":
             _wait_rate_limit(history, cfg)
-            result = _download_image(session, image_or_url, rem_bytes, headers)
+            result = _download_image(
+                session,
+                image_or_url["src"],
+                rem_bytes,
+                headers,
+            )
 
             if not result["is_cached"]:
                 history.append((time.time(), result["size_bytes"]))
 
             if not result["success"]:
-                progress["ignored"].append(image_or_url)
+                progress["ignored"].append(image_or_url["src"])
                 jobber.update_progress(job_id, progress)
                 jobber.db.commit()
                 continue
 
             im: Image.Image = result["im"]
-            url = image_or_url
+            url = image_or_url["src"]
             size_bytes = result["size_bytes"]
         else:
             im: Image.Image = image_or_url["im"]

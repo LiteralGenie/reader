@@ -54,13 +54,15 @@
     {selected}
 >
     <Select.Trigger class="h-full">
-        <Select.Value placeholder={value} />
+        <Select.Value placeholder={value} class="break-all" />
     </Select.Trigger>
     <Select.Content class="max-h-[50vh] overflow-auto">
         <Select.Group>
             {#each chaptersSorted as ch, idx}
                 <Select.Item value={ch} label={ch.filename}>
-                    <span bind:this={refs[idx]}>{ch.filename}</span>
+                    <span class="break-all" bind:this={refs[idx]}>
+                        {ch.filename}
+                    </span>
                 </Select.Item>
             {/each}
         </Select.Group>

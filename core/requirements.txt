@@ -16,3 +16,4 @@ requests
 requests-cache
 toml
 uvicorn
+yarl

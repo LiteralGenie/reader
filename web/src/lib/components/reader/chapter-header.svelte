@@ -34,7 +34,7 @@
             <ChevronLeft class=" w-[2.75em] p-3 stroke-[4px] " />
         </Button>
 
-        <div class="h-full w-full">
+        <div class="h-full w-full min-w-0">
             <ChapterSelect {seriesId} {chapters} value={chapterId} />
         </div>
 
