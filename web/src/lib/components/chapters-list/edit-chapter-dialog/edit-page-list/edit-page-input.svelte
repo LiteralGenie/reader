@@ -1,85 +1,62 @@
+<script context="module" lang="ts">
+    export type PageInputState =
+        | { type: 'default' }
+        | { type: 'delete' }
+        | {
+              type: 'rename'
+
+              newFilename: string
+          }
+</script>
+
 <script lang="ts">
     import Button from '$lib/components/ui/button/button.svelte'
     import Input from '$lib/components/ui/input/input.svelte'
     import ArrowUturnLeft from '$lib/icons/arrow-uturn-left.svelte'
     import PencilSquare from '$lib/icons/pencil-square.svelte'
     import Trash from '$lib/icons/trash.svelte'
-    import type { ReadableParam } from '$lib/miscUtils'
-    import type { EditChapterFormControls } from '../../edit-chapter-dialog/editChapterContext'
+    import { createEventDispatcher } from 'svelte'
 
-    export let control: ReadableParam<
-        EditChapterFormControls['children']['existingPages']['children']
-    >[number]
-    export let series: string
-    export let chapter: string
-    export let disabled: boolean = false
+    export let state: PageInputState
+    export let filename: string
+    export let src: string
+    export let isNew = false
 
-    $: ({ value: filenameValue } = control.children.filename)
-    $: ({ value: actionValue, setValue: setAction } =
-        control.children.action)
+    const dispatch = createEventDispatcher()
 
+    let inputElValue = ''
     let isEditing = false
-    let inputElValue: string | undefined
-
-    $: allowEdit = !disabled && $actionValue?.type !== 'delete'
 
     function onRenameStart() {
-        if ($actionValue?.type === 'rename') {
-            inputElValue = $actionValue.filename
+        if (state.type === 'rename') {
+            inputElValue = state.newFilename
         } else {
-            inputElValue = $filenameValue
+            inputElValue = filename
         }
 
         isEditing = true
     }
 
     function onRenameEnd() {
+        dispatch('rename', inputElValue.trim())
+
         isEditing = false
-
-        let update = (inputElValue ?? '').trim()
-
-        const ext = $filenameValue.split('.').slice(-1)[0]
-        if (update && !update.endsWith(ext)) {
-            update = update + '.' + ext
-        }
-
-        if (update && update !== $filenameValue) {
-            setAction({
-                type: 'rename',
-                filename: update
-            })
-        } else {
-            setAction(null)
-        }
-    }
-
-    function onDelete() {
-        setAction({
-            type: 'delete'
-        })
-    }
-
-    function onRestore() {
-        setAction(null)
     }
 </script>
 
 <div class="flex {$$restProps['class'] ?? ''} items-center">
     <div class="relative">
-        <img
-            src="/series/{series}/{chapter}/{$filenameValue}"
-            class="w-12 h-16 object-cover"
-        />
+        <img {src} class="w-12 h-16 object-cover" />
 
         <div
             class="absolute top-0 bottom-0 left-0 right-0 bg-background opacity-70"
-            class:invisible={$actionValue?.type !== 'delete'}
+            class:invisible={state.type !== 'delete'}
         ></div>
     </div>
 
     <button
         on:click={onRenameStart}
-        disabled={!allowEdit}
+        disabled={state.type === 'delete'}
         class="flex-1 flex items-center justify-start text-start mx-4"
     >
         {#if isEditing}
@@ -90,29 +67,41 @@
                 on:keydown={(ev) =>
                     ev.key === 'Enter' ? onRenameEnd() : ''}
             />
-        {:else if $actionValue?.type === 'rename'}
-            <div
-                class="text-sm sm:text-base flex flex-col gap-1 !leading-none"
-            >
-                <span class="deleted">
-                    {$filenameValue}
-                </span>
-                <span>{$actionValue.filename}</span>
+        {:else if state.type === 'rename'}
+            <div class="flex gap-1 items-center">
+                <div
+                    class="text-sm sm:text-base flex flex-col gap-1 !leading-none"
+                >
+                    <span class="deleted">
+                        {filename}
+                    </span>
+                    <span>{state.newFilename}</span>
+                </div>
+
+                {#if isNew}
+                    <div class="new-pill">NEW</div>
+                {/if}
             </div>
         {:else}
-            <span
-                class="text-sm sm:text-base"
-                class:deleted={$actionValue?.type === 'delete'}
-            >
-                {$filenameValue}
-            </span>
+            <div class="flex gap-1 items-center">
+                <span
+                    class="text-sm sm:text-base"
+                    class:deleted={state.type === 'delete'}
+                >
+                    {filename}
+                </span>
+
+                {#if isNew}
+                    <div class="new-pill">NEW</div>
+                {/if}
+            </div>
         {/if}
     </button>
 
     <div class="flex">
-        {#if $actionValue?.type !== 'delete'}
+        {#if state.type !== 'delete'}
             <Button
-                on:click={onDelete}
+                on:click={() => dispatch('delete')}
                 variant="ghost"
                 class="edit-page-btn ripple"
             >
@@ -127,7 +116,7 @@
             </Button>
         {:else}
             <Button
-                on:click={onRestore}
+                on:click={() => dispatch('restore')}
                 variant="ghost"
                 class="edit-page-btn ripple"
             >
@@ -148,5 +137,16 @@
 
     :global(.edit-page-btn) svg {
         @apply p-[0.7em] sm:p-[0.9em];
+    }
+
+    .new-pill {
+        @apply rounded-md border flex items-center px-[6px] h-[18px] font-bold ml-1;
+
+        font-size: 0.6rem;
+        margin-top: -1px; /** Fixes weirdly offcenter on Chrome */
+
+        background-color: #a5d6a7;
+        color: #388e3c;
+        border-color: darkgreen;
     }
 </style>

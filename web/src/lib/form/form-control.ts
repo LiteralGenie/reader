@@ -198,7 +198,7 @@ export class WritableSlice<T> {
     public subscribe(cb: Subscriber<T[keyof T]>): any {
         return derived(
             this.source,
-            (v) => v[this.key] as T[keyof T]
+            (v) => v?.[this.key] as T[keyof T]
         ).subscribe(cb)
     }
 }

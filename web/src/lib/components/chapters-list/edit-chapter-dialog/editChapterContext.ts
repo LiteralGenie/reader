@@ -22,7 +22,11 @@ export interface EditChapterForm {
             | { type: 'rename'; filename: string }
             | null
     }>
-    newPages: File[]
+    newPages: Array<{
+        id: string
+        file: File
+        newFilename: string | null
+    }>
 }
 
 export interface EditChapterContext {
@@ -68,7 +72,10 @@ export function createEditChapterContext(
         newPages: {
             _type: 'array',
             children: {
-                _type: 'scalar'
+                _type: 'record',
+                id: { _type: 'scalar' },
+                file: { _type: 'scalar' },
+                newFilename: { _type: 'scalar' }
             }
         }
     } as EditChapterFormTemplate)
@@ -153,7 +160,13 @@ export type EditChapterFormTemplate = TemplateRecord<{
             >
         }>
     >
-    newPages: TemplateArray<TemplateScalar<File>>
+    newPages: TemplateArray<
+        TemplateRecord<{
+            id: TemplateScalar<string>
+            file: TemplateScalar<File>
+            newFilename: TemplateScalar<string | null>
+        }>
+    >
 }>
 
 export type EditChapterFormControls =

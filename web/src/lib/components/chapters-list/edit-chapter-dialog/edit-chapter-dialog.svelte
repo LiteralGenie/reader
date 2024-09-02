@@ -50,12 +50,13 @@
                 control={controls.children.name}
                 {disabled}
                 class="px-4 sm:px-8"
+                variant="md"
             />
 
             <EditPageList
                 {series}
                 chapter={chapter.filename}
-                class="p-4 sm:px-8"
+                class="p-4 pt-8 sm:px-8"
             />
         </div>
 

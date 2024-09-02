@@ -106,3 +106,26 @@ export type ExpandRecursively<T> = T extends object
         ? { [K in keyof O]: ExpandRecursively<O[K]> }
         : never
     : T
+
+let next_id = 1
+
+/**
+ * UUIDs aren't available on http. This replacement is only meant for testing.
+ */
+export function getUuidWithFallback(): string {
+    const isSsr = typeof window === 'undefined'
+    const isHttp = isSsr || window.crypto.randomUUID === undefined
+    const hasUuid = !isHttp
+
+    if (hasUuid) {
+        return window.crypto.randomUUID()
+    } else {
+        console.warn(
+            'crypto.randomUUID() not available. Falling back to integer ids.'
+        )
+
+        const result = (next_id += 1)
+        next_id += 1
+        return result.toString()
+    }
+}

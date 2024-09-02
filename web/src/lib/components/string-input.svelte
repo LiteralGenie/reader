@@ -10,6 +10,16 @@
     export let name: string
     export let control: FormControl<string>
     export let disabled = false
+    export let variant: 'sm' | 'md' = 'sm'
+
+    $: labelTextSize = {
+        sm: 'text-sm',
+        md: 'text-base'
+    }[variant]
+    $: inputTextSize = {
+        sm: 'text-xs',
+        md: 'text-sm'
+    }[variant]
 
     let inputEl: Input
     const subSink = writable<Unsubscribe[]>([])
@@ -17,6 +27,11 @@
 </script>
 
 <div class="flex flex-col gap-1.5 {$$restProps['class'] ?? ''}">
-    <Label for={name}>{label}</Label>
-    <Input bind:this={inputEl} {disabled} {name} class="text-xs" />
+    <Label for={name} class={labelTextSize}>{label}</Label>
+    <Input
+        bind:this={inputEl}
+        {disabled}
+        {name}
+        class="text-xs {inputTextSize}"
+    />
 </div>
