@@ -8,11 +8,16 @@
     export let chapters: ChapterDto[]
     export let value: string
 
-    $: selectedChapter = chapters.find((ch) => ch.filename === value)
+    $: chaptersSorted = chapters.toReversed()
+    $: selectedChapter = chaptersSorted.find(
+        (ch) => ch.filename === value
+    )
     $: selected = {
         label: selectedChapter?.filename,
         value: selectedChapter
     }
+
+    $: refs = [] as any[]
 
     function onSelectedChange(val?: any) {
         const ch = val as ChapterDto | undefined
@@ -22,20 +27,40 @@
 
         goto(`/series/${euc(seriesId)}/${euc(ch.filename)}`)
     }
+
+    function onOpenChange(isOpen: boolean) {
+        if (!isOpen) {
+            return
+        }
+
+        // Scroll to selected chapter
+        // Open event fires before refs are updated so need to delay it
+        setTimeout(() => {
+            const idxSelected = chaptersSorted.findIndex(
+                (ch) => ch.filename === value
+            )
+            if (idxSelected < 0) {
+                return
+            }
+
+            refs[idxSelected]?.scrollIntoView({ block: 'center' })
+        }, 10)
+    }
 </script>
 
 <Select.Root
     onSelectedChange={(ev) => onSelectedChange(ev?.value)}
+    onOpenChange={(ev) => onOpenChange(ev)}
     {selected}
 >
     <Select.Trigger class="h-full">
         <Select.Value placeholder={value} />
     </Select.Trigger>
-    <Select.Content>
+    <Select.Content class="max-h-[50vh] overflow-auto">
         <Select.Group>
-            {#each chapters as ch}
+            {#each chaptersSorted as ch, idx}
                 <Select.Item value={ch} label={ch.filename}>
-                    {ch.filename}
+                    <span bind:this={refs[idx]}>{ch.filename}</span>
                 </Select.Item>
             {/each}
         </Select.Group>

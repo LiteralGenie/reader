@@ -13,18 +13,20 @@
     const dispatch = createEventDispatcher()
 </script>
 
-<div class="root w-full h-16 flex justify-between items-center">
+<div class="root w-full min-h-16 flex justify-between items-center">
     <Button
         variant="link"
         {href}
-        class="py-0 px-4 h-full hover:no-underline"
+        class="py-0 px-4 h-full hover:no-underline min-w-0 overflow-hidden"
     >
         <div
-            class="flex gap-2 items-center hover:border-b border-primary"
+            class="min-w-0 back-link flex gap-2 items-center border-b-2 border-transparent text-foreground stroke-foreground hover:text-primary hover:stroke-primary"
         >
-            <ArrowLongLeft class="w-6 stroke-2 stroke-foreground" />
+            <ArrowLongLeft class="w-6 flex-shrink-0 stroke-2" />
 
-            <span class="text-foreground text-lg">
+            <span
+                class="min-w-0 text-lg text-ellipsis overflow-hidden whitespace-nowrap"
+            >
                 {seriesId}
             </span>
         </div>
@@ -49,5 +51,9 @@
 <style lang="postcss">
     .root {
         background-color: var(--header);
+    }
+
+    .back-link:hover {
+        border-color: hsla(var(--primary) / 80%) !important;
     }
 </style>

@@ -94,6 +94,7 @@
                     <a
                         href="https://mangadex.org/title/{series.id_mangadex}"
                         class="pill dex-pill"
+                        target="_blank"
                     >
                         <MangaDex class="size-4" />
                         <span class="hidden sm:inline">MangaDex</span>
@@ -104,6 +105,7 @@
                     <a
                         href="https://www.mangaupdates.com/series/{series.id_mangaupdates}"
                         class="pill mu-pill"
+                        target="_blank"
                     >
                         <MangaUpdates class="size-4" />
                         <span class="hidden sm:inline"
