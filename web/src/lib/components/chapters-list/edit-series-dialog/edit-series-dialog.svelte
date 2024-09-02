@@ -92,18 +92,15 @@
         isDeleting = true
 
         try {
-            const countResp = await fetch(
-                `/api/count/${series.filename}`
-            )
-            await throwOnStatus(countResp)
-
-            await fetch('/api/series', {
+            const resp = await fetch('/api/series', {
                 method: 'DELETE',
                 body: JSON.stringify({ series: series.filename }),
                 headers: {
                     'Content-Type': 'application/json'
                 }
             })
+            throwOnStatus(resp)
+
             dispatch('close')
 
             goto('/series')
@@ -230,7 +227,6 @@
             >
         </p>
 
-        <!-- {#if deleteCount} -->
         <p>
             This will delete
             <span class="text-primary">
@@ -246,7 +242,6 @@
             </span>
             other files.
         </p>
-        <!-- {/if} -->
     </div>
 </ConfirmDialog>
 

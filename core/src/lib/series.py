@@ -180,7 +180,7 @@ def count_file_types(fp: Path):
     tally = dict(
         images=0,
         other=0,
-        folders=0,
+        folders=1,
     )
 
     for fp in children:

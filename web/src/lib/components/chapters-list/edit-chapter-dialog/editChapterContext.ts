@@ -6,8 +6,9 @@ import type {
     TemplateScalar,
     TemplateToControlType
 } from '$lib/form/types'
-import { deepCopy, throwOnStatus } from '$lib/miscUtils'
+import { deepCopy, isFileEqual, throwOnStatus } from '$lib/miscUtils'
 import { newPromiseStore, type PromiseStore } from '$lib/promiseStore'
+import { counting, isEqual, zip } from 'radash'
 import { getContext, setContext } from 'svelte'
 import { derived, get, writable, type Readable } from 'svelte/store'
 
@@ -34,6 +35,7 @@ export interface EditChapterContext {
     formInitial: Readable<Readonly<EditChapterForm>>
     controls: EditChapterFormControls
     hasChanges: Readable<boolean>
+    errors: Readable<EditChapterFormErrors>
     submit: () => Promise<any>
     destroy: () => void
 
@@ -88,24 +90,34 @@ export function createEditChapterContext(
     const pages = newPromiseStore(fetchPages(), null)
     const unsubPages = pages.subscribe((pages) => {
         if (pages.data) {
+            const existingPages = pages.data.map((pg) => ({
+                action: null,
+                filename: pg.filename
+            }))
+
             form.update((curr) => ({
                 ...curr,
-                existingPages: pages.data.map((pg) => ({
-                    action: null,
-                    filename: pg.filename
-                }))
+                existingPages
+            }))
+
+            formInitial.update((curr) => ({
+                ...curr,
+                existingPages
             }))
         }
     })
+
+    const errors = derived(form, (curr) => checkErrors(curr))
 
     const ctx: EditChapterContext = {
         form,
         formInitial,
         controls,
         hasChanges,
+        errors,
         submit: () => submit(series, chapter.filename, get(form)),
-        pages,
-        destroy: () => unsubPages()
+        destroy: () => unsubPages(),
+        pages
     }
 
     setContext(CTX_KEY, ctx)
@@ -169,10 +181,64 @@ function isFormEqual(
     a: EditChapterForm,
     b: EditChapterForm
 ): boolean {
-    // @todo
-    return false
+    if (a.name !== b.name) {
+        return false
+    }
+
+    if (a.existingPages.length !== b.existingPages.length) {
+        return false
+    }
+    for (let [pgA, pgB] of zip(a.existingPages, b.existingPages)) {
+        if (!isEqual(pgA, pgB)) {
+            return false
+        }
+    }
+
+    if (a.newPages.length !== b.newPages.length) {
+        return false
+    }
+    for (let [pgA, pgB] of zip(a.newPages, b.newPages)) {
+        if (pgA.id !== pgB.id) {
+            return false
+        }
+
+        if (!isFileEqual(pgA.file, pgB.file)) {
+            return false
+        }
+
+        if (pgA.newFilename !== pgB.newFilename) {
+            return false
+        }
+    }
 
     return true
+}
+
+function checkErrors(form: EditChapterForm): EditChapterFormErrors {
+    const errors = {} as EditChapterFormErrors
+
+    const existingNames = form.existingPages.map((pg) =>
+        pg.action?.type === 'rename'
+            ? pg.action.filename
+            : pg.filename
+    )
+    const newNames = form.newPages.map(
+        (pg) => pg.newFilename || pg.file.name
+    )
+    const tally = counting(
+        [...existingNames, ...newNames],
+        (name) => name
+    )
+    for (let [name, count] of Object.entries(tally)) {
+        if (count <= 1) {
+            continue
+        }
+
+        errors['duplicates'] = errors['duplicates'] ?? []
+        errors['duplicates'].push(name)
+    }
+
+    return errors
 }
 
 export type EditChapterFormTemplate = TemplateRecord<{
@@ -198,3 +264,7 @@ export type EditChapterFormTemplate = TemplateRecord<{
 
 export type EditChapterFormControls =
     TemplateToControlType<EditChapterFormTemplate>
+
+export interface EditChapterFormErrors {
+    duplicates?: string[]
+}

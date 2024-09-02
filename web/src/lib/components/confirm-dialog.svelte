@@ -39,6 +39,7 @@
             Delete
         </Button>
         <Button
+            on:click={() => dispatch('close')}
             variant="outline"
             {disabled}
             class="w-full hover:bg-muted hover:text-foreground"

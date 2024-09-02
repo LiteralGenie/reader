@@ -1,7 +1,10 @@
 <script lang="ts">
     import type { ReadableParam } from '$lib/miscUtils'
     import { derived } from 'svelte/store'
-    import type { EditChapterFormControls } from '../editChapterContext'
+    import {
+        getEditChapterContext,
+        type EditChapterFormControls
+    } from '../editChapterContext'
     import EditPageInput from './edit-page-input.svelte'
 
     export let control: ReadableParam<
@@ -9,6 +12,9 @@
     >[number]
     export let series: string
     export let chapter: string
+    export let disabled: boolean
+
+    const { errors } = getEditChapterContext()
 
     $: ({ value: filenameValue } = control.children.filename)
     $: ({ value: actionValue, setValue: setAction } =
@@ -30,6 +36,10 @@
             } as const
         }
     })
+
+    $: isError = !!$errors.duplicates?.includes(
+        $inputState.newFilename || $filenameValue
+    )
 
     function onRename(update: string) {
         const ext = $filenameValue.split('.').slice(-1)[0]
@@ -62,6 +72,8 @@
     state={$inputState}
     filename={$filenameValue}
     src="/series/{series}/{chapter}/{$filenameValue}"
+    {isError}
+    {disabled}
     on:rename={(ev) => onRename(ev.detail)}
     on:delete={onDelete}
     on:restore={onRestore}

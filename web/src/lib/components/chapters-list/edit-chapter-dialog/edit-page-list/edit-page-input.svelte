@@ -21,6 +21,8 @@
     export let filename: string
     export let src: string
     export let isNew = false
+    export let isError = false
+    export let disabled: boolean
 
     const dispatch = createEventDispatcher()
 
@@ -58,9 +60,10 @@
 
     <button
         on:click={onRenameStart}
-        disabled={state.type === 'delete'}
+        disabled={disabled || state.type === 'delete'}
         class="flex-1 flex items-center justify-start text-start mx-4"
         type="button"
+        class:text-red-500={isError}
     >
         {#if isEditing}
             <Input
@@ -104,6 +107,7 @@
     <div class="flex">
         {#if state.type !== 'delete'}
             <Button
+                {disabled}
                 on:click={() => dispatch('delete')}
                 variant="ghost"
                 class="edit-page-btn ripple"
@@ -111,6 +115,7 @@
                 <Trash />
             </Button>
             <Button
+                {disabled}
                 on:click={onRenameStart}
                 variant="ghost"
                 class="edit-page-btn ripple"
@@ -119,6 +124,7 @@
             </Button>
         {:else}
             <Button
+                {disabled}
                 on:click={() => dispatch('restore')}
                 variant="ghost"
                 class="edit-page-btn ripple"

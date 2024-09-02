@@ -21,7 +21,7 @@
     let showAddChapter = false
     let showEditChapter: ChapterDto | null = null
 
-    async function refresh() {
+    async function refreshSeries() {
         series = await (
             await fetch(`/api/series/${series.filename}`)
         ).json()
@@ -149,7 +149,7 @@
     open={showAddChapter}
     seriesId={series.filename}
     on:close={() => (showAddChapter = false)}
-    on:done={refresh}
+    on:done={refreshSeries}
 />
 
 {#if showEditSeries}
@@ -157,7 +157,7 @@
         open={true}
         {series}
         on:close={() => (showEditSeries = false)}
-        on:done={refresh}
+        on:done={refreshSeries}
     />
 {/if}
 
@@ -167,7 +167,7 @@
         series={series.filename}
         chapter={showEditChapter}
         on:close={() => (showEditChapter = null)}
-        on:done={refresh}
+        on:done={refreshSeries}
     />
 {/if}
 

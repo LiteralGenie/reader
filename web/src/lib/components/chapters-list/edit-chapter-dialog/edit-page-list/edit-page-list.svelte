@@ -11,13 +11,16 @@
 
     export let series: string
     export let chapter: string
+    export let disabled: boolean
 
     let inputEl: HTMLInputElement
 
-    const { controls } = getEditChapterContext()
+    const { controls, errors } = getEditChapterContext()
 
     $: existingPages = controls.children.existingPages.children
     $: newPages = controls.children.newPages.children
+
+    $: hasDupes = 'duplicates' in $errors
 
     $: inputComponents = derived(
         [existingPages, newPages],
@@ -92,13 +95,22 @@
 </script>
 
 <div class={$$restProps['class'] ?? ''}>
-    <div class="flex justify-between items-center">
-        <Label class="text-base">Pages</Label>
+    <div
+        class="flex justify-between items-center"
+        class:text-red-500={hasDupes}
+    >
+        <div class="flex flex-col gap-0 leading-none">
+            <Label class="text-base">Pages</Label>
+            {#if hasDupes}
+                <p class="text-sm">File names must be unique.</p>
+            {/if}
+        </div>
 
         <Button
             on:click={() => inputEl.click()}
             variant="secondary"
             class="p-0 w-16 h-7 py-2 mr-2 flex gap-0.5"
+            {disabled}
         >
             <Plus class="h-3 stroke-[4px]" />
 
@@ -121,6 +133,7 @@
                 this={d.component}
                 {...d.props}
                 on:delete={d.onDelete}
+                {disabled}
             />
         {/each}
     </div>
