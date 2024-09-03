@@ -1,6 +1,5 @@
 definitions page - 3
     link from reader view - 1
-    search input - 2
 use template for llm definitions - 2
 docker - 3
 move worker init to outside web server (so that uvicorn can spawn multiple workers) - 2

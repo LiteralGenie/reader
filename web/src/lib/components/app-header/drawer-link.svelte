@@ -19,7 +19,7 @@
 
 <style lang="postcss">
     .active {
-        @apply font-bold text-primary cursor-default;
+        @apply font-bold text-primary pointer-events-none;
 
         background-color: hsl(var(--muted) / 40%);
     }

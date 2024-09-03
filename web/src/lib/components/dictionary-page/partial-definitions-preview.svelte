@@ -29,7 +29,9 @@
                             href="/dictionary?query={d.text}"
                             class="border-b border-b-pink-700 leading-none pb-0.5 text-pink-700 flex items-center gap-1"
                         >
-                            <span>View results for {d.text} </span>
+                            <span
+                                >View all results for {d.text}
+                            </span>
                             <ArrowRight class="size-3" />
                         </a>
                     </div>

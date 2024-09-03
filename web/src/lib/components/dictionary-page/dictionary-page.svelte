@@ -7,7 +7,6 @@
     } from '$lib/api/dtos'
     import ArrowRight from '$lib/icons/arrow-right.svelte'
     import { draw } from 'radash'
-    import AppHeader from '../app-header/app-header.svelte'
     import Button from '../ui/button/button.svelte'
     import Input from '../ui/input/input.svelte'
     import Definitions from './definitions-preview.svelte'
@@ -43,8 +42,6 @@
         }
     }
 </script>
-
-<AppHeader />
 
 <form
     on:submit|preventDefault={onSubmit}
