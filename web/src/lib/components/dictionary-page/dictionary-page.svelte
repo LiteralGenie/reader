@@ -21,6 +21,12 @@
     export let exampleCount: Promise<number>
 
     const placeholders = [
+        'ㄹ 수 있다',
+        '면 되다',
+        '지 못하다',
+        'ㄹ 걸',
+        'ㄴ다니',
+        //
         '안녕하세요',
         '15세 이상 감상을 권장합니다',
         '방과 후 전쟁활동',
@@ -48,7 +54,6 @@
     bind:this={formEl}
     class="flex items-center px-6 pt-8 pb-4"
 >
-    <!-- <Label for="search" class="text-lg font-bold">Search</Label> -->
     <Input
         name="search"
         class="h-12 text-xl border-primary bg-muted rounded-r-none rounded-l-xl"

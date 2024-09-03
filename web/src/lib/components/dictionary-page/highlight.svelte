@@ -34,12 +34,9 @@
             .join('')
         const jamoStart = allJamo.indexOf(targetJamo)
         if (jamoStart === -1) {
-            console.log('wtf', targetJamo, allJamo)
             return defaultReturn
         }
-        const jamoEnd = jamoStart + targetJamo.length
-
-        console.log(chars, jamoByChar, allJamo, targetJamo, jamoStart)
+        let jamoEnd = jamoStart + targetJamo.length
 
         // Convert jamo-based indices to char-based indices
         let charStart = -1
@@ -76,6 +73,7 @@
 
         let charEnd = -1
         while (true) {
+            // Assume entire tail of string matches if we run out of characters
             const charJamo = jamoByChar[charIdx]
             if (charJamo === undefined) {
                 charEnd = jamoByChar.length - 1
@@ -90,6 +88,11 @@
 
             jamoIdx = nextJamoIdx
             charIdx += 1
+
+            // Ignore whitespace
+            if (charJamo[0].trim() === '') {
+                jamoEnd += 1
+            }
         }
 
         const head = text.slice(0, charStart)

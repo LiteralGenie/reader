@@ -2,6 +2,7 @@
     import { page } from '$app/stores'
     import type { ExampleDto } from '$lib/api/dtos'
     import ArrowRight from '$lib/icons/arrow-right.svelte'
+    import Highlight from './highlight.svelte'
 
     export let query: string
     export let examples: ExampleDto[]
@@ -26,7 +27,7 @@
         <div class="flex flex-col gap-4 mt-4 ml-4">
             {#each examples as ex, idx}
                 <div class="flex flex-col gap-1 leading-tight">
-                    <div>{ex.korean}</div>
+                    <Highlight text={ex.korean} target={query} />
                     <div class="italic">{ex.english}</div>
                 </div>
 

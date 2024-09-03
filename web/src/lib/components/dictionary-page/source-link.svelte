@@ -56,7 +56,6 @@
             <a {href} target="_blank" class="hover:underline">
                 [{idx}]
             </a>
-            <span></span>
         {/each}
     </span>
 {:else if hrefs.length === 0}
