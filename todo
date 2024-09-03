@@ -1,7 +1,6 @@
 definitions page - 3
-    dictionary lru cache - 1
     link from reader view - 1
-    null search - 1
+    search input - 2
 use template for llm definitions - 2
 docker - 3
 move worker init to outside web server (so that uvicorn can spawn multiple workers) - 2
@@ -39,3 +38,4 @@ ocr progress doesnt update
 mu / md icons
 add chapter progress link-able
 mobile devtools
+dictionary lru cache
