@@ -2,7 +2,9 @@ import sqlite3
 import time
 from typing import TypeAlias
 
-from ..misc_utils import to_jamo, to_joined_jamo
+from Levenshtein import distance as levenshtein_distance
+
+from ..misc_utils import to_joined_jamo
 from ..paths import DICTIONARY_FILE
 
 DictionaryDb: TypeAlias = sqlite3.Connection
@@ -13,6 +15,8 @@ def load_dictionary_db():
 
     db = sqlite3.connect(DICTIONARY_FILE)
     db.row_factory = sqlite3.Row
+
+    db.create_function("levenshtein", 2, levenshtein_distance)
 
     return db
 
@@ -93,6 +97,9 @@ def select_definitions(
     offset=0,
     limit=10,
 ) -> list[dict]:
+    text_jamo = to_joined_jamo(text)
+
+    # @todo use a compiled extension like spellfix instead of python function
     rs = db.execute(
         f"""
         SELECT id, word, pos, definition, source
@@ -101,10 +108,11 @@ def select_definitions(
             jamo LIKE ?
             AND definition NOT LIKE 'See the entry%'
             AND pos != 'syllable'
+        ORDER BY levenshtein(?, jamo) ASC
         LIMIT ?
         OFFSET ?
         """,
-        [f"%{to_joined_jamo(text)}%", limit, offset],
+        [f"%{text_jamo}%", text_jamo, limit, offset],
     ).fetchall()
 
     return [dict(r) for r in rs]

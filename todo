@@ -1,5 +1,3 @@
-definitions page - 3
-    link from reader view - 1
 use template for llm definitions - 2
 docker - 3
 move worker init to outside web server (so that uvicorn can spawn multiple workers) - 2
@@ -27,6 +25,7 @@ create chapter from archive
 random 404s
 add blocks and merge pages
     or ocr all pages as strip
+transitions
 
 image load priority
 fix spacing before nlp

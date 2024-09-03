@@ -17,3 +17,6 @@ requests-cache
 toml
 uvicorn
 yarl
+
+# sudo apt install libsqlite3-dev
+git+https://github.com/karlb/sqlite-spellfix@2768432edfaa93968dc38b7c36f0e8a071fb4b83

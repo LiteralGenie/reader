@@ -2,6 +2,7 @@
     import { page } from '$app/stores'
     import type { BestDefDto, NlpDto } from '$lib/api/dtos'
     import { type DictionaryContextValue } from '$lib/contexts/dictionaryContext'
+    import ArrowTopRightOnSquare from '$lib/icons/arrow-top-right-on-square.svelte'
     import PencilSquare from '$lib/icons/pencil-square.svelte'
     import Trash from '$lib/icons/trash.svelte'
     import { createEventDispatcher } from 'svelte'
@@ -222,7 +223,7 @@
                         {@const wordMtl = $mtl.data?.words[word]}
 
                         <div class="mb-4">
-                            <div>
+                            <div class="flex gap-1 items-center">
                                 <h1>
                                     <span
                                         class="font-bold text-lg text-accent-foreground"
@@ -238,14 +239,40 @@
                                         </span>
                                     {/if}
                                 </h1>
+
+                                <a
+                                    href="/dictionary?query={word}"
+                                    target="_blank"
+                                    class="ripple rounded-full"
+                                >
+                                    <ArrowTopRightOnSquare
+                                        class="size-6 p-1 text-muted-foreground"
+                                    />
+                                </a>
                             </div>
 
                             {#each $nlp.data[idxWord] as part, idxPart}
-                                <div class="ml-4">
-                                    <span>{part.text}</span>
-                                    <span class="text-sm">
-                                        {prettyPrintKkma(part.pos)}
-                                    </span>
+                                <div
+                                    class="flex items-center gap-0.5"
+                                >
+                                    <div class="ml-4">
+                                        <span>{part.text}</span>
+                                        <span class="text-sm">
+                                            {prettyPrintKkma(
+                                                part.pos
+                                            )}
+                                        </span>
+                                    </div>
+
+                                    <a
+                                        href="/dictionary?query={part.text}"
+                                        target="_blank"
+                                        class="ripple rounded-full"
+                                    >
+                                        <ArrowTopRightOnSquare
+                                            class="size-[1.375rem] p-1 text-muted-foreground"
+                                        />
+                                    </a>
                                 </div>
 
                                 <ul>
