@@ -29,6 +29,16 @@ def nlp(req: Request, text: str):
     return words
 
 
+@router.get("/nlp_parts/{text}")
+@cache(expire=365 * 86400)  # type: ignore
+def nlp_partial(req: Request, text: str):
+    words = get_pos_by_word(req.app.state.kkma_pool, text)
+    if not words:
+        words = get_pos_by_word_dumb(req.app.state.kkma_pool, text)
+
+    return words
+
+
 @router.get("/examples/{text}")
 def examples(
     text: str,

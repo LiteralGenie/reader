@@ -1,6 +1,11 @@
 import { env } from '$env/dynamic/private'
 import { euc } from '$lib/miscUtils'
-import type { DefinitionDto, ExampleDto, JSONResponse } from './dtos'
+import type {
+    DefinitionDto,
+    ExampleDto,
+    JSONResponse,
+    PartialNlpDto
+} from './dtos'
 
 export async function fetchDefinitions(
     text: string,
@@ -47,5 +52,13 @@ export async function countExamples(
         // @ts-ignore
         env.config.apiUrl + `/examples/${euc(text)}/count`
     )
+    return fetch(url)
+}
+
+export async function fetchNlpParts(
+    text: string
+): Promise<JSONResponse<PartialNlpDto[][]>> {
+    // @ts-ignore
+    const url = new URL(env.config.apiUrl + `/nlp_parts/${euc(text)}`)
     return fetch(url)
 }

@@ -3,19 +3,21 @@
     import type { PageData } from './$types'
 
     export let data: PageData
-    const {
+    $: ({
         query,
         definitions,
         definitionCount,
+        partialDefinitions,
         examples,
         exampleCount
-    } = data
+    } = data)
 </script>
 
 <DictionaryPage
     {query}
     {definitions}
     {definitionCount}
+    {partialDefinitions}
     {examples}
     {exampleCount}
 />

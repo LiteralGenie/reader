@@ -39,6 +39,11 @@ export interface NlpDto {
     defs: DefDto[]
 }
 
+export interface PartialNlpDto {
+    text: string
+    pos: string
+}
+
 export interface DefDto {
     id: number
     word: string
@@ -72,3 +77,8 @@ export interface ExampleDto {
 }
 
 export type BestDefDto = number[][][]
+
+export interface PartialDefinition {
+    text: string
+    definitions: DefinitionDto[]
+}
