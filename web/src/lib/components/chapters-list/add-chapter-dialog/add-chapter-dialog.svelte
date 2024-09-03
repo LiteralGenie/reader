@@ -117,7 +117,12 @@
     class="w-[90vw] max-w-[50em] h-max m-auto"
 >
     {#if jobId}
-        <AddChapterProgress {jobId} on:reset={onReset} on:done />
+        <AddChapterProgress
+            on:close
+            {jobId}
+            on:reset={onReset}
+            on:done
+        />
     {:else}
         <div class="pb-8">
             <BasicDialogHeader on:close label="Add Chapter" />

@@ -33,6 +33,7 @@
     import { euc } from '$lib/miscUtils'
 
     import Button from '$lib/components/ui/button/button.svelte'
+    import XIcon from '$lib/icons/x-icon.svelte'
     import { createEventDispatcher, onMount } from 'svelte'
     import { writable } from 'svelte/store'
 
@@ -100,6 +101,14 @@
         </div>
     {:else}
         <div class="pt-2"></div>
+
+        <Button
+            variant="ghost"
+            class="absolute top-3 right-3 rounded-full p-0 h-max w-max hover:bg-background"
+            on:click={() => dispatch('close')}
+        >
+            <XIcon class="size-12 p-2" />
+        </Button>
     {/if}
 
     <div class="p-4 pl-6 pr-16">
