@@ -7,7 +7,6 @@
     import SeriesRow from './series-row.svelte'
 
     export let series: SeriesDto[]
-    $: console.log(series)
 
     let showAddSeriesDialog = false
 </script>

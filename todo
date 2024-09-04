@@ -2,6 +2,7 @@ use template for llm definitions - 2
 docker - 3
 move worker init to outside web server (so that uvicorn can spawn multiple workers) - 2
 workers dying - 2
+readme - 2
 
 demo
     resource blocks
