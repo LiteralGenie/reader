@@ -16,17 +16,21 @@ Features:
         Screenshots
         </summary>
 
-        <img src="https://github.com/LiteralGenie/reader/blob/master/assets/dict_1.png">
+<img width="40%" src="https://github.com/LiteralGenie/reader/blob/master/assets/series_1.png">
 
-        <img src="https://github.com/LiteralGenie/reader/blob/master/assets/dict_2.png">
+<img width="40%" src="https://github.com/LiteralGenie/reader/blob/master/assets/chapters_1.png">
 
-        <img src="https://github.com/LiteralGenie/reader/blob/master/assets/edit_chap_1.png">
+<img width="40%" src="https://github.com/LiteralGenie/reader/blob/master/assets/dict_1.png">
 
-        <img src="https://github.com/LiteralGenie/reader/blob/master/assets/edit_series_1.png">
+<img width="40%" src="https://github.com/LiteralGenie/reader/blob/master/assets/dict_2.png">
 
-        <img src="https://github.com/LiteralGenie/reader/blob/master/assets/search_1.png">
+<img width="40%" src="https://github.com/LiteralGenie/reader/blob/master/assets/edit_chap_1.png">
 
-    </details>
+<img width="40%" src="https://github.com/LiteralGenie/reader/blob/master/assets/edit_series_1.png">
+
+<img width="40%" src="https://github.com/LiteralGenie/reader/blob/master/assets/search_1.png">
+
+</details>
 
 </blockquote>
 
