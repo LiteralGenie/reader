@@ -6,13 +6,29 @@ Demo: https://reader.velchees.dev/
 
 Features:
 
--   Text is OCR'd using [docTR](https://github.com/mindee/doctr) (custom trained using a [synthetic dataset](https://github.com/LiteralGenie/ocr_data)).
+-   Text is OCR'd using [docTR](https://github.com/mindee/doctr) (custom trained using a [synthetic dataset](https://github.com/LiteralGenie/comic_ocr)).
 -   Dictionary data is gathered from [Wiktionary](https://kaikki.org/dictionary/Korean/) and the [National Institute of Korean Language's dictionary](https://krdict.korean.go.kr/eng/mainAction).
 -   Machine translations are generated via an LLM. LLMs are also used as a context-aware way of scoring dictionary definitions.
 
-Screenshots:
+<blockquote>
+    <details>
+        <summary>
+        Screenshots
+        </summary>
 
--   @todo
+        <img src="https://github.com/LiteralGenie/reader/blob/master/assets/dict_1.png">
+
+        <img src="https://github.com/LiteralGenie/reader/blob/master/assets/dict_2.png">
+
+        <img src="https://github.com/LiteralGenie/reader/blob/master/assets/edit_chap_1.png">
+
+        <img src="https://github.com/LiteralGenie/reader/blob/master/assets/edit_series_1.png">
+
+        <img src="https://github.com/LiteralGenie/reader/blob/master/assets/search_1.png">
+
+    </details>
+
+</blockquote>
 
 # Setup
 
@@ -46,21 +62,23 @@ systemctl restart docker
 
 Clone the repo:
 
-```
-git clone https://github.com/LiteralGenie/reader/@todo
+```bash
+git clone https://github.com/LiteralGenie/reader/
 cd reader
 ```
 
 Create a config file by copying the default template.  
 See the [Config section](#config) for details. Note that GPU-acceleration is disabled by default.
 
-```
+Downloading custom weights for `det_weights` and `reco_weights` from [here](https://github.com/LiteralGenie/comic_ocr/releases) is also heavily recommended.
+
+```bash
 cp config_example.toml config.toml
 ```
 
 Build the dictionary
 
-```
+```bash
 cd ./core
 python3 -m venv venv
 . ./venv/bin/activate
@@ -95,15 +113,18 @@ Install the following:
 
 Clone the repo:
 
-```
-git clone https://github.com/LiteralGenie/reader/@todo
+```bash
+git clone git@github.com:LiteralGenie/reader.git
 cd reader
 ```
 
-Create a config file by copying the default template. Set `api_host = localhost` in the config.  
+Create a config file by copying the default template. Set `api_host = localhost` in the config.
+
+Downloading custom weights for `det_weights` and `reco_weights` from [here](https://github.com/LiteralGenie/comic_ocr/releases) is also heavily recommended.
+
 See the [Config section](#config) for more details. Note that GPU-acceleration is disabled by default.
 
-```
+```bash
 cp config_example.toml config.toml
 ```
 
@@ -123,7 +144,7 @@ cd ..
 
 Build the dictionary
 
-```
+```bash
 cd ./core
 . ./venv/bin/activate
 python src/scripts/build_dictionary.py
@@ -157,7 +178,7 @@ Some notable config options / defaults are...
 -   Enable GPU-acceleration for the OCR step by setting `use_gpu_for_ocr = true`
 -   Enable GPU-acceleration for machine translations / definition sorting by setting `llm_num_gpu_layers` to a positive number.
 -   Definition sorting is also disabled by default (because it's super slow on CPU) but can be enabled by setting `use_llm_for_definition_sort = true`
--   Custom weights for the OCR models can be downloaded from [@todo](https://github.com/LiteralGenie/ocr_data) and enabled by modifying `det_weights` and `reco_weights`.
+-   Custom weights for the OCR models can be downloaded from https://github.com/LiteralGenie/comic_ocr/releases and enabled by modifying `det_weights` and `reco_weights`.
 -   If using Docker, set `api_host = core` (the default). Otherwise set `api_host = localhost`.
 
 If using Docker, do **NOT** modify the `root_image_folder` option. Also, the paths specified in `det_weights` and `reco_weights` (if any) should point to somewhere in the data folder.
@@ -174,7 +195,7 @@ This is because only the data folder is mounted to the Docker container, any oth
 
 # Usage
 
-Series and chapters can be added through the web gui, but for bulk imports, copying the files to the `root_image_folder` specified in `config.toml` (default `reader/data/series`) may be faster.
+Series and chapters can be added through the web gui (via file upload or URL), but for bulk imports, copying the files to the `root_image_folder` specified in `config.toml` (default `reader/data/series`) may be faster.
 
 # Troubleshooting
 
@@ -191,3 +212,11 @@ docker container restart reader-core-1
 # If not using Docker, kill the process (eg ctrl+c) and rerun the launch command
 python src/run_server.py
 ```
+
+# Limitations
+
+-   New OCR blocks cannot be added through the web GUI at the moment.
+    -   If you really need it, you'll have you edit the `_reader_data.sqlite` database in the folder for that chapter.
+    -   As a workaround you could just edit a nearby block to include the missing text.
+    -   The boxes tend to be correct 99% of the time and this feature would be a lot of work so this has been low-priority.
+-   Only the series title / cover and the chapter title are currently displayed / saved. I do not plan to support other metadata like genre tags and series descriptions. Mostly because this is a primarily a project for myself and that's a lot of work for something I won't use.
