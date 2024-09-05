@@ -8,6 +8,7 @@ import toml
 class Config:
     root_image_folder: Path
 
+    api_host: str
     api_port: int
 
     det_weights: str

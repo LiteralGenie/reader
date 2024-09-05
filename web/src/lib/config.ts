@@ -50,6 +50,7 @@ export function loadConfig(): Config {
 export class Config {
     constructor(
         public root_image_folder: string,
+        public api_host: number,
         public api_port: number
     ) {}
 
@@ -62,10 +63,14 @@ export class Config {
     }
 
     static load(data: any) {
-        return new Config(data.root_image_folder, data.api_port)
+        return new Config(
+            data.root_image_folder,
+            data.api_host,
+            data.api_port
+        )
     }
 
     get apiUrl(): string {
-        return `http://localhost:${this.api_port}`
+        return `http://${this.api_host}:${this.api_port}`
     }
 }
