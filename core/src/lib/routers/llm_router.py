@@ -6,7 +6,6 @@ from fastapi_cache.decorator import cache
 from ..db.llm_cache import load_llm_cache, select_best_defs, select_translation
 from ..db.reader_db import load_reader_db
 from ..llm.llm_worker import insert_llm_job
-from ..llm.mtl import parse_mtl
 
 router = APIRouter()
 
@@ -27,8 +26,7 @@ async def get_mtl(req: Request, text: str):
         await asyncio.sleep(1)
         translation = select_translation(cache, text)
 
-    parsed = parse_mtl(translation)
-    return parsed
+    return translation
 
 
 @router.get("/best_defs/{text}")

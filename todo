@@ -1,8 +1,4 @@
-use template for llm definitions - 2
-docker - 3
-move worker init to outside web server (so that uvicorn can spawn multiple workers) - 2
-workers dying - 2
-readme - 2
+logging
 
 demo
     resource blocks
@@ -21,12 +17,13 @@ demo
         no chapter uploads
         no series edits
 
-logging
 create chapter from archive
 random 404s
 add blocks and merge pages
     or ocr all pages as strip
 transitions
+move worker init to outside web server (so that uvicorn can spawn multiple workers) - 2
+workers dying - 2
 
 image load priority
 fix spacing before nlp

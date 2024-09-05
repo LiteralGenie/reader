@@ -32,7 +32,7 @@ def load_llm_cache() -> LlmCache:
     return db
 
 
-def select_translation(cache: LlmCache, korean: str) -> str | None:
+def select_translation(cache: LlmCache, korean: str) -> dict | None:
     korean = korean.strip()
 
     r = cache.execute(
@@ -44,7 +44,7 @@ def select_translation(cache: LlmCache, korean: str) -> str | None:
         [korean],
     ).fetchone()
 
-    return r["english"] if r else None
+    return json.loads(r["english"]) if r else None
 
 
 def insert_translation(cache: LlmCache, korean: str, english: str):

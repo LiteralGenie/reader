@@ -1,4 +1,5 @@
 import gc
+import json
 import traceback
 from typing import Literal
 
@@ -90,7 +91,7 @@ def _process_job(
 
     if job["type"] == "mtl":
         translation = mtl(llm, job["text"])
-        insert_translation(cache, job["text"], translation)
+        insert_translation(cache, job["text"], json.dumps(translation))
     else:
         best_defs = get_best_defs(llm, job["text"], cfg.llm_num_definitions)
         insert_best_defs(cache, job["text"], best_defs)

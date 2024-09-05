@@ -7,6 +7,8 @@ from nltk import edit_distance
 
 from .db.dictionary_db import load_dictionary_db, select_words
 
+_NUM_WORKERS = 2
+
 
 def get_pos_by_word(tagger: Kkma | Pool, text: str) -> list[list[dict]] | None:
     if isinstance(tagger, Kkma):
@@ -180,7 +182,7 @@ def _score_definition_match(text: str, kkma_pos: str, data: dict):
 # ¯\_(ツ)_/¯
 def start_nlp_pool():
     return multiprocessing.Pool(
-        1,
+        _NUM_WORKERS,
         initializer=_init_pool_worker,
     )
 
