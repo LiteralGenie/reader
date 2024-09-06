@@ -82,21 +82,21 @@
                 }))
 
                 // Add to prefetch queue
-                const texts = Object.values(update.data).map(
-                    (m) => m.value
-                )
-                nlpPrefetchQueue.update((queue) => [
-                    ...queue,
-                    ...texts
-                ])
-                bestDefsPrefetchQueue.update((queue) => [
-                    ...queue,
-                    ...texts
-                ])
-                mtlPrefetchQueue.update((queue) => [
-                    ...queue,
-                    ...texts
-                ])
+                // const texts = Object.values(update.data).map(
+                //     (m) => m.value
+                // )
+                // nlpPrefetchQueue.update((queue) => [
+                //     ...queue,
+                //     ...texts
+                // ])
+                // bestDefsPrefetchQueue.update((queue) => [
+                //     ...queue,
+                //     ...texts
+                // ])
+                // mtlPrefetchQueue.update((queue) => [
+                //     ...queue,
+                //     ...texts
+                // ])
             }
         }
     })
