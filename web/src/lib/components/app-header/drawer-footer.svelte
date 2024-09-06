@@ -18,7 +18,7 @@
     </Button>
 
     <Button variant="ghost" class="rounded-full p-0 size-11">
-        <a target="_blank" href="https://discord.gg/5tsjQwBjMs">
+        <a target="_blank" href="https://discord.gg/RddchCRPwr">
             <Discord variant={$theme} class="size-7" />
         </a>
     </Button>
