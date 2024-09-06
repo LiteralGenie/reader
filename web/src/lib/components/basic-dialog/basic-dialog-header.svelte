@@ -10,7 +10,7 @@
 </script>
 
 <div
-    class="flex items-center justify-between pl-6 pr-4 py-2 bg-muted"
+    class="flex items-center justify-between pl-6 pr-4 py-2 bg-muted mb-6"
 >
     <h1 class="text-xl font-bold py-2 break-all">{label}</h1>
 

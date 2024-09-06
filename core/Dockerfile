@@ -25,7 +25,7 @@ COPY . .
 RUN python3.10 -m pip install -r requirements.txt
 
 # llama-cpp
-RUN apt install -y ffmpeg libsm6 libxext6
+RUN apt install -y libsm6 libxext6
 
 # konlpy
 RUN apt install -y g++ openjdk-8-jdk curl

@@ -129,7 +129,7 @@
             <BasicDialogHeader on:close label="Add Chapter" />
 
             <div
-                class="bg-yellow-700 text-destructive-foreground p-4 text-sm flex gap-2 items-center justify-center"
+                class="bg-yellow-700 text-destructive-foreground p-4 text-sm flex gap-2 items-center justify-center mt-[-1.5rem]"
             >
                 <TriangleAlert class="min-w-6 min-h-6" />
 
