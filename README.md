@@ -172,7 +172,7 @@ python src/run_server.py
 ```bash
 cd web
 npm run build
-HOST=0.0.0.0 PORT=3030 node build
+HOST=0.0.0.0 PORT=3030 BODY_SIZE_LIMIT=500M node build
 ```
 
 # Config
