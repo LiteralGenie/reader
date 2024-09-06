@@ -5,6 +5,7 @@
     import ArrowTopRightOnSquare from '$lib/icons/arrow-top-right-on-square.svelte'
     import PencilSquare from '$lib/icons/pencil-square.svelte'
     import Trash from '$lib/icons/trash.svelte'
+    import { throwOnStatus } from '$lib/miscUtils'
     import { createEventDispatcher } from 'svelte'
     import ConfirmDialog from '../confirm-dialog.svelte'
     import Button from '../ui/button/button.svelte'
@@ -118,54 +119,50 @@
     }
 
     async function onDelete() {
-        const resp = await fetch('/api/ocr/delete', {
-            method: 'DELETE',
-            body: JSON.stringify({
-                series: $page.params.seriesId,
-                chapter: $page.params.chapterId,
-                page: dict.page.filename,
-                block: dict.match.id
+        try {
+            const resp = await fetch('/api/ocr/delete', {
+                method: 'DELETE',
+                body: JSON.stringify({
+                    series: $page.params.seriesId,
+                    chapter: $page.params.chapterId,
+                    page: dict.page.filename,
+                    block: dict.match.id
+                })
             })
-        })
+            throwOnStatus(resp)
 
-        if (resp.status !== 200) {
-            console.error(resp)
-            alert(`Error: ${resp.statusText}`)
-
+            dispatch('delete', { page: dict.page, match: dict.match })
+        } catch (e) {
+            alert(String(e))
+        } finally {
             showDeleteConfirmation = false
-            return
         }
-
-        dispatch('delete', { page: dict.page, match: dict.match })
-        showDeleteConfirmation = false
     }
 
     async function onEdit(ev: CustomEvent<string>) {
-        const resp = await fetch('/api/ocr/text', {
-            method: 'PATCH',
-            body: JSON.stringify({
-                series: $page.params.seriesId,
-                chapter: $page.params.chapterId,
-                page: dict.page.filename,
-                block: dict.match.id,
-                text: ev.detail
+        try {
+            const resp = await fetch('/api/ocr/text', {
+                method: 'PATCH',
+                body: JSON.stringify({
+                    series: $page.params.seriesId,
+                    chapter: $page.params.chapterId,
+                    page: dict.page.filename,
+                    block: dict.match.id,
+                    text: ev.detail
+                })
             })
-        })
+            throwOnStatus(resp)
 
-        if (resp.status !== 200) {
-            console.error(resp)
-            alert(`Error: ${resp.statusText}`)
-
+            dispatch('edit', {
+                page: dict.page,
+                match: dict.match,
+                value: ev.detail
+            })
+        } catch (e) {
+            alert(String(e))
+        } finally {
             showEdit = false
-            return
         }
-
-        dispatch('edit', {
-            page: dict.page,
-            match: dict.match,
-            value: ev.detail
-        })
-        showEdit = false
     }
 </script>
 
