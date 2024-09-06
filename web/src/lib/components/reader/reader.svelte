@@ -216,7 +216,7 @@
             </div>
         {/each}
 
-        <div class="flex w-full">
+        <div class="flex flex-1 h-full w-full items-end">
             <Button
                 variant="link"
                 class="ripple w-full p-0 min-h-8 bg-secondary text-secondary-foreground font-bold rounded-none"
