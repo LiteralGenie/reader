@@ -121,11 +121,11 @@ export function getUuidWithFallback(): string {
         return window.crypto.randomUUID()
     } else {
         console.warn(
-            'crypto.randomUUID() not available. Falling back to integer ids.'
+            'crypto.randomUUID() not available. Falling back to Math.random()'
         )
 
-        const result = (next_id += 1)
-        next_id += 1
+        // @ts-ignore
+        const result = parseInt(Math.random() * 1_000_000)
         return result.toString()
     }
 }
