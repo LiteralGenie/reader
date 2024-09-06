@@ -32,6 +32,7 @@ from ..series import (
     validate_image_upload,
 )
 from ..url_import import IMPORT_JOB_TYPE, insert_import_job
+from . import EDIT_LOGGER
 
 router = APIRouter()
 
@@ -113,7 +114,10 @@ def create_series_(
     if cover_im:
         upsert_cover(cfg, filename, cover_im)
 
-    return get_series(cfg, filename)
+    info = get_series(cfg, filename)
+    EDIT_LOGGER.info(f"Created series {info}")
+
+    return info
 
 
 @router.get("/cover/{series}/{filename}")
@@ -149,6 +153,7 @@ def upsert_series_cover_auto(req: Request, series: str):
     except FileNotFoundError:
         raise HTTPException(404)
 
+    EDIT_LOGGER.info(f"Updated series cover {series}")
     return "ok"
 
 
@@ -194,6 +199,8 @@ def update_series_(
     )
 
     info = get_series(req.app.state.cfg, filename)
+    EDIT_LOGGER.info(f"Updated series {info}")
+
     return info
 
 
@@ -214,6 +221,8 @@ def delete_series_(req: Request, body: DeleteSeriesRequest):
     except:
         traceback.print_exc()
         raise HTTPException(500)
+
+    EDIT_LOGGER.info(f"Deleted series {body}")
 
     return "ok"
 
@@ -274,13 +283,10 @@ def create_chapter(
     db = load_chapter_db(chap_dir)
     update_chapter(db, chapterName)
 
-    return get_chapter(cfg, series, chapter_filename)
+    info = get_chapter(cfg, series, chapter_filename)
+    EDIT_LOGGER.info(f"Created {series} chapter {info}")
 
-
-class RenameChapterRequest(BaseModel):
-    series: str
-    chapter: str
-    name: str
+    return info
 
 
 @router.patch("/chapter")
@@ -390,7 +396,10 @@ def edit_chapter(
         name=name or None,
     )
 
-    return get_chapter(cfg, series, chapter)
+    info = get_chapter(cfg, series, chapter)
+    EDIT_LOGGER.info(f"Updated {series} chapter {info}")
+
+    return info
 
 
 class RenamePageRequest(BaseModel):
@@ -425,6 +434,8 @@ def delete_chapter(req: Request, body: DeleteChapterRequest):
     except:
         traceback.print_exc()
         raise HTTPException(500)
+
+    EDIT_LOGGER.info(f"Deleted chapter {body}")
 
     return "ok"
 
@@ -469,6 +480,8 @@ def add_page(req: Request, series: str, chapter: str, page: UploadFile):
         im.save(fp_page)
     except FileNotFoundError:
         raise HTTPException(404)
+
+    EDIT_LOGGER.info(f"Added page to {series} chapter {chapter}")
 
     return get_all_pages(cfg, series, chapter)
 
@@ -519,6 +532,8 @@ def rename_page(
         im.save(tgt["fp_dest"])
         fp_source.unlink()
 
+    EDIT_LOGGER.info(f"Renamed pages {body}")
+
     return fp_dest.name
 
 
@@ -541,6 +556,8 @@ def delete_page(req: Request, body: DeletePageRequest):
         raise HTTPException(404)
 
     fp.unlink()
+
+    EDIT_LOGGER.info(f"Deleted page {body}")
 
     return "ok"
 
@@ -611,10 +628,13 @@ def import_chapter(req: Request, body: ImportChapterRequest):
         patt,
     )
 
-    return dict(
+    info = dict(
         job_id=job_id,
         chapter=chapter,
     )
+    EDIT_LOGGER.info(f"Importing chapter {body}")
+
+    return info
 
 
 @router.get("/import_chapter/{job_id}")

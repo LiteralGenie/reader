@@ -1,5 +1,3 @@
-logging
-
 demo
     resource blocks
         as panic button enabled by env

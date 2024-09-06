@@ -1,17 +1,26 @@
 import base64
 import traceback
 
+import loguru
 import requests
 
 from ..config import Config
 from ..db.reader_db import ReaderDb, load_reader_db
 from ..job_utils import JobManager, start_job_worker
+from ..paths import LOG_DIR
 from .request_log import RequestLog
 
 PROXY_JOB_TYPE = "proxy"
 
-
 _REQ_LOG = RequestLog()
+
+loguru.logger.add(
+    LOG_DIR / "proxy.log",
+    filter=lambda record: record["extra"].get("name") == "proxy",
+    rotation="10 MB",
+    retention=2,
+)
+_LOGGER = loguru.logger.bind(name="proxy")
 
 
 def start_proxy_job_worker(cfg: Config):
@@ -29,19 +38,17 @@ def insert_proxy_job(
     rate_limit: int,
     user_agent: str | None = None,
 ):
-    print("Inserting proxy job for", url)
-
     id = f"{url}"
+    job = dict(
+        url=url,
+        rate_limit=rate_limit,
+        user_agent=user_agent,
+    )
+
+    _LOGGER.info(f"Inserting proxy job {id} {job}")
 
     jobber = JobManager(db, PROXY_JOB_TYPE)
-    jobber.insert(
-        id,
-        dict(
-            url=url,
-            rate_limit=rate_limit,
-            user_agent=user_agent,
-        ),
-    )
+    jobber.insert(id, job)
     db.commit()
 
     return id
@@ -73,7 +80,7 @@ def _process_job(
     job_id: str,
 ):
     job = jobber.select(job_id)
-    print("Processing proxy job", job_id, job)
+    _LOGGER.info(f"Processing proxy job {job_id}")
 
     _REQ_LOG.wait_limit(job["url"], job["rate_limit"])
 

@@ -10,7 +10,7 @@ from lib.config import Config
 from lib.db.reader_db import clear_jobs, load_reader_db
 from lib.job_utils import start_job_purge_task
 from lib.llm.llm_worker import start_llm_job_worker
-from lib.misc_utils import log_422s
+from lib.middleware import ErrorLog, log_422s, log_http_exceptions
 from lib.nlp import start_nlp_pool
 from lib.ocr import start_ocr_job_worker
 from lib.proxy.proxy import start_proxy_job_worker
@@ -51,6 +51,9 @@ async def _lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=_lifespan)
+
+app.add_middleware(ErrorLog)
+log_http_exceptions(app)
 
 app.include_router(series_router.router)
 app.include_router(dictionary_router.router)

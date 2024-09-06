@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import TypeAlias
 from uuid import uuid4
 
-import requests
+import loguru
 from bs4 import BeautifulSoup
 from PIL import Image
 from requests_cache import CachedSession, SQLiteCache
@@ -16,7 +16,7 @@ from .config import Config
 from .db.chapter_db import load_chapter_db, update_chapter
 from .db.reader_db import ReaderDb, load_reader_db
 from .job_utils import JobManager, start_job_worker
-from .paths import DATA_DIR
+from .paths import DATA_DIR, LOG_DIR
 
 IMPORT_JOB_TYPE = "import"
 
@@ -24,6 +24,14 @@ _WORKER_SESSION: CachedSession = None  # type: ignore
 
 # time requested, bytes
 RequestHistory: TypeAlias = list[tuple[float, int]]
+
+loguru.logger.add(
+    LOG_DIR / "url_import.log",
+    filter=lambda record: record["extra"].get("name") == "url_import",
+    rotation="10 MB",
+    retention=2,
+)
+_LOGGER = loguru.logger.bind(name="url_import")
 
 
 def start_import_job_worker(cfg: Config):
@@ -44,22 +52,21 @@ def insert_import_job(
     min_height: int,
     patt: re.Pattern | None,
 ):
-    print("Inserting import job for", urls)
-
     id = uuid4().hex
 
-    jobber = JobManager(db, IMPORT_JOB_TYPE)
-    jobber.insert(
-        id,
-        dict(
-            urls=urls,
-            chap_dir=str(chap_dir.absolute()),
-            chap_name=chap_name,
-            min_width=min_width,
-            min_height=min_height,
-            patt=patt.pattern if patt else None,
-        ),
+    job = dict(
+        urls=urls,
+        chap_dir=str(chap_dir.absolute()),
+        chap_name=chap_name,
+        min_width=min_width,
+        min_height=min_height,
+        patt=patt.pattern if patt else None,
     )
+
+    _LOGGER.info(f"Inserting import job {id} {job}")
+
+    jobber = JobManager(db, IMPORT_JOB_TYPE)
+    jobber.insert(id, job)
     db.commit()
 
     return id
@@ -78,11 +85,15 @@ def _process_all_jobs(cfg: Config, job_ids: list[str]):
 
     for id in job_ids:
         try:
+            _LOGGER.info(f"Processing import job {id}")
             result = _process_job(
                 cfg,
                 _WORKER_SESSION,
                 jobber,
                 id,
+            )
+            _LOGGER.info(
+                f"Done with import job {id} with {len(result['done'])} downloaded and {len(result['ignored'])} ignored"
             )
         except:
             # Delete job on error
@@ -91,7 +102,7 @@ def _process_all_jobs(cfg: Config, job_ids: list[str]):
             jobber.delete(id)
             reader_db.commit()
 
-            raise
+            _LOGGER.exception(f"Failed import job {id}")
 
         jobber.set_result(id, result)
         jobber.db.commit()
@@ -104,7 +115,6 @@ def _process_job(
     job_id: str,
 ):
     job = jobber.select(job_id)
-    print("Processing import job", job_id, job)
 
     chap_dir = Path(job["chap_dir"])
     if chap_dir.exists():

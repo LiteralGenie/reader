@@ -9,6 +9,7 @@ jamo
 konlpy
 levenshtein
 llama-cpp-python
+loguru
 nltk
 pathvalidate
 pillow

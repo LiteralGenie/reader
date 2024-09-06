@@ -4,7 +4,7 @@ from pathlib import Path
 
 import numpy as np
 import requests
-from fastapi import FastAPI, HTTPException
+from fastapi import HTTPException
 from jamo import h2j, j2hcj
 from pathvalidate import sanitize_filename
 
@@ -65,25 +65,6 @@ def download_stream(url: str, fp: Path, chunk_size=8192):
         with open(fp, "wb") as file:
             for chunk in resp.iter_content(chunk_size=chunk_size):
                 file.write(chunk)
-
-
-def log_422s(app: FastAPI):
-    from fastapi import Request, status
-    from fastapi.exceptions import RequestValidationError
-    from fastapi.responses import JSONResponse
-
-    @app.exception_handler(RequestValidationError)
-    async def validation_exception_handler(
-        request: Request, exc: RequestValidationError
-    ):
-
-        exc_str = f"{exc}".replace("\n", " ").replace("   ", " ")
-        # or logger.error(f'{exc}')
-        print(request, exc_str)
-        content = {"status_code": 10422, "message": exc_str, "data": None}
-        return JSONResponse(
-            content=content, status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
-        )
 
 
 def dump_sse_event(data: dict) -> str:

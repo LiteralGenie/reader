@@ -16,6 +16,7 @@ from ..db.chapter_db import (
 from ..db.reader_db import load_reader_db
 from ..misc_utils import sanitize_or_raise_400
 from ..ocr import get_all_ocr_data, insert_ocr_job
+from . import EDIT_LOGGER
 
 router = APIRouter()
 
@@ -103,6 +104,7 @@ def update_block_text(req: Request, body: UpdateBlockTextRequest):
         raise HTTPException(400)
 
     update_ocr_text(db, body.block, body.text)
+    EDIT_LOGGER.info(f"Updated OCR block {body}")
 
     return "ok"
 
@@ -123,5 +125,6 @@ def delete_block(req: Request, body: DeleteBlockRequest):
         raise HTTPException(400)
 
     delete_ocr_data(db, body.block)
+    EDIT_LOGGER.info(f"Deleted OCR block {body}")
 
     return "ok"
