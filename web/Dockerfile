@@ -16,4 +16,4 @@ COPY . .
 RUN npm install
 
 RUN npm run build
-CMD HOST=0.0.0.0 PORT=3030 node build
+CMD HOST=0.0.0.0 PORT=3030 BODY_SIZE_LIMIT=500M node build
