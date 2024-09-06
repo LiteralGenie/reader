@@ -67,7 +67,15 @@ async def _pprint_request(request: Request):
     try:
         data["body"] = await request.json()
     except Exception as err:
-        data["body"] = await request.body()
+        try:
+            data["body"] = await request.body()
+        except:
+            data["body"] = "(stream consumed)"
+            for key in ["_json", "_form", "_body"]:
+                val = getattr(request, key, None)
+                if val is not None:
+                    data["body"] = val
+                    break
 
     try:
         data["headers"] = dict(request.headers.items())

@@ -44,6 +44,18 @@
 
         isEditing = false
     }
+
+    function onKeydown(ev: KeyboardEvent) {
+        if (ev.key === 'Escape') {
+            inputElValue = ''
+            isEditing = false
+
+            ev.stopImmediatePropagation()
+            ev.preventDefault()
+        } else if (ev.key === 'Enter') {
+            onRenameEnd()
+        }
+    }
 </script>
 
 <div class="flex {$$restProps['class'] ?? ''} items-center">
@@ -70,8 +82,7 @@
                 autofocus
                 bind:value={inputElValue}
                 on:blur={onRenameEnd}
-                on:keydown={(ev) =>
-                    ev.key === 'Enter' ? onRenameEnd() : ''}
+                on:keydown={onKeydown}
             />
         {:else if state.type === 'rename'}
             <div class="flex gap-1 items-center min-w-0">

@@ -102,7 +102,7 @@ export function createEditChapterContext(
 
             formInitial.update((curr) => ({
                 ...curr,
-                existingPages
+                existingPages: deepCopy(existingPages)
             }))
         }
     })
