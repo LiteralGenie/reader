@@ -7,6 +7,7 @@
         addSuffixUntilUnique,
         throwOnStatus
     } from '$lib/miscUtils'
+    import { TriangleAlert } from 'lucide-svelte'
     import { createEventDispatcher } from 'svelte'
     import AddChapterForm from './add-chapter-form.svelte'
     import AddChapterProgress from './add-chapter-progress.svelte'
@@ -124,10 +125,22 @@
             on:done
         />
     {:else}
-        <div class="pb-8">
+        <div class="flex flex-col">
             <BasicDialogHeader on:close label="Add Chapter" />
 
-            <div class="px-6">
+            <div
+                class="bg-yellow-700 text-destructive-foreground p-4 text-sm flex gap-2 items-center justify-center"
+            >
+                <TriangleAlert class="min-w-6 min-h-6" />
+
+                <p>
+                    For demo purposes, this chapter will not be
+                    publically visible. This chapter will also be
+                    deleted a few hours after creation.
+                </p>
+            </div>
+
+            <div class="p-8 px-6">
                 <AddChapterForm
                     on:submit={onSubmit}
                     on:close={() =>
