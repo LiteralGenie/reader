@@ -8,12 +8,6 @@ demo
         length nlp input
         disable prefetch
         uploads per ip
-    hide custom uploads
-    lock default uploads
-        no ocr edits
-        no chapter edits
-        no chapter uploads
-        no series edits
 
 create chapter from archive
 random 404s

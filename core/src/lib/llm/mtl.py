@@ -61,5 +61,12 @@ def mtl(llm: Llama, text: str) -> dict:
 
     resp = output["choices"][0]["message"]["content"].strip()  # type: ignore
 
-    resp_data = json.loads(resp)
+    try:
+        resp_data = json.loads(resp)
+    except:
+        resp_data = dict(
+            translation="",
+            words=dict(),
+        )
+
     return resp_data
