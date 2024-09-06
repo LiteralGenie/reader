@@ -1,4 +1,5 @@
 <script lang="ts">
+    import type { SeriesWithChaptersDto } from '$lib/api/dtos'
     import ArrowLongLeft from '$lib/icons/arrow-long-left.svelte'
     import Cog_6 from '$lib/icons/cog-6.svelte'
     import { euc } from '$lib/miscUtils'
@@ -6,9 +7,9 @@
     import ThemeToggle from '../theme-toggle.svelte'
     import Button from '../ui/button/button.svelte'
 
-    export let seriesId: string
+    export let series: SeriesWithChaptersDto
 
-    $: href = `/series/${euc(seriesId)}`
+    $: href = `/series/${euc(series.filename)}`
 
     const dispatch = createEventDispatcher()
 </script>
@@ -27,7 +28,7 @@
             <span
                 class="min-w-0 text-lg text-ellipsis overflow-hidden whitespace-nowrap"
             >
-                {seriesId}
+                {series.name || series.filename}
             </span>
         </div>
     </Button>

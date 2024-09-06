@@ -5,13 +5,7 @@
 
     export let data: PageData
     $: ({ series, pages, ocrData } = data)
-    $: ({ seriesId, chapterId } = $page.params)
+    $: ({ chapterId } = $page.params)
 </script>
 
-<Reader
-    chapters={series.chapters}
-    {pages}
-    {ocrData}
-    {seriesId}
-    {chapterId}
-/>
+<Reader {series} {chapterId} {pages} {ocrData} />

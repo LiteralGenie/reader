@@ -1,9 +1,9 @@
 <script lang="ts">
     import type {
-        ChapterDto,
         OcrMatchDto,
         OcrPageDto,
-        PageDto
+        PageDto,
+        SeriesWithChaptersDto
     } from '$lib/api/dtos'
     import DictionaryView from '$lib/components/dictionary-view/dictionary-view.svelte'
     import OcrImage from '$lib/components/reader/ocr-image/ocr-image.svelte'
@@ -18,11 +18,10 @@
     import ReaderSettingsDialog from './reader-settings-dialog.svelte'
     import ReaderStatus from './reader-status.svelte'
 
-    export let chapters: ChapterDto[]
+    export let series: SeriesWithChaptersDto
+    export let chapterId: string
     export let pages: PageDto[]
     export let ocrData: Record<string, OcrPageDto | null>
-    export let seriesId: string
-    export let chapterId: string
 
     const {
         dict,
@@ -60,7 +59,7 @@
 
         if (missingOcr.length) {
             const url = new URL(window.location.href)
-            url.pathname = `/api/ocr/${seriesId}/${chapterId}/sse`
+            url.pathname = `/api/ocr/${series.filename}/${chapterId}/sse`
             for (let pg of missingOcr) {
                 url.searchParams.append('pages', pg.filename)
             }
@@ -168,11 +167,15 @@
     >
         <div class="headers w-full flex flex-col">
             <ReaderHeader
-                {seriesId}
+                {series}
                 on:settings={() => (showSettingsDialog = true)}
             />
 
-            <ChapterHeader {seriesId} {chapterId} {chapters} />
+            <ChapterHeader
+                seriesId={series.filename}
+                {chapterId}
+                chapters={series.chapters}
+            />
 
             <ReaderStatus data={dataStore} />
         </div>
