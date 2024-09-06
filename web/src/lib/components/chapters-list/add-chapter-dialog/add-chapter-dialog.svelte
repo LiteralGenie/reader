@@ -1,10 +1,9 @@
 <script lang="ts">
     import { goto } from '$app/navigation'
-    import type { SeriesWithChaptersDto } from '$lib/api/dtos'
     import BasicDialogHeader from '$lib/components/basic-dialog/basic-dialog-header.svelte'
     import BasicDialog from '$lib/components/basic-dialog/basic-dialog.svelte'
     import {
-        addSuffixUntilUnique,
+        getUuidWithFallback,
         throwOnStatus
     } from '$lib/miscUtils'
     import { TriangleAlert } from 'lucide-svelte'
@@ -33,13 +32,7 @@
                 return
             }
 
-            const series: SeriesWithChaptersDto = await (
-                await fetch(`/api/series/${seriesId}`)
-            ).json()
-            const chapterId = addSuffixUntilUnique(
-                series.chapters.map((ch) => ch.filename),
-                name
-            )
+            const chapterId = getUuidWithFallback()
 
             const files = data.getAll('files') as File[]
             if (files.length) {
