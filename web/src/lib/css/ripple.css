@@ -30,8 +30,23 @@ SOFTWARE.
 
 .ripple {
     position: relative;
-    overflow: hidden;
     transform: translate3d(0, 0, 0);
+
+    /* @todo: why does the ripple overflow? */
+    overflow: hidden;
+
+    --ripple-image: radial-gradient(
+        circle,
+        hsl(var(--foreground) / 20%),
+        transparent 10%
+    );
+}
+.ripple-invert {
+    --ripple-image: radial-gradient(
+        circle,
+        hsl(var(--background) / 30%),
+        transparent 20%
+    );
 }
 .ripple:after {
     content: '';
@@ -42,11 +57,7 @@ SOFTWARE.
     top: 0;
     left: 0;
     pointer-events: none;
-    background-image: radial-gradient(
-        circle,
-        hsl(var(--foreground)) 10%,
-        transparent 10.01%
-    );
+    background-image: var(--ripple-image);
     background-repeat: no-repeat;
     background-position: 50%;
     opacity: 0;
@@ -55,7 +66,7 @@ SOFTWARE.
 }
 .ripple:active:after,
 .ripple:focus:after {
-    opacity: 0.2;
+    opacity: 1;
     transition: 0s;
 
     transform: scale(10, 10);

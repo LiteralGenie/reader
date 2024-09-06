@@ -28,7 +28,7 @@
     <div class="flex w-full gap-2 items-center justify-center">
         <Button
             variant="link"
-            class="chapter-nav {!hrefPrev ? 'disabled' : ''}"
+            class="chapter-nav ripple {!hrefPrev ? 'disabled' : ''}"
             href={hrefPrev}
         >
             <ChevronLeft class=" w-[2.75em] p-3 stroke-[4px] " />
@@ -40,7 +40,7 @@
 
         <Button
             variant="link"
-            class="chapter-nav {!hrefNext ? 'disabled' : ''}"
+            class="chapter-nav ripple {!hrefNext ? 'disabled' : ''}"
             href={hrefNext}
         >
             <ChevronRight class="w-[2.75em] p-3 stroke-[4px]" />
