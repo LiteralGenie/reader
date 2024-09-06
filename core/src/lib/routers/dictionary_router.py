@@ -18,6 +18,8 @@ router = APIRouter()
 @router.get("/nlp/{text}")
 @cache(expire=365 * 86400)  # type: ignore
 def nlp(req: Request, text: str):
+    text = text[:500]
+
     words = get_pos_by_word(req.app.state.kkma_pool, text)
     if not words:
         words = get_pos_by_word_dumb(req.app.state.kkma_pool, text)
@@ -32,6 +34,8 @@ def nlp(req: Request, text: str):
 @router.get("/nlp_parts/{text}")
 @cache(expire=365 * 86400)  # type: ignore
 def nlp_partial(req: Request, text: str):
+    text = text[:500]
+
     words = get_pos_by_word(req.app.state.kkma_pool, text)
     if not words:
         words = get_pos_by_word_dumb(req.app.state.kkma_pool, text)
@@ -45,6 +49,8 @@ def examples(
     offset: Annotated[str, Query()] = "0",
     limit: Annotated[str, Query()] = "10",
 ):
+    text = text[:500]
+
     db = load_dictionary_db()
 
     num_offset = int(offset)
@@ -56,6 +62,8 @@ def examples(
 @router.get("/examples/{text}/count")
 @cache()  # type: ignore
 def examples_count(text: str):
+    text = text[:500]
+
     db = load_dictionary_db()
     return count_examples(db, text)
 
@@ -66,6 +74,8 @@ def definitions(
     offset: Annotated[str, Query()] = "0",
     limit: Annotated[str, Query()] = "10",
 ):
+    text = text[:500]
+
     db = load_dictionary_db()
 
     num_offset = int(offset)
@@ -77,5 +87,7 @@ def definitions(
 @router.get("/definitions/{text}/count")
 @cache()  # type: ignore
 def definitions_count(text: str):
+    text = text[:500]
+
     db = load_dictionary_db()
     return count_definitions(db, text)

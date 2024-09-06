@@ -4,9 +4,7 @@ demo
         ocr
         mtl
     resource limits
-        length llm input
         length nlp input
-        disable prefetch
         uploads per ip
 
 create chapter from archive

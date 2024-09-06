@@ -13,6 +13,8 @@ router = APIRouter()
 @router.get("/mtl/{text}")
 @cache()  # type: ignore
 async def get_mtl(req: Request, text: str):
+    text = text[:500]
+
     if not req.app.state.cfg.use_llm_for_mtl:
         return None
 
@@ -32,6 +34,8 @@ async def get_mtl(req: Request, text: str):
 @router.get("/best_defs/{text}")
 @cache()  # type: ignore
 async def get_best_defs(req: Request, text: str):
+    text = text[:500]
+
     if not req.app.state.cfg.use_llm_for_definition_sort:
         return None
 
