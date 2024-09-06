@@ -248,38 +248,40 @@
                                 </a>
                             </div>
 
-                            {#each $nlp.data[idxWord] as part, idxPart}
-                                <div
-                                    class="flex items-center gap-0.5"
-                                >
-                                    <div class="ml-4">
-                                        <span>{part.text}</span>
-                                        <span class="text-sm">
-                                            {prettyPrintKkma(
-                                                part.pos
-                                            )}
-                                        </span>
+                            {#if $nlp.data.length > idxWord}
+                                {#each $nlp.data[idxWord] as part, idxPart}
+                                    <div
+                                        class="flex items-center gap-0.5"
+                                    >
+                                        <div class="ml-4">
+                                            <span>{part.text}</span>
+                                            <span class="text-sm">
+                                                {prettyPrintKkma(
+                                                    part.pos
+                                                )}
+                                            </span>
+                                        </div>
+
+                                        <a
+                                            href="/dictionary?query={part.text}"
+                                            target="_blank"
+                                            class="ripple rounded-full"
+                                        >
+                                            <ArrowTopRightOnSquare
+                                                class="size-[1.375rem] p-1 text-muted-foreground"
+                                            />
+                                        </a>
                                     </div>
 
-                                    <a
-                                        href="/dictionary?query={part.text}"
-                                        target="_blank"
-                                        class="ripple rounded-full"
-                                    >
-                                        <ArrowTopRightOnSquare
-                                            class="size-[1.375rem] p-1 text-muted-foreground"
-                                        />
-                                    </a>
-                                </div>
-
-                                <ul>
-                                    {#each pickDefs($nlp.data, idxWord, idxPart, $bestDefs.data) as def}
-                                        <li class="ml-8">
-                                            - {def}
-                                        </li>
-                                    {/each}
-                                </ul>
-                            {/each}
+                                    <ul>
+                                        {#each pickDefs($nlp.data, idxWord, idxPart, $bestDefs.data) as def}
+                                            <li class="ml-8">
+                                                - {def}
+                                            </li>
+                                        {/each}
+                                    </ul>
+                                {/each}
+                            {/if}
                         </div>
                     {/each}
                 {/if}
