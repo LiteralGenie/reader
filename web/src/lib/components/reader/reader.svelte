@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { goto } from '$app/navigation'
     import type {
         OcrMatchDto,
         OcrPageDto,
@@ -13,6 +14,7 @@
     import { onDestroy, onMount } from 'svelte'
     import { writable } from 'svelte/store'
     import Resizable from '../resizable.svelte'
+    import Button from '../ui/button/button.svelte'
     import ChapterHeader from './chapter-header.svelte'
     import ReaderHeader from './reader-header.svelte'
     import ReaderSettingsDialog from './reader-settings-dialog.svelte'
@@ -39,6 +41,15 @@
     let showSettingsDialog = false
 
     $: dataStore = writable(ocrData)
+
+    $: idxChapter = series.chapters.findIndex(
+        (ch) => ch.filename === chapterId
+    )
+    $: idxNext =
+        idxChapter + 1 < series.chapters.length
+            ? idxChapter + 1
+            : null
+    $: idxPrev = idxChapter - 1 >= 0 ? idxChapter - 1 : null
 
     onMount(() => {
         // Prefetch stuff
@@ -101,9 +112,17 @@
         }
     })
 
-    function onEscape(ev: KeyboardEvent) {
+    function onKeydown(ev: KeyboardEvent) {
         if (ev.key === 'Escape') {
             setDict(null)
+        } else if (ev.key === 'ArrowLeft') {
+            if (idxPrev !== null) {
+                goto(getChapterHref(idxPrev))
+            }
+        } else if (ev.key === 'ArrowRight') {
+            if (idxNext !== null) {
+                goto(getChapterHref(idxNext))
+            }
         }
     }
 
@@ -152,18 +171,25 @@
         setDict(detail, true)
     }
 
+    function getChapterHref(idx: number) {
+        return `/series/${series.filename}/${
+            series.chapters[idx].filename
+        }`
+    }
+
     onDestroy(() => destroy())
 </script>
 
 <div
     class="text-center w-full flex flex-col items-center h-full"
     tabindex="-1"
-    on:keydown={(ev) => onEscape(ev)}
+    on:keydown={(ev) => onKeydown(ev)}
 >
     <div
         class="flex flex-col min-h-0 flex-1 overflow-auto w-full items-center"
         class:overflow-hidden={isResizing}
         on:click={() => setDict(null)}
+        autofocus
     >
         <div class="headers w-full flex flex-col">
             <ReaderHeader
@@ -184,11 +210,23 @@
             <OcrImage {pg} ocr={$dataStore[pg.filename] ?? {}} />
         {:else}
             <div
-                class="flex items-center justify-center pt-24 text-muted-foreground text-lg"
+                class="flex flex-1 items-center justify-center pt-24 text-muted-foreground text-lg"
             >
                 No pages found.
             </div>
         {/each}
+
+        <div class="flex w-full">
+            <Button
+                variant="link"
+                class="ripple w-full p-0 min-h-8 bg-secondary text-secondary-foreground font-bold rounded-none"
+                href={idxNext
+                    ? getChapterHref(idxNext)
+                    : `/series/${series.filename}`}
+            >
+                {idxNext ? 'Next Chapter' : 'Back to overview'}
+            </Button>
+        </div>
     </div>
 
     {#if $dict}

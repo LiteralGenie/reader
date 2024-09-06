@@ -18,10 +18,10 @@
     <Button
         variant="link"
         {href}
-        class="py-0 px-4 h-full hover:no-underline min-w-0 overflow-hidden"
+        class="back-link py-0 px-4 h-full hover:no-underline min-w-0 overflow-hidden"
     >
         <div
-            class="min-w-0 back-link flex gap-2 items-center border-b-2 border-transparent text-foreground stroke-foreground hover:text-primary hover:stroke-primary"
+            class="back-link-text min-w-0 flex gap-2 items-center border-b-2 border-transparent text-foreground stroke-foreground"
         >
             <ArrowLongLeft class="w-6 flex-shrink-0 stroke-2" />
 
@@ -36,13 +36,13 @@
     <div class="pr-2 flex">
         <ThemeToggle
             variant="ghost"
-            class="size-10 p-0 rounded-full mx-1 my-2"
+            class="ripple ripple-invert size-10 p-0 rounded-full mx-1 my-2"
         />
 
         <Button
             on:click={() => dispatch('settings')}
             variant="ghost"
-            class="size-10 p-0 rounded-full mx-1 my-2"
+            class="ripple ripple-invert size-10 p-0 rounded-full mx-1 my-2"
         >
             <Cog_6 class="size-6" />
         </Button>
@@ -54,7 +54,9 @@
         background-color: var(--header);
     }
 
-    .back-link:hover {
+    :global(.back-link:hover .back-link-text),
+    :global(.back-link:focus .back-link-text) {
+        @apply text-primary stroke-primary;
         border-color: hsla(var(--primary) / 80%) !important;
     }
 </style>
