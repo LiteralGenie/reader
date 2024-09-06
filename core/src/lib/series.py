@@ -31,6 +31,9 @@ SERIES_COVER_ALTERNATIVES = ["cover.png", "cover.jpg", "cover.jpeg"]
 
 def get_series(cfg: Config, filename: str):
     fp = cfg.root_image_folder / filename
+    if not fp.exists():
+        raise FileNotFoundError()
+
     db = load_series_db(fp)
 
     info = select_series(db)

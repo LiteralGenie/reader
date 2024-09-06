@@ -1,17 +1,13 @@
-import { env } from '$env/dynamic/private'
+import { proxyApiRequest } from '$lib/proxy'
 import type { RequestHandler } from '@sveltejs/kit'
 
-export const POST: RequestHandler = async ({ request, url }) => {
-    const proxyPath = url.pathname.replace('api/', '')
-
-    const apiUrl = new URL(
-        // @ts-ignore
-        env.config.apiUrl + proxyPath
-    )
-
-    return await fetch(apiUrl, {
-        method: request.method,
-        body: await request.text(),
-        headers: request.headers
+export const POST: RequestHandler = async ({
+    request,
+    url,
+    getClientAddress
+}) => {
+    return proxyApiRequest(request, url, getClientAddress(), {
+        allHeaders: true,
+        bodyType: 'JSON'
     })
 }
