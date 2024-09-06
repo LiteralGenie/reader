@@ -4,7 +4,9 @@ bs4
 datasets
 fastapi
 fastapi-cache2
-huggingface-hub
+# Temporary fork until API is fixed: https://github.com/huggingface/huggingface_hub/issues/2523
+# huggingface-hub
+git+https://github.com/LiteralGenie/huggingface_hub.git
 jamo
 konlpy
 levenshtein
