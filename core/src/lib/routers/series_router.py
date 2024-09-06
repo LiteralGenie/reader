@@ -6,8 +6,7 @@ import shutil
 import traceback
 from pathlib import Path
 
-from fastapi import (APIRouter, File, Form, HTTPException, Request, Response,
-                     UploadFile)
+from fastapi import APIRouter, File, Form, HTTPException, Request, Response, UploadFile
 from fastapi.responses import FileResponse, StreamingResponse
 from PIL import Image
 from pydantic import BaseModel
@@ -19,10 +18,19 @@ from ..db.series_db import load_series_db, update_series
 from ..job_utils import JobManager, wait_job
 from ..misc_utils import dump_sse_event, sanitize_or_raise_400
 from ..proxy.proxy import PROXY_JOB_TYPE, insert_proxy_job
-from ..series import (apply_chapter_crud, count_file_types, create_series,
-                      get_all_chapters, get_all_pages, get_all_series,
-                      get_chapter, get_series, raise_on_size_limit,
-                      upsert_cover, validate_image_upload)
+from ..series import (
+    apply_chapter_crud,
+    count_file_types,
+    create_series,
+    get_all_chapters,
+    get_all_pages,
+    get_all_series,
+    get_chapter,
+    get_series,
+    raise_on_size_limit,
+    upsert_cover,
+    validate_image_upload,
+)
 from ..url_import import IMPORT_JOB_TYPE, insert_import_job
 from . import EDIT_LOGGER
 
@@ -83,6 +91,8 @@ def create_series_(
     id_mangadex: str | None = Form(None),
     id_mangaupdates: str | None = Form(None),
 ):
+    raise HTTPException(400, "Feature disabled for demo")
+
     filename = sanitize_or_raise_400(filename)
 
     cfg: Config = req.app.state.cfg
@@ -128,6 +138,8 @@ def get_series_cover(req: Request, series: str, filename: str):
 
 @router.patch("/cover/{series}/auto")
 def upsert_series_cover_auto(req: Request, series: str):
+    raise HTTPException(400, "Feature disabled for demo")
+
     series = sanitize_or_raise_400(series)
 
     cfg: Config = req.app.state.cfg
@@ -165,6 +177,8 @@ def update_series_(
     id_mangadex: str | None = Form(None),
     cover: UploadFile | str | None = Form(None),
 ):
+    raise HTTPException(400, "Feature disabled for demo")
+
     filename = sanitize_or_raise_400(filename)
 
     cfg: Config = req.app.state.cfg
@@ -202,6 +216,8 @@ class DeleteSeriesRequest(BaseModel):
 
 @router.delete("/series")
 def delete_series_(req: Request, body: DeleteSeriesRequest):
+    raise HTTPException(400, "Feature disabled for demo")
+
     filename = sanitize_or_raise_400(body.series)
 
     series_dir = req.app.state.cfg.root_image_folder / filename
@@ -229,6 +245,11 @@ def create_chapter(
 ):
     series = sanitize_or_raise_400(series)
     chapter_filename = sanitize_or_raise_400(chapter)
+
+    if series != "tmp":
+        raise HTTPException(
+            400, "Edits to this chapter have been disabled in this demo"
+        )
 
     cfg: Config = req.app.state.cfg
 
@@ -291,6 +312,8 @@ def edit_chapter(
     pages_modified: str = Form("{}"),
     pages_added: list[UploadFile] = File([]),
 ):
+    raise HTTPException(400, "Feature disabled for demo")
+
     series = sanitize_or_raise_400(series)
     chapter = sanitize_or_raise_400(chapter)
     name = name.strip()
@@ -412,6 +435,8 @@ class DeleteChapterRequest(BaseModel):
 
 @router.delete("/chapter")
 def delete_chapter(req: Request, body: DeleteChapterRequest):
+    raise HTTPException(400, "Feature disabled for demo")
+
     series = sanitize_or_raise_400(body.series)
     chapter = sanitize_or_raise_400(body.chapter)
 
@@ -434,6 +459,8 @@ def delete_chapter(req: Request, body: DeleteChapterRequest):
 
 @router.post("/page/{series}/{chapter}")
 def add_page(req: Request, series: str, chapter: str, page: UploadFile):
+    raise HTTPException(400, "Feature disabled for demo")
+
     series = sanitize_or_raise_400(series)
     chapter = sanitize_or_raise_400(chapter)
 
@@ -483,6 +510,8 @@ def rename_page(
     req: Request,
     body: RenamePageRequest,
 ):
+    raise HTTPException(400, "Feature disabled for demo")
+
     series = sanitize_or_raise_400(body.series)
     chapter = sanitize_or_raise_400(body.chapter)
 
@@ -537,6 +566,8 @@ class DeletePageRequest(BaseModel):
 
 @router.delete("/page")
 def delete_page(req: Request, body: DeletePageRequest):
+    raise HTTPException(400, "Feature disabled for demo")
+
     series = sanitize_or_raise_400(body.series)
     chapter = sanitize_or_raise_400(body.chapter)
     page = sanitize_or_raise_400(body.page)
@@ -593,6 +624,8 @@ class ImportChapterRequest(BaseModel):
 
 @router.post("/import_chapter")
 def import_chapter(req: Request, body: ImportChapterRequest):
+    raise HTTPException(400, "Feature disabled for demo")
+
     series = sanitize_or_raise_400(body.series)
     chapter = sanitize_or_raise_400(body.chapter)
 

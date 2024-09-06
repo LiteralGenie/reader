@@ -97,7 +97,15 @@ class UpdateBlockTextRequest(BaseModel):
 
 @router.patch("/ocr/text")
 def update_block_text(req: Request, body: UpdateBlockTextRequest):
-    chap_dir: Path = req.app.state.cfg.root_image_folder / body.series / body.chapter
+    series = sanitize_or_raise_400(body.series)
+    chapter = sanitize_or_raise_400(body.chapter)
+
+    if series != "tmp":
+        raise HTTPException(
+            400, "Edits to this chapter have been disabled in this demo"
+        )
+
+    chap_dir: Path = req.app.state.cfg.root_image_folder / series / chapter
     try:
         db = load_chapter_db(chap_dir, raise_on_missing=True)
     except FileNotFoundError:
@@ -118,7 +126,15 @@ class DeleteBlockRequest(BaseModel):
 
 @router.delete("/ocr/delete")
 def delete_block(req: Request, body: DeleteBlockRequest):
-    chap_dir: Path = req.app.state.cfg.root_image_folder / body.series / body.chapter
+    series = sanitize_or_raise_400(body.series)
+    chapter = sanitize_or_raise_400(body.chapter)
+
+    if series != "tmp":
+        raise HTTPException(
+            400, "Edits to this chapter have been disabled in this demo"
+        )
+
+    chap_dir: Path = req.app.state.cfg.root_image_folder / series / chapter
     try:
         db = load_chapter_db(chap_dir, raise_on_missing=True)
     except FileNotFoundError:
