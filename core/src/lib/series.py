@@ -136,6 +136,9 @@ def get_all_series(cfg: Config) -> list[dict]:
 def get_all_chapters(cfg: Config, series: str):
     chaps = []
 
+    if series == "tmp":
+        return []
+
     series_dir = cfg.root_image_folder / series
     if not series_dir.exists():
         raise FileNotFoundError()

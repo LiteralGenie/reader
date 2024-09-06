@@ -7,12 +7,8 @@ from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from ..db.chapter_db import (
-    delete_ocr_data,
-    load_chapter_db,
-    select_ocr_data,
-    update_ocr_text,
-)
+from ..db.chapter_db import (delete_ocr_data, load_chapter_db, select_ocr_data,
+                             update_ocr_text)
 from ..db.reader_db import load_reader_db
 from ..misc_utils import sanitize_or_raise_400
 from ..ocr import get_all_ocr_data, insert_ocr_job
@@ -102,7 +98,7 @@ def update_block_text(req: Request, body: UpdateBlockTextRequest):
 
     if series != "tmp":
         raise HTTPException(
-            400, "Edits to this chapter have been disabled in this demo"
+            400, "Edits to this demo chapter have been disabled"
         )
 
     chap_dir: Path = req.app.state.cfg.root_image_folder / series / chapter
@@ -131,7 +127,7 @@ def delete_block(req: Request, body: DeleteBlockRequest):
 
     if series != "tmp":
         raise HTTPException(
-            400, "Edits to this chapter have been disabled in this demo"
+            400, "Edits to this demo chapter have been disabled"
         )
 
     chap_dir: Path = req.app.state.cfg.root_image_folder / series / chapter

@@ -247,9 +247,7 @@ def create_chapter(
     chapter_filename = sanitize_or_raise_400(chapter)
 
     if series != "tmp":
-        raise HTTPException(
-            400, "Edits to this chapter have been disabled in this demo"
-        )
+        raise HTTPException(400, "Edits to this demo chapter have been disabled")
 
     cfg: Config = req.app.state.cfg
 
@@ -624,10 +622,11 @@ class ImportChapterRequest(BaseModel):
 
 @router.post("/import_chapter")
 def import_chapter(req: Request, body: ImportChapterRequest):
-    raise HTTPException(400, "Feature disabled for demo")
-
     series = sanitize_or_raise_400(body.series)
     chapter = sanitize_or_raise_400(body.chapter)
+
+    if series != "tmp":
+        raise HTTPException(400, "Feature disabled for demo")
 
     cfg: Config = req.app.state.cfg
 
