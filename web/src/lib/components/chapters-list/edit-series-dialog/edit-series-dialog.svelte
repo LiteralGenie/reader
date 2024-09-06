@@ -99,7 +99,7 @@
                     'Content-Type': 'application/json'
                 }
             })
-            throwOnStatus(resp)
+            await throwOnStatus(resp)
 
             dispatch('close')
 

@@ -129,7 +129,7 @@
                     block: dict.match.id
                 })
             })
-            throwOnStatus(resp)
+            await throwOnStatus(resp)
 
             dispatch('delete', { page: dict.page, match: dict.match })
         } catch (e) {
@@ -151,7 +151,7 @@
                     text: ev.detail
                 })
             })
-            throwOnStatus(resp)
+            await throwOnStatus(resp)
 
             dispatch('edit', {
                 page: dict.page,
