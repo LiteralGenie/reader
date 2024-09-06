@@ -222,5 +222,5 @@ python src/run_server.py
 -   New OCR blocks cannot be added through the web GUI at the moment.
     -   If you really need it, you'll have you edit the `_reader_data.sqlite` database in the folder for that chapter.
     -   As a workaround you could just edit a nearby block to include the missing text.
-    -   The boxes tend to be correct 99% of the time and this feature would be a lot of work so this has been low-priority.
--   Only the series title / cover and the chapter title are currently displayed / saved. I do not plan to support other metadata like genre tags and series descriptions. Mostly because this is a primarily a project for myself and that's a lot of work for something I won't use.
+    -   The boxes tend to be correct 99% of the time so this has been low-priority.
+-   Only the series title / cover and the chapter title are currently displayed / saved. I do not plan to support other metadata like genre tags and series descriptions.
