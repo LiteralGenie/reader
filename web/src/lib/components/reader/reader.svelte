@@ -179,6 +179,12 @@
 
         {#each pages as pg}
             <OcrImage {pg} ocr={$dataStore[pg.filename] ?? {}} />
+        {:else}
+            <div
+                class="flex items-center justify-center pt-24 text-muted-foreground text-lg"
+            >
+                No pages found.
+            </div>
         {/each}
     </div>
 

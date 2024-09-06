@@ -6,7 +6,8 @@ import shutil
 import traceback
 from pathlib import Path
 
-from fastapi import APIRouter, File, Form, HTTPException, Request, Response, UploadFile
+from fastapi import (APIRouter, File, Form, HTTPException, Request, Response,
+                     UploadFile)
 from fastapi.responses import FileResponse, StreamingResponse
 from PIL import Image
 from pydantic import BaseModel
@@ -18,19 +19,10 @@ from ..db.series_db import load_series_db, update_series
 from ..job_utils import JobManager, wait_job
 from ..misc_utils import dump_sse_event, sanitize_or_raise_400
 from ..proxy.proxy import PROXY_JOB_TYPE, insert_proxy_job
-from ..series import (
-    apply_chapter_crud,
-    count_file_types,
-    create_series,
-    get_all_chapters,
-    get_all_pages,
-    get_all_series,
-    get_chapter,
-    get_series,
-    raise_on_size_limit,
-    upsert_cover,
-    validate_image_upload,
-)
+from ..series import (apply_chapter_crud, count_file_types, create_series,
+                      get_all_chapters, get_all_pages, get_all_series,
+                      get_chapter, get_series, raise_on_size_limit,
+                      upsert_cover, validate_image_upload)
 from ..url_import import IMPORT_JOB_TYPE, insert_import_job
 from . import EDIT_LOGGER
 

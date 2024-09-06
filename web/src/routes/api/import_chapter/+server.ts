@@ -7,7 +7,6 @@ export const POST: RequestHandler = async ({
     getClientAddress
 }) => {
     return proxyApiRequest(request, url, getClientAddress(), {
-        allHeaders: true,
         bodyType: 'JSON'
     })
 }
