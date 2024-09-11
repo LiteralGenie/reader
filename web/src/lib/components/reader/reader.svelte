@@ -51,6 +51,9 @@
             : null
     $: idxPrev = idxChapter - 1 >= 0 ? idxChapter - 1 : null
 
+    let scrollEl: HTMLElement
+    $: chapterId && scrollEl?.scrollTo({ top: 0 })
+
     onMount(() => {
         // Prefetch stuff
         const texts = pages
@@ -186,6 +189,7 @@
     on:keydown={(ev) => onKeydown(ev)}
 >
     <div
+        bind:this={scrollEl}
         class="flex flex-col min-h-0 flex-1 overflow-auto w-full items-center"
         class:overflow-hidden={isResizing}
         on:click={() => setDict(null)}
