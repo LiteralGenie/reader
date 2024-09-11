@@ -37,9 +37,12 @@
             downloadEl.href = URL.createObjectURL($value)
             downloadEl.download = $value.name
         } else {
-            downloadEl.href = $value
-            downloadEl.download =
+            downloadEl.href = `/api/cover/${series.filename}/${$value}`
+
+            let filename =
                 $value.split('/').slice(-1)[0] ?? 'cover.png'
+            filename = filename.split('?')[0]
+            downloadEl.download = filename
         }
 
         downloadEl.click()
