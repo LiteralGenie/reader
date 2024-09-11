@@ -67,7 +67,7 @@ systemctl restart docker
 Clone the repo:
 
 ```bash
-git clone https://github.com/LiteralGenie/reader/
+git clone git@github.com:LiteralGenie/reader.git
 cd reader
 ```
 
