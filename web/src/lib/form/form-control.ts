@@ -49,18 +49,18 @@ const controls = createFormControlRecord(data, {
 
 // Reading and updating all Data
 controls.value.subscribe(data => console.log(data))     // { a: "lol", b: { c: 1, d: true } }
-controls.setValue({ a: "lol", { c: 2, d: true }})       // { a: "lol", b: { c: 2, d: true } }
+controls.setValue({ a: "lol", { c: 2, d: true }})       // $data === { a: "lol", b: { c: 2, d: true } }
 // (or just call data.subscribe() and data.set() directly)
 
 // Reading and updating Data.b
 const controlB = controls.children.b
-controlB.value.subscribe(b => ...)                      // { a: "lol", b: { c: 2, d: true } }
-controlB.setValue({ c: 3, d: false })                   // { a: "lol", b: { c: 3, d: false } }
+controlB.value.subscribe(b => ...)                      // { c: 2, d: true }
+controlB.setValue({ c: 3, d: false })                   // $data === { a: "lol", b: { c: 3, d: false } }
 
 // Reading and updating Data.b.c
 const controlC = controlB.children.c
-controlC.value.subscribe(c => ...)                      // { a: "lol", b: { c: 3, d: false } }
-controlC.setValue(4)                                    // { a: "lol", b: { c: 4, d: false } }
+controlC.value.subscribe(c => ...)                      // 3
+controlC.setValue(4)                                    // $data === { a: "lol", b: { c: 4, d: false } }
 
 
 ### Motivation ###
@@ -106,11 +106,12 @@ child-input.svelte
         export let control: FormControl<string>
         let inputEl: HTMLInputElement
 
-        // Update inputEl when control values is updated programmatically (or by another component referencing this control)
+        // Update inputEl when control value is updated programmatically
+        // (or by another component referencing this control)
         controlC.value.subscribe(c => inputEl?.value = c)
 
-        // Update parent's data store on user input
-        // (Note that we didn't need to pass in data as a prop!)
+        // Update store on user input
+        // (essentially $data.b.c = ...)
         function onChange() {
             controlC.setValue(parseInt(inputEl.value))
         }
@@ -129,9 +130,9 @@ This is essentially what the FormControl / FormControlArray / FormControlRecord 
 Controls expose an interface similar to Writable stores,
 with the main difference being that the source of truth usually lives outside of the control.
 
-To be more specific, the "root" control always wraps a Writable store that's stores the entire state.
+To be more specific, the "root" control always wraps a Writable store that's holfds the entire state.
 For reading, sub-controls expose a derived() store (FormControl.value) that retrieves the slice of the state they target
-For writing, sub-controls expose a setValue() method that essentially wraps the Writable.update() method of the root control's store
+For writing, sub-controls expose a setValue() method that essentially wraps the Writable.update() method of the root control's store to target whatever slice of state
 
 In terms of pseudo-code...
 ```
