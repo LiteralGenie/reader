@@ -107,7 +107,7 @@ def select_definitions(
         WHERE 
             jamo LIKE ?
             AND definition NOT LIKE 'See the entry%'
-            AND pos != 'syllable'
+            AND (pos != 'syllable' OR pos IS NULL)
         ORDER BY levenshtein(?, jamo) ASC
         LIMIT ?
         OFFSET ?
@@ -126,7 +126,7 @@ def count_definitions(db: DictionaryDb, text: str) -> int:
         WHERE 
             jamo LIKE ?
             AND definition NOT LIKE 'See the entry%'
-            AND pos != 'syllable'
+            AND (pos != 'syllable' OR pos IS NULL)
         """,
         [f"%{to_joined_jamo(text)}%"],
     ).fetchone()
