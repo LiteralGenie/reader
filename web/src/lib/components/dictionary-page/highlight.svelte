@@ -103,7 +103,5 @@
 </script>
 
 <span>
-    {head}
-    <b class="text-red-700">{highlighted}</b>
-    {tail}
+    {head}<b class="text-red-700">{highlighted}</b>{tail}
 </span>
