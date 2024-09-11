@@ -50,7 +50,7 @@
         'https://mangadex.org' +
         ($form.id_dex ? `/title/${$form.id_dex}` : '')
     $: muHref =
-        'mangaupdates.com' +
+        'https://www.mangaupdates.com' +
         ($form.id_mu ? `/series/${$form.id_mu}` : '')
 
     const dispatch = createEventDispatcher()

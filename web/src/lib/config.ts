@@ -28,6 +28,8 @@ export function loadConfig(): Config {
             '..',
             '..',
             '..',
+            '..',
+            '..',
             'config.toml'
         )
     } else {
