@@ -96,6 +96,13 @@
                     query
                 )}"
             />
+
+            <ExternalSearchButton
+                label="Google"
+                href="https://www.google.com/search?q={euc(
+                    query + ' 뜻'
+                )}"
+            />
         </div>
     {:else}
         <div class="pt-4"></div>
