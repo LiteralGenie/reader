@@ -50,7 +50,7 @@ def select_words(
                 -- wiktionary quirk
                 AND definition NOT LIKE 'See the entry%'
 
-                AND pos != 'syllable'
+                AND (pos != 'syllable' OR pos IS NULL)
             """,
             to_check,
         )
