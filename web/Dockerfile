@@ -1,13 +1,13 @@
 # OS Deps
 FROM nvidia/cuda:12.2.2-devel-ubuntu22.04 AS base
 ARG DEBIAN_FRONTEND=noninteractive
-RUN apt update -y
+RUN apt-get update -y
 
-RUN apt install git curl -y
+RUN apt-get install git curl -y
 
 RUN curl -fsSL https://deb.nodesource.com/setup_current.x -o nodesource_setup.sh
 RUN bash nodesource_setup.sh
-RUN apt install -y nodejs
+RUN apt-get install -y nodejs
 
 
 # Node deps

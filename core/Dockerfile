@@ -4,10 +4,10 @@ ARG cuda="false"
 ### OS Deps
 FROM nvidia/cuda:12.2.2-devel-ubuntu22.04 AS base
 ARG DEBIAN_FRONTEND=noninteractive
-RUN apt update -y
+RUN apt-get update -y
 
-RUN apt install -y git curl
-RUN apt install -y python3-pip python3.10-full
+RUN apt-get install -y git curl
+RUN apt-get install -y python3-pip python3.10-full
 
 
 ### Enable GPU
@@ -25,10 +25,10 @@ COPY . .
 RUN python3.10 -m pip install -r requirements.txt
 
 # llama-cpp
-RUN apt install -y libsm6 libxext6
+RUN apt-get install -y libsm6 libxext6
 
 # konlpy
-RUN apt install -y g++ openjdk-8-jdk curl
+RUN apt-get install -y g++ openjdk-8-jdk curl
 
 WORKDIR /app
 CMD python3.10 core/src/run_server.py

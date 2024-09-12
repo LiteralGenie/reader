@@ -51,9 +51,11 @@
                             {def.word}
                         </a>
                     </h2>
-                    <span class="text-sm">
-                        ({def.pos})
-                    </span>
+                    {#if def.pos}
+                        <span class="text-sm">
+                            ({def.pos})
+                        </span>
+                    {/if}
                 </div>
 
                 <div>{def.definition}</div>
