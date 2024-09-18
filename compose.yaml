@@ -16,6 +16,8 @@ services:
                         - driver: nvidia
                           count: all
                           capabilities: [gpu]
+        restart: always
+
     web:
         build: web
         image: reader-web
@@ -26,3 +28,5 @@ services:
               source: ./data
               target: /app/data
             - ${PWD}/config.toml:/app/config.toml
+
+        restart: always
