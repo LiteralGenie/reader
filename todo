@@ -4,7 +4,6 @@ demo
         ocr
         mtl
     resource limits
-        length nlp input
         uploads per ip
 
 create chapter from archive
